@@ -338,9 +338,11 @@ margin:0;
  * Generic elements
  */
 body {
+  border: 10px solid #ff6c00;
   margin: 0;
   padding: 0;
   background: url(images/bg.png) #edf5fa;
+
   font: 12px/170% Verdana, sans-serif;
   color: #494949;
 }
