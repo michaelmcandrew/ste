@@ -38,17 +38,17 @@
 	    <div class="label"><label>{ts}When{/ts}</label></div>
 	    <div class="content">
             <abbr class="dtstart" title="{$event.event_start_date|crmDate}">
-            {$event.event_start_date|date_format:"%A%e%B%Y"}</abbr>
+            {$event.event_start_date|date_format:"%A %e %B %Y"}</abbr>
             {if $event.event_end_date}
                 &nbsp; {ts}to{/ts} &nbsp;
                 {* Only show end time if end date = start date *}
                 {if $event.event_end_date|date_format:"%Y%m%d" == $event.event_start_date|date_format:"%Y%m%d"}
                     <abbr class="dtend" title="{$event.event_end_date|crmDate:0:1}">
-                    {$event.event_end_date|date_format:"%A%e%B%Y":0:1}
+                    {$event.event_end_date|date_format:"%A %e %B %Y":0:1}
                     </abbr>        
                 {else}
                     <abbr class="dtend" title="{$event.event_end_date|crmDate}">
-                    {$event.event_end_date|date_format:"%A%e%B%Y"}
+                    {$event.event_end_date|date_format:"%A %e %B %Y"}
                     </abbr> 	
                 {/if}
             {/if}
