@@ -1,0 +1,23 @@
+<?php
+// $Id: imagefield_extended.install,v 1.1.2.1 2010/01/14 10:12:56 aland Exp $
+
+/**
+ * @file
+ * Standard installation hooks.
+ */
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function imagefield_extended_uninstall() {
+  variable_del('imagefield_extended_textfields');
+  variable_del('imagefield_extended_checkboxes');
+}
+
+/**
+ * Implementation of hook_update_63XX().
+ */
+function imagefield_extended_update_6300() {
+  cache_clear_all();
+  return array();
+}
