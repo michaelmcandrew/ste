@@ -1,0 +1,885 @@
+<?php
+// $Id: drush.inc,v 1.37 2009/05/11 15:20:16 weitzman Exp $
+
+/**
+ * @file
+ * The drush API implementation and helpers.
+ */
+
+
+/**
+ * Dispatch a given set of commands.
+ * Modules can add commands by implementing hook_drush_command().
+ *
+ * @param
+ *   Command whose callback you want to call, defaults to current command.
+ */
+function drush_dispatch($command = NULL) {
+  $command = ($command) ? $command : drush_get_command();
+  $return = FALSE;
+
+  if ($command) {
+    // Call the callback function of the active command.
+    $return = call_user_func_array($command['callback'], $command['arguments']);
+  }
+  
+  // prevent a '1' at the end of the output
+  if ($return === TRUE) {
+    $return = '';
+  }
+  
+  // Add a final log entry, just so a timestamp appears.
+  drush_log(dt('Command dispatch complete'), 'notice');
+
+  return $return;
+}
+
+/**
+ * Include a file, selecting a version specific file if available.
+ * 
+ * For example, if you pass the path "/var/drush" and the name
+ * "update" when bootstrapped on a Drupal 6 site it will first check for
+ * the presence of "/var/drush/update_6.inc" in include it if exists. If this
+ * file does NOT exist it will proceed and check for "/var/drush/update.inc".
+ * If neither file exists, it will return FALSE.
+ * 
+ * @param $path
+ *   The path you want to search.
+ * @param $name
+ *   The file base name you want to include (not including a version suffix
+ *   or extension). 
+ * @param $version
+ *   The version suffix you want to include (could be specific to the software
+ *   or platform your are connecting to) - defaults to the current Drupal core
+ *   major version.
+ * @param $extension
+ *   The extension - defaults to ".inc".
+ *   
+ * @return
+ *   TRUE if the file was found and included.
+ */
+function drush_include($path, $name, $version = NULL, $extension = 'inc') {
+  $version = ($version) ? $version : drush_drupal_major_version();
+  $file = sprintf("%s/%s_%s.%s", $path, $name, $version, $extension);
+  if (file_exists($file)) {
+    drush_log(dt('Including version specific file : @file', array('@file' => $file)));
+    include_once($file);
+    return TRUE;
+  }
+  $file = sprintf("%s/%s.%s", $path, $name, $extension);
+  if (file_exists($file)) {
+    drush_log(dt('Including non-version specific file : @file', array('@file' => $file)));
+    include_once($file);
+    return TRUE;
+  }
+}
+
+/**
+ * Return a structured array of engines of a specific type from commandfiles
+ * implementing hook_drush_engine_$type.
+ * 
+ * Engines are pluggable subsystems. Each engine of a specific type will
+ * implement the same set of API functions and perform the same high-level
+ * task using a different backend or approach. 
+ * 
+ * This function/hook is useful when you have a selection of several mutually
+ * exclusive options to present to a user to select from.
+ * 
+ * Other commands are able to extend this list and provide their own engines.
+ * The hook can return useful information to help users decide which engine
+ * they need, such as description or list of available engine options.
+ * 
+ * The engine path element will automatically default to a subdirectory (within
+ * the directory of the commandfile that implemented the hook) with the name of
+ * the type of engine - e.g. an engine "wget" of type "handler" provided by
+ * the "pm" commandfile would automatically be found if the file
+ * "pm/handler/wget.inc" exists and a specific path is not provided.
+ * 
+ * @param $type
+ *   The type of engine.
+ *  
+ * @return
+ *   A structured array of engines.
+ */
+function drush_get_engines($type) {
+  $engines = array();
+  $list = drush_commandfile_list();
+  foreach ($list as $commandfile => $path) {
+    if (drush_command_hook($commandfile, 'drush_engine_' . $type)) {
+      $function = $commandfile . '_drush_engine_' . $type;
+      $result = $function();
+      foreach ((array)$result as $key => $engine) {
+        // Add some defaults
+        $engine += array(
+          'commandfile' => $commandfile,
+          // Engines by default live in a subdirectory of the commandfile that
+          // declared them, named as per the type of engine they are.
+          'path' => sprintf("%s/%s", dirname($path), $type),
+        );
+        $engines[$key] = $engine;
+      }
+    }
+  }
+  return $engines;
+}
+
+/**
+ * Include the engine code for a specific named engine of a certain type.
+ *
+ * If the engine type has implemented hook_drush_engine_$type the path to the
+ * engine specified in the array will be used.
+ * 
+ * If you don't need to present any user options for selecting the engine
+ * (which is common if the selection is implied by the running environment)
+ * and you don't need to allow other modules to define their own engines you can
+ * simply pass the $path to the directory where the engines are, and the
+ * appropriate one will be included.
+ * 
+ * Unlike drush_include this function will set errors if the requested engine
+ * cannot be found.
+ *
+ * @param $type
+ *   The type of engine.
+ * @param $engine
+ *   The key for the engine to be included.
+ * @param $version
+ *   The version of the engine to be included - defaults to the current Drupal core
+ *   major version.
+ * @param $path
+ *   A path to include from, if the engine has no corresponding
+ *   hook_drush_engine_$type item path.
+ * @return unknown_type
+ */
+function drush_include_engine($type, $engine, $version = NULL, $path = NULL) {
+  $engines = drush_get_engines($type);
+  if (!$path && isset($engines[$engine])) {
+    $path = $engines[$engine]['path'];
+  }
+  if (!$path) {
+    return drush_set_error('DRUSH_ENGINE INCLUDE_NO_PATH', dt('No !path was set for including the !type engine !engine.', array('!path' => $path, '!type' => $type, '!engine' => $engine)));
+  }
+  if (drush_include($path, $engine, $version)) {
+    return TRUE;
+  }
+  return drush_set_error('DRUSH_ENGINE INCLUDE_FAILED', dt('Unable to include the !type engine !engine from !path.' , array('!path' => $path, '!type' => $type, '!engine' => $engine)));
+}
+
+/**
+ * Detects the version number of the current Drupal installation,
+ * if any. Returns false if there is no current Drupal installation,
+ * or it is somehow broken.
+ *
+ * This function relies on the presence of DRUPAL_ROOT/modules/system/system.module
+ *
+ * @return
+ *   A string containing the version number of the current
+ *   Drupal installation, if any. Otherwise, return false.
+ */
+function drush_drupal_version() {
+  static $version = FALSE;
+
+  if (!$version) {
+    if ($drupal_root = drush_get_context('DRUSH_DRUPAL_ROOT')) {
+      if (file_exists($drupal_root . '/modules/system/system.module')) {
+        // We can safely include system.module as it contains defines and functions only.
+        require_once($drupal_root . '/modules/system/system.module');
+        // We just might be dealing with an early Drupal version (pre 4.7)
+        if (defined('VERSION')) {
+          $version = VERSION;
+        }
+      }
+    }
+  }
+  return $version;
+}
+
+/**
+ * Returns the Drupal major version number (5, 6, 7 ...)
+ */
+function drush_drupal_major_version() {
+  $major_version = FALSE;
+  if ($version = drush_drupal_version()) {
+    $version_parts = explode('.', $version);
+    if (is_numeric($version_parts[0])) {
+      $major_version = (integer)$version_parts[0];
+    }
+  }
+  return $major_version;
+}
+
+/**
+ * Save a string to a temporary file. Does not depend on Drupal's API.
+ *
+ * @param string $data 
+ * @return string
+ *   A path to the file.
+ */
+function drush_save_data_to_temp_file($data) {
+  static $fp;
+
+  $fp = tmpfile();
+  fwrite($fp, $data);
+  $meta_data = stream_get_meta_data($fp);
+  return $meta_data['uri'];
+}
+
+
+/**
+ * Calls a given function, passing through all arguments unchanged.
+ *
+ * This should be used when calling possibly mutative or destructive functions
+ * (e.g. unlink() and other file system functions) so that can be suppressed
+ * if the simulation mode is enabled.
+ *
+ * @param $function
+ *   The name of the function.
+ * @return
+ *   The return value of the function, or TRUE if simulation mode is enabled.
+ */
+function drush_op($function) {
+  $args = func_get_args();
+  array_shift($args); // Skip function name
+
+  if (drush_get_context('DRUSH_VERBOSE') || drush_get_context('DRUSH_SIMULATE')) {
+     drush_print("Calling $function(". implode(", ", $args) .')');
+  }
+
+  if (drush_get_context('DRUSH_SIMULATE')) {
+    return true;
+  }
+
+  return call_user_func_array($function, $args);
+}
+
+/**
+ * Rudimentary replacement for Drupal API t() function.
+ *
+ * @param string
+ *   String to process, possibly with replacement item.
+ * @param array
+ *  An associative array of replacement items.
+ *
+ * @return
+ *   The processed string.
+ *
+ * @see t()
+ */
+function dt($string, $args = NULL) {
+  if (function_exists('t')) {
+    return t($string, $args);
+  }
+  else {
+    if (!empty($args)) {
+      return strtr($string, $args);
+    }
+    else {
+      return $string;
+    }
+  }
+}
+
+/**
+ * Get the available options for Drush for use by help page.
+ *
+ * @return
+ *   An associative array containing the option definition as the key, and the description as the value,
+ *   for each of the available options.
+ */
+function drush_get_option_help() {
+  // TODO: Add a hook for this, to allow other modules to add their options
+  $options['-r <path>, --root=<path>'] = dt("Drupal root directory to use (default: current directory)");
+  $options['-l <uri> , --uri=<uri>']   = dt('URI of the drupal site to use (only needed in multisite environments)');
+  $options['-v, --verbose']            = dt('Display extra information about the command.');
+  $options['-d, --debug']              = dt('Display even more information, including internal messages.');
+  $options['-q, --quiet']              = dt('Hide all output');
+  $options['-y, --yes']                = dt("Assume 'yes' as answer to all prompts");
+  $options['-s, --simulate']           = dt("Simulate all relevant actions (don't actually change the system)");
+  $options['-i, --include']            = dt("A list of paths to search for drush commands");
+  $options['-c, --config']             = dt("Specify a config file to use. See example.drushrc.php");
+  $options['-u, --user']               = dt("Specify a user to login with. May be a name or a number.");
+  $options['-b, --backend']            = dt("Hide all output and return structured data (internal use only).");
+  $options['-p, --pipe']            = dt("Emit a compact representation of the command for scripting.");
+  return $options;
+}
+
+/**
+ * Prints out the default drush help page.
+ */
+function drush_show_help($commands) {
+  $phases = _drush_bootstrap_phases();
+
+  $commandstring = implode(" ", $commands);
+
+  foreach ($phases as $phase_index) {
+    if ($phase_index > drush_get_context('DRUSH_BOOTSTRAP_PHASE')) {
+      drush_bootstrap($phase_index);
+    }
+    if (!drush_get_error()) {
+      $commands = drush_get_commands();
+      if (array_key_exists($commandstring, $commands)) {
+        $command = $commands[$commandstring];
+        
+        // Merge in engine specific help.
+        foreach ($command['engines'] as $type => $description) {
+          $all_engines = drush_get_engines($type);
+          foreach ($all_engines as $name => $engine) {
+            $command = array_merge_recursive($command, $engine);
+          }
+        }
+        $help = drush_command_invoke_all('drush_help', 'drush:'. $commandstring);
+        if (!empty($help)) {
+          drush_print(wordwrap(implode("\n", $help), 80));
+          drush_print();
+          
+          // TODO: Let commands define additional sections.
+          $sections = array(
+            'examples' => 'Examples',
+            'arguments' => 'Arguments',
+            'options' => 'Options',
+          );
+          
+          foreach ($sections as $key => $value) {
+            if (!empty($command[$key])) {
+              drush_print(dt($value) . ':');
+              foreach ($command[$key] as $name => $description) {
+                // '[command] is a token representing the current command. @see pm_drush_engine_version_control().
+                $rows[] = array(str_replace('[command]', $commandstring, $name), dt($description));
+              }
+              drush_print_table($rows, 2);
+              unset($rows);
+              drush_print();
+            }
+          }
+          return TRUE;
+        }
+        else {
+          drush_print("No help available for command 'drush $commandstring'.");
+          return TRUE;
+        }
+      }
+    }
+    else {
+      break;
+    }
+  }
+  return drush_set_error('DRUSH_COMMAND_NOT_FOUND', dt('Invalid command !command.', array('!command' => $commandstring)));
+}
+
+/**
+ * Executes a shell command.
+ * Output is only printed if in verbose mode.
+ * Output is stored and can be retrieved using drush_shell_exec_output().
+ * If in simulation mode, no action is taken.
+ *
+ * @param $cmd
+ *   The command to execute.
+ * @param $indent
+ *   Indentation for the output (only for verbose mode).
+ */
+function drush_shell_exec($cmd, $indent = 0) {
+  if (drush_get_context('DRUSH_VERBOSE') || drush_get_context('DRUSH_SIMULATE')) {
+    drush_print('Executing: ' . $cmd, $indent);
+  }
+
+  if (drush_get_context('DRUSH_SIMULATE')) {
+    return true;
+  }
+
+  exec($cmd . ' 2>&1', $output, $result);
+  
+  _drush_shell_exec_output_set($output);
+
+  if (drush_get_context('DRUSH_VERBOSE')) {
+    foreach ($output as $line) {
+      drush_print($line, $indent + 2);
+    }
+  }
+
+  // Exit code 0 means success.
+  return ($result == 0);
+}
+
+/**
+ * Stores output for the most recent shell command.
+ * This should only be run from drush_shell_exec().
+ *
+ * @param $output
+ *   The output of the most recent shell command.
+ *   If this is not set the stored value will be returned.
+ */
+function _drush_shell_exec_output_set($output = FALSE) {
+  static $stored_output;
+  if (!$output) return $stored_output;
+  $stored_output = $output;
+}
+
+/**
+ * Returns the output of the most recent shell command as an array of lines.
+ */
+function drush_shell_exec_output() {
+  return _drush_shell_exec_output_set();
+}
+
+/**
+ * Exits with a message.
+ * TODO: Exit with a correct status code.
+ */
+function drush_die($msg = NULL, $status = NULL) {
+  die($msg ? "drush: $msg\n" : '');
+}
+
+/**
+ * Prints a message with optional indentation.
+ * @param $message
+ *   The message to print.
+ * @param $indent
+ *    The indentation (space chars)
+ */
+function drush_print($message = '', $indent = 0) {
+  print str_repeat(' ', $indent) . (string)$message . "\n";
+}
+
+/**
+ * Stores a message which is printed during drush_shutdown() if in compact mode.
+ * @param $message
+ *   The message to print.
+ */
+function drush_print_pipe($message = '') {
+  $buffer = &drush_get_context('DRUSH_PIPE_BUFFER' , '');
+  $buffer .= $message;
+}
+
+/**
+ * Prints an array or string.
+ * @param $array
+ *   The array to print.
+ */
+function drush_print_r($array) {
+  print_r($array);
+}
+
+/**
+ * Ask the user a basic yes/no question.
+ *
+ * @param $msg The question to ask
+ * @return TRUE if the user entered 'y', FALSE if he entered 'n'
+ */
+function drush_confirm($msg, $indent = 0) {
+  print str_repeat(' ', $indent) . (string)$msg . " (y/n): ";
+
+  if (drush_get_context('DRUSH_AFFIRMATIVE')) {
+    print "y\n";
+    return TRUE;
+  }
+  while ($line = trim(fgets(STDIN))) {
+    if ($line == 'y') {
+      return TRUE;
+    }
+    if ($line == 'n') {
+      return FALSE;
+    }
+    print str_repeat(' ', $indent) . (string)$msg . " (y/n): ";
+  }
+}
+
+/**
+ * Print a formatted table.
+ * @param $rows
+ *   The rows to print
+ * @param $indent
+ *   Indentation for the whole table
+ * @param $header
+ *   If TRUE, the first line will be treated as table
+ *   header and therefore be underlined.
+ */
+function drush_print_table($rows, $indent = 0, $header = FALSE) {
+  if (count($rows) == 0) {
+    // Nothing to output.
+    return;
+  }
+
+  $indent = str_repeat(' ', $indent);
+  $format = _drush_get_table_row_format($rows);
+
+  $header_printed = FALSE;
+  foreach ($rows as $cols) {
+    // Print the current line.
+    print $indent . vsprintf($format, $cols) . "\n";
+    // Underline the first row if $header is set to true.
+    if (!$header_printed && $header) {
+      $headers = array();
+      foreach ($cols as $col) {
+        $headers[] = str_repeat('-', strlen($col));
+      }
+      print $indent . trim(vsprintf($format, $headers)) . "\n";
+      $header_printed = TRUE;
+    }
+  }
+}
+
+/**
+ * Create the table row format string to be used in vsprintf().
+ */
+function _drush_get_table_row_format($table) {
+  $widths = _drush_get_table_column_widths($table);
+  foreach ($widths as $col_width) {
+    $col_formats[] = "%-{$col_width}s";
+  }
+  $format = implode("\t", $col_formats);
+  return $format;
+}
+
+/**
+ * Calculate table column widths.
+ */
+function _drush_get_table_column_widths($table) {
+  $widths = array();
+  foreach ($table as $row => $cols) {
+    foreach ($cols as $col => $value) {
+      $old_width = isset($widths[$col]) ? $widths[$col] : 0;
+      $widths[$col] = max($old_width, strlen((string)$value));
+    }
+  }
+  return $widths;
+}
+
+
+/**
+ * @defgroup logging Logging information to be provided as output.
+ * @{
+ *
+ * These functions are primarily for diagnostic purposes, but also provide an overview of tasks that were taken
+ * by drush.
+ */
+
+/**
+ * Add a log message to the log history.
+ *
+ * This function calls the callback stored in the 'DRUSH_LOG_CALLBACK' context with
+ * the resulting entry at the end of execution.
+ *
+ * This allows you to replace it with custom logging implementations if needed,
+ * such as logging to a file or logging to a database (drupal or otherwise).
+ *
+ * The default callback is the _drush_print_log() function with prints the messages
+ * to the shell.
+ *
+ * @param message
+ *   String containing the message to be logged.
+ * @param type
+ *   The type of message to be logged. Common types are 'warning', 'error', 'success' and 'notice'.
+ *   A type of 'failed' can also be supplied to flag as an 'error'.
+ *   A type of 'ok' or 'completed' can also be supplied to flag as a 'success'
+ *   All other types of messages will be assumed to be notices.
+ */
+function drush_log($message, $type = 'notice', $error = null) {
+  $log =& drush_get_context('DRUSH_LOG', array());
+  $callback = drush_get_context('DRUSH_LOG_CALLBACK', '_drush_print_log');
+  $entry = array(
+     'type' => $type, 
+     'message' => $message, 
+     'timestamp' => microtime(TRUE),
+   );
+  $entry['error'] = $error;
+  $log[] = $entry;
+  return $callback($entry);
+}
+
+/**
+ * Retrieve the log messages from the log history
+ *
+ * @return
+ *   Entire log history
+ */
+function drush_get_log() {
+  return drush_get_context('DRUSH_LOG', array());
+}
+
+/**
+ * Run print_r on a variable and log the output.
+ */
+function dlm($object) {
+  ob_start();
+  print_r($object);
+  $contents = ob_get_contents();
+  ob_end_clean();
+
+  drush_log($contents);
+}
+
+/*
+ * Display the pipe output for the current request.
+ */ 
+function drush_pipe_output() {
+  $pipe = drush_get_context('DRUSH_PIPE_BUFFER');
+  drush_print_r($pipe);
+}
+
+/**
+ * Display the log message
+ *
+ * By default, only warnings and errors will be displayed, if 'verbose' is specified, it will also display notices.
+ *
+ * @param
+ *   The associative array for the entry.
+ *
+ * @return
+ *   False in case of an error or failed type, True in all other cases.
+ */
+function _drush_print_log($entry) {
+  $red = "\033[31m\033[1m[%s]\033[0m";
+  $yellow = "\033[1;33m\033[1m[%s]\033[0m";
+  $green = "\033[0;33m\033[1m[%s]\033[0m";
+
+  $verbose = drush_get_context('DRUSH_VERBOSE');
+  $debug = drush_get_context('DRUSH_DEBUG');
+
+  $return = TRUE;
+  switch ($entry['type']) {
+    case 'warning' : 
+      $type_msg = sprintf($yellow, $entry['type']);
+      break;
+    case 'failed' : 
+    case 'error' : 
+      $type_msg = sprintf($red, $entry['type']);
+      $return = FALSE;
+      break;
+    case 'ok' :
+    case 'completed' :
+    case 'success' :
+      $type_msg = sprintf($green, $entry['type']);
+      break;
+    case 'notice' : 
+    case 'message' : 
+      if (!$verbose) {
+        // print nothing. exit cleanly.
+        return TRUE;
+      }
+      $type_msg = sprintf("[%s]", $entry['type']);
+      break;
+    default : 
+      if (!$debug) {
+        // print nothing. exit cleanly.
+        return TRUE;
+      }
+      $type_msg = sprintf("[%s]", $entry['type']);
+      break;
+  }
+
+  // When running in backend mode, log messages are not displayed, as they will
+  // be returned in the JSON encoded associative array.
+  if (drush_get_context('DRUSH_BACKEND')) {
+    return $return;
+  }
+
+  $columns = drush_get_context('DRUSH_COLUMNS', 80);
+
+  $width[1] = 11;
+  // Append timer value.
+  if ($debug) {
+    $timer = sprintf('[%s sec]', round($entry['timestamp']-DRUSH_REQUEST_TIME, 3));
+    $entry['message'] = $entry['message'] . ' ' . $timer;
+  }
+
+  $width[0] = ($columns - 11);
+
+  $format = sprintf("%%-%ds%%%ds", $width[0], $width[1]); 
+
+  // Place the status message right aligned with the top line of the error message.
+  $message = wordwrap($entry['message'], $width[0]);
+  $lines = explode("\n", $message);
+  $lines[0] = sprintf($format, $lines[0], $type_msg);
+  $message = implode("\n", $lines);
+  drush_print($message);
+  return $return;
+}
+
+/**
+* Turn drupal_set_message errors into drush_log errors
+*/
+function _drush_log_drupal_messages() {
+  if (function_exists('drupal_get_messages')) {
+
+    $messages = drupal_get_messages();
+    
+    if (array_key_exists('error', $messages)) {
+      //Drupal message errors.
+      foreach ((array) $messages['error'] as $error) {
+        $error = strip_tags($error);
+        if (preg_match('/^warning: Cannot modify header information - headers already sent by /i', $error)) {
+          //This is a special case for an unavoidable warning
+          //that is generated by generating output before Drupal is bootstrapped.
+          //Simply ignore it.
+          continue;
+        }
+        elseif (preg_match('/^warning:/i', $error)) {
+          drush_log(ereg_replace('/^warning: /i', '', $error), 'warning');
+        }
+        elseif (preg_match('/^notice:/i', $error)) {
+          drush_log(ereg_replace('/^notice: /i', '', $error), 'notice');
+        }
+        elseif (preg_match('/^user warning:/i', $error)) {
+          // This is a special case. PHP logs sql errors as 'User Warnings', not errors.
+          drush_set_error('DRUSH_DRUPAL_ERROR_MESSAGE', ereg_replace('/^user warning: /i', '', $error));
+        }
+        else {
+          drush_set_error('DRUSH_DRUPAL_ERROR_MESSAGE', $error);
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Log the return value of Drupal hook_update_n functions.
+ *
+ * This is used during install and update to log the output
+ * of the update process to the logging system.
+ */
+function _drush_log_update_sql($ret) {
+  if (sizeof($ret)) {
+    foreach ($ret as $info) {
+      if (is_array($info)) {
+        if (!$info['success']) {
+          drush_set_error('DRUPAL_UPDATE_FAILED', $info['query']);
+        }
+        else {
+          drush_log($info['query'], ($info['success']) ? 'success' : 'error');
+        }
+      }
+    }
+  }
+}
+
+/**
+ * @} End of "defgroup logging".
+ */
+
+/**
+* @name Error status definitions
+* @{
+* Error code definitions for interpreting the current error status.
+* @see drush_set_error(), drush_get_error(), drush_get_error_log(), drush_cmp_error()
+*/
+
+/** The command was not successfully completed. This is the default error status. */
+define('DRUSH_NOT_COMPLETED', 0);
+/** The command completed succesfully. */
+define('DRUSH_SUCCESS', 1);
+/** The command could not be completed because the framework has specified errors that have occured. */
+define('DRUSH_FRAMEWORK_ERROR', 2);
+
+/**
+ * @} End of "name Error status defintions".
+ */
+
+/**
+ * @defgroup errorhandling Managing errors that occur in the Drush framework.
+ * @{
+ * Functions that manage the current error status of the Drush framework.
+ *
+ * These functions operate by maintaining a static variable that is a equal to the constant DRUSH_FRAMEWORK_ERROR if an
+ * error has occurred.
+ * This error code is returned at the end of program execution, and provide the shell or calling application with
+ * more information on how to diagnose any problems that may have occurred.
+ */
+
+/**
+ * Set an error code for the error handling system.
+ *
+ * @param error
+ *   A text string identifying the type of error.
+ *
+ * @param message
+ *   Optional. Error message to be logged. If no message is specified, hook_drush_help will be consulted, 
+ *   using a key of 'error:MY_ERROR_STRING'.
+ *
+ * @return
+ *   Always returns FALSE, to allow you to return with false in the calling functions,
+ *   such as <code>return drush_set_error('DRUSH_FRAMEWORK_ERROR')</code>
+ */
+function drush_set_error($error, $message = null) {
+  $error_code =& drush_get_context('DRUSH_ERROR_CODE', DRUSH_NOT_COMPLETED);
+  $error_code = DRUSH_FRAMEWORK_ERROR;
+
+  $error_log =& drush_get_context('DRUSH_ERROR_LOG', array());
+
+  if (is_numeric($error)) {
+    $error = 'DRUSH_FRAMEWORK_ERROR';
+  }
+
+  $message = ($message) ? $message : drush_command_invoke_all('drush_help', 'error:' . $error);
+
+  if (is_array($message)) {
+    $message = implode("\n", $message);
+  }
+
+  $error_log[$error][] = $message;
+  drush_log(($message) ? $message : $error, 'error', $error);
+
+  return FALSE;
+}
+
+/**
+ * Return the current error handling status
+ *
+ * @return
+ *   The current aggregate error status
+ */
+function drush_get_error() {
+  return drush_get_context('DRUSH_ERROR_CODE', DRUSH_NOT_COMPLETED);
+}
+
+/**
+ * Return the current list of errors that have occurred.
+ *
+ * @return
+ *   An associative array of error messages indexed by the type of message.
+ */
+function drush_get_error_log() {
+  return drush_get_context('DRUSH_ERROR_LOG', array());
+}
+
+/**
+ * Check if a specific error status has been set.
+ *
+ * @param error
+ *   A text string identifying the error that has occurred.
+ * @return
+ *   TRUE if the specified error has been set, FALSE if not 
+ */
+function drush_cmp_error($error) {
+  $error_log = drush_get_error_log();
+  
+  if (is_numeric($error)) {
+    $error = 'DRUSH_FRAMEWORK_ERROR';
+  }
+
+  return array_key_exists($error, $error_log);
+}
+
+/**
+ * Turn PHP error handling off.
+ *
+ * This is commonly used while bootstrapping Drupal for install
+ * or updates.
+ */
+function drush_errors_off() {
+  $errors =& drush_get_context('DRUSH_ERROR_REPORTING', 0);
+  $errors = error_reporting(0);
+  ini_set('display_errors', FALSE);
+}
+
+/**
+ * Turn PHP error handling on.
+ */
+function drush_errors_on() {
+  $errors =& drush_get_context('DRUSH_ERROR_REPORTING', E_ALL ^ E_NOTICE);
+  $errors = error_reporting($errors);
+  ini_set('display_errors', TRUE);
+}
+
+/**
+ * @} End of "defgroup errorhandling".
+ */
+

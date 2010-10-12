@@ -1,0 +1,5 @@
+; $Id$
+name = Breadcrumbs Disabler
+description = A simple module, which allows the administrator to disable breadcrumbs.
+core = 6.x
+
