@@ -10,8 +10,8 @@
  +----------------------------------------------------------------------------+
 */
 
-/**
- -----------------------------------------------------------------------------------------------
+/*
+-----------------------------------------------------------------------------------------------
 The basic functionality of this processor is that variables from the $params object are transformed
 into xml. The xml is submitted to the processor's https site
 using curl and the response is translated back into an array using the processor's function.
@@ -284,7 +284,7 @@ class CRM_Core_Payment_Barclay extends CRM_Core_Payment
                 return $params;
             } else {
                 $params['status_id'] = 1;
-                $params['trxn_id'] = $processorResponse['EngineDoc']['DocumentID'];//'trxn_id' is varchar(255) field. returned value is length 37
+                $params['trxn_id'] = $processorResponse['EngineDoc']['DocumentId'];//'trxn_id' is varchar(255) field. returned value is length 37
                 $params['trxn_result_code'] = $processorResponse['EngineDoc']['OrderFormDoc']['Transaction']['CardProcResponse']['ProcReturnMsg'] ;
 				return $params;
             }
