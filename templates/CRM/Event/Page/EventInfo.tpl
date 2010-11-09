@@ -1,6 +1,6 @@
 {*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.2                                                |
+ | CiviCRM version 3.1                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -25,42 +25,32 @@
 *}
 {* this template is used for displaying event information *}
 
-{if $registerClosed }
-<div class="spacer"></div>
-<div class="messages status">
-  <div class="icon inform-icon"></div>
-     &nbsp;{ts}Registration is closed for this event{/ts}
-  </div>
-{/if}
-<div class="vevent crm-block crm-event-info-form-block">
+<div class="vevent">
 	<div class="event-info">
 	
 	{if $event.summary}
-	    <div class="crm-section event_summary-section">{$event.summary}</div>
+	    <div class="section event_summary-section">{$event.summary}</div>
 	{/if}
 	{if $event.description}
-	    <div class="crm-section event_description-section summary">{$event.description}</div>
+	    <div class="section event_description-section summary">{$event.description}</div>
 	{/if}
-	<div class="crm-section event_date_time-section">
+	<div class="section event_date_time-section">
 	    <div class="label"><label>{ts}When{/ts}</label></div>
 	    <div class="content">
-            <abbr class="dtstart" title="{$event.event_start_date|crmDate}">
             {$event.event_start_date|date_format:"%A %e %B %Y %l:%M %p"}
-			</abbr>
-
-			
-
-            {if $event.event_end_date}
+            
+			{if $event.event_end_date}
                 &nbsp;{ts}to{/ts}&nbsp;
-                {* Only show end time if end date = start date *}
+                {* If event ends on same day, no need to repeat date information - just display end time. 'date_format' specified to say compare just the Y/M/d i.e. not the time*}
                 {if $event.event_end_date|date_format:"%Y%m%d" == $event.event_start_date|date_format:"%Y%m%d"}
-                    <abbr class="dtend" title="{$event.event_end_date|crmDate:0:1}">
-                    {$event.event_end_date|date_format:"%A %e %B %Y %l:%M %p":0:1}
-                    </abbr>        
+                    
+                    {$event.event_end_date|crmDate:0:1}
+                 
+			 {* else we do need to display the end date b/c it's different *}        
                 {else}
-                    <abbr class="dtend" title="{$event.event_end_date|crmDate}">
+                    
                     {$event.event_end_date|date_format:"%A %e %B %Y %l:%M %p"}
-                    </abbr> 	
+          	
                 {/if}
             {/if}
         </div>
@@ -70,7 +60,7 @@
 	{if $isShowLocation}
 
         {if $location.address.1}
-            <div class="crm-section event_address-section">
+            <div class="section event_address-section">
                 <div class="label"><label>{ts}Location{/ts}</label></div>
                 <div class="content">{$location.address.1.display|nl2br}</div>
                 <div class="clear"></div>
@@ -80,7 +70,7 @@
 	    {if ( $event.is_map && $config->mapAPIKey && 
 	        ( is_numeric($location.address.1.geo_code_1)  || 
 	        ( $config->mapGeoCoding && $location.address.1.city AND $location.address.1.state_province ) ) ) }
-	        <div class="crm-section event_map-section">
+	        <div class="section event_map-section">
 	            <div class="content">
                     {assign var=showDirectly value="1"}
                     {if $mapProvider eq 'Google'}
@@ -98,7 +88,7 @@
 
 
 	{if $location.phone.1.phone || $location.email.1.email}
-	    <div class="crm-section event_contact-section">
+	    <div class="section event_contact-section">
 	        <div class="label"><label>{ts}Contact{/ts}</label></div>
 	        <div class="content">
 	            {* loop on any phones and emails for this event *}
@@ -121,7 +111,7 @@
 
     
 	{if $event.is_monetary eq 1 && $feeBlock.value}
-	    <div class="crm-section event_fees-section">
+	    <div class="section event_fees-section">
 	        <div class="label"><label>{$event.fee_label}</label></div>
 	        <div class="content">
 	            <table class="form-layout-compressed fee_block-table">
@@ -133,7 +123,7 @@
 	                        {assign var="lClass" value="fee_level-label"}
 	                    {/if}
 	                    <tr>
-	                        <td class="{$lClass} crm-event-label">{$feeBlock.label.$idx}</td>
+	                        <td class="{$lClass}">{$feeBlock.label.$idx}</td>
 	                        <td class="fee_amount-value right">{$feeBlock.value.$idx|crmMoney}</td>
 	                    </tr>
 	                {/foreach}
@@ -148,7 +138,7 @@
         
 	{if $allowRegistration}
         <div class="action-link section register_link-section">
-            <a href="{$registerURL}" title="{$registerText}" class="button crm-register-button"><span>{$registerText}</span></a>
+            <strong><a href="{$registerURL}" title="{$registerText}">&raquo; {$registerText}</a></strong>
         </div>
     {/if}
     { if $event.is_public }
