@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -46,15 +46,29 @@ function run( ) {
     require_once '../civicrm.config.php'; 
     require_once 'CRM/Core/Config.php'; 
     
-    $config =& CRM_Core_Config::singleton(); 
+    $config = CRM_Core_Config::singleton(); 
 
     // this does not return on failure
     CRM_Utils_System::authenticateScript( true );
+
+    //log the execution of script
+    CRM_Core_Error::debug_log_message( 'civimail.cronjob.php');
+    
+    // load bootstrap to call hooks
+    require_once 'CRM/Utils/System.php';
+    CRM_Utils_System::loadBootStrap(  );
 
     // we now use DB locks on a per job basis
     processQueue( );
 }
 
-run( );
-
+// you can run this program either from an apache command, or from the cli
+if ( php_sapi_name() == "cli" ) {
+  require_once ("bin/cli.php");
+  $cli=new civicrm_cli ();
+  //if it doesn't die, it's authenticated 
+  processQueue( );
+} else  { //from the webserver
+  run( );
+}
 

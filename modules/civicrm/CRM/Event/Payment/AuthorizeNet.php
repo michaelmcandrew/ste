@@ -11,7 +11,7 @@
 /**
  * @package CRM
  * @author Marshal Newrock <marshal@idealso.com>
- * $Id: AuthorizeNet.php 9800 2007-06-07 02:46:32Z marshal $
+ * $Id: AuthorizeNet.php 26018 2010-01-25 09:00:59Z deepak $
  **/
 
 require_once 'CRM/Core/Payment/AuthorizeNet.php';
@@ -47,7 +47,7 @@ class CRM_Event_Payment_AuthorizeNet extends CRM_Core_Payment_AuthorizeNet {
      */
     static function &singleton( $mode, &$paymentProcessor ) {
         if (self::$_singleton === null ) {
-            self::$_singleton =& new CRM_Event_Payment_AuthorizeNet( $mode, $paymentProcessor );
+            self::$_singleton = new CRM_Event_Payment_AuthorizeNet( $mode, $paymentProcessor );
         }
         return self::$_singleton;
     }

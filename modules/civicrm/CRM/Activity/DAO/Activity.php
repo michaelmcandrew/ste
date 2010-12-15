@@ -1,7 +1,7 @@
 <?php
 /*
 +--------------------------------------------------------------------+
-| CiviCRM version 3.1                                                |
+| CiviCRM version 3.2                                                |
 +--------------------------------------------------------------------+
 | Copyright CiviCRM LLC (c) 2004-2010                                |
 +--------------------------------------------------------------------+
@@ -241,7 +241,7 @@ class CRM_Activity_DAO_Activity extends CRM_Core_DAO
     {
         if (!(self::$_fields)) {
             self::$_fields = array(
-                'id' => array(
+                'activity_id' => array(
                     'name' => 'id',
                     'type' => CRM_Utils_Type::T_INT,
                     'title' => ts('Activity ID') ,
@@ -276,10 +276,10 @@ class CRM_Activity_DAO_Activity extends CRM_Core_DAO
                     'where' => 'civicrm_activity.activity_type_id',
                     'headerPattern' => '/(activity.)?type(.id$)/i',
                     'dataPattern' => '',
-                    'export' => true,
+                    'export' => false,
                     'default' => '',
                 ) ,
-                'subject' => array(
+                'activity_subject' => array(
                     'name' => 'subject',
                     'type' => CRM_Utils_Type::T_STRING,
                     'title' => ts('Subject') ,
@@ -301,7 +301,7 @@ class CRM_Activity_DAO_Activity extends CRM_Core_DAO
                     'dataPattern' => '',
                     'export' => true,
                 ) ,
-                'duration' => array(
+                'activity_duration' => array(
                     'name' => 'duration',
                     'type' => CRM_Utils_Type::T_INT,
                     'title' => ts('Duration') ,
@@ -311,7 +311,7 @@ class CRM_Activity_DAO_Activity extends CRM_Core_DAO
                     'dataPattern' => '',
                     'export' => true,
                 ) ,
-                'location' => array(
+                'activity_location' => array(
                     'name' => 'location',
                     'type' => CRM_Utils_Type::T_STRING,
                     'title' => ts('Location') ,
@@ -335,7 +335,7 @@ class CRM_Activity_DAO_Activity extends CRM_Core_DAO
                     'maxlength' => 64,
                     'size' => CRM_Utils_Type::BIG,
                 ) ,
-                'details' => array(
+                'activity_details' => array(
                     'name' => 'details',
                     'type' => CRM_Utils_Type::T_TEXT,
                     'title' => ts('Details') ,
@@ -347,15 +347,15 @@ class CRM_Activity_DAO_Activity extends CRM_Core_DAO
                     'dataPattern' => '',
                     'export' => true,
                 ) ,
-                'status_id' => array(
+                'activity_status_id' => array(
                     'name' => 'status_id',
                     'type' => CRM_Utils_Type::T_INT,
-                    'title' => ts('Activity Status Label') ,
+                    'title' => ts('Activity Status Id') ,
                     'import' => true,
                     'where' => 'civicrm_activity.status_id',
                     'headerPattern' => '/(activity.)?status(.label$)?/i',
                     'dataPattern' => '',
-                    'export' => true,
+                    'export' => false,
                 ) ,
                 'priority_id' => array(
                     'name' => 'priority_id',
@@ -366,7 +366,7 @@ class CRM_Activity_DAO_Activity extends CRM_Core_DAO
                     'type' => CRM_Utils_Type::T_INT,
                     'FKClassName' => 'CRM_Activity_DAO_Activity',
                 ) ,
-                'is_test' => array(
+                'activity_is_test' => array(
                     'name' => 'is_test',
                     'type' => CRM_Utils_Type::T_BOOLEAN,
                     'title' => ts('Test') ,
@@ -376,7 +376,7 @@ class CRM_Activity_DAO_Activity extends CRM_Core_DAO
                     'dataPattern' => '',
                     'export' => true,
                 ) ,
-                'medium_id' => array(
+                'activity_medium_id' => array(
                     'name' => 'medium_id',
                     'type' => CRM_Utils_Type::T_INT,
                     'title' => ts('Activity Medium') ,

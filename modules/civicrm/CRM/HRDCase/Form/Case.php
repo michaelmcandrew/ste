@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -101,7 +101,7 @@ class CRM_Case_Form_Case extends CRM_Contact_Form_Task
             $advanced = null;
             $builder  = null;
             
-            $session =& CRM_Core_Session::singleton();
+            $session = CRM_Core_Session::singleton();
             $advanced = $session->get('isAdvanced');
             $builder  = $session->get('isSearchBuilder');
             
@@ -136,7 +136,7 @@ class CRM_Case_Form_Case extends CRM_Contact_Form_Task
             CRM_Case_BAO_Case::retrieve($params, $defaults, $ids);
             
             $defaults['case_contact'] = CRM_Case_BAO_Case::retrieveContactIdsByCaseId( $this->_id, $this->_contactID );
-            $contactNames =  CRM_Case_BAO_Case::getcontactNames( $this->_id );
+            $contactNames =  CRM_Case_BAO_Case::getContactNames( $this->_id );
             foreach( $contactNames as $key => $name ){
                 $defaults['contact_names'] .=  $defaults['contact_names']?",\"$name\"":"\"$name\"";
             }
@@ -144,7 +144,7 @@ class CRM_Case_Form_Case extends CRM_Contact_Form_Task
         }    
         $this->assign('contactNames',CRM_Utils_Array::value( 'contact_names', $defaults ) );
         $defaults['case_type_id'] = explode( CRM_Case_BAO_Case::VALUE_SEPERATOR, CRM_Utils_Array::value( 'case_type_id' , $defaults ) );
-        $config =& CRM_Core_Config::singleton( );
+        $config = CRM_Core_Config::singleton( );
         if ($config->civiHRD){
             $defaults['casetag2_id'] = explode( CRM_Case_BAO_Case::VALUE_SEPERATOR, CRM_Utils_Array::value( 'casetag2_id' , $defaults ) );
             $defaults['casetag3_id'] = explode( CRM_Case_BAO_Case::VALUE_SEPERATOR, CRM_Utils_Array::value( 'casetag3_id' , $defaults ) );
@@ -208,7 +208,7 @@ class CRM_Case_Form_Case extends CRM_Contact_Form_Task
         $caseType = CRM_Core_OptionGroup::values('case_type');
         $this->add('select', 'case_type_id',  ts( 'Case Type' ),  
                    $caseType , true, array("size"=>"5",  "multiple"));
-        $config =& CRM_Core_Config::singleton( );
+        $config = CRM_Core_Config::singleton( );
         if ($config->civiHRD){
             $caseSubType = CRM_Core_OptionGroup::values('f1_case_sub_type');
             $this->add('select', 'casetag2_id',  ts( 'Case Sub Type' ),  
@@ -288,7 +288,7 @@ class CRM_Case_Form_Case extends CRM_Contact_Form_Task
      * @access public  
      * @static  s
      */  
-    static function formRule( &$values ) {
+    static function formRule( $values ) {
 
         $errors = array( ); 
 
@@ -329,7 +329,7 @@ class CRM_Case_Form_Case extends CRM_Contact_Form_Task
         $params['end_date'    ] = CRM_Utils_Date::format( $params['end_date'] );
         $params['case_type_id'] = CRM_Case_BAO_Case::VALUE_SEPERATOR.implode(CRM_Case_BAO_Case::VALUE_SEPERATOR, $params['case_type_id'] ).CRM_Case_BAO_Case::VALUE_SEPERATOR;
         
-        $config =& CRM_Core_Config::singleton( );
+        $config = CRM_Core_Config::singleton( );
         if ($config->civiHRD){
             $params['casetag2_id'] = CRM_Case_BAO_Case::VALUE_SEPERATOR.implode(CRM_Case_BAO_Case::VALUE_SEPERATOR, $params['casetag2_id'] ).CRM_Case_BAO_Case::VALUE_SEPERATOR;
             $params['casetag3_id'] = CRM_Case_BAO_Case::VALUE_SEPERATOR.implode(CRM_Case_BAO_Case::VALUE_SEPERATOR, $params['casetag3_id'] ).CRM_Case_BAO_Case::VALUE_SEPERATOR;

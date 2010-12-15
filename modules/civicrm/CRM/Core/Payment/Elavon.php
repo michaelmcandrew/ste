@@ -2,7 +2,7 @@
 
 /*
  +----------------------------------------------------------------------------+
- | Elavon (Nova) Virtual Merchant Core Payment Module for CiviCRM version 3.1 |
+ | Elavon (Nova) Virtual Merchant Core Payment Module for CiviCRM version 3.2 |
  +----------------------------------------------------------------------------+
  | Licensed to CiviCRM under the Academic Free License version 3.0            |
  |                                                                            |
@@ -275,7 +275,7 @@ class CRM_Core_Payment_Elavon extends CRM_Core_Payment
     function _checkDupe( $invoiceId )
     {
         require_once 'CRM/Contribute/DAO/Contribution.php';
-        $contribution =& new CRM_Contribute_DAO_Contribution( );
+        $contribution = new CRM_Contribute_DAO_Contribution( );
         $contribution->invoice_id = $invoiceId;
         return $contribution->find( );
     }

@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -53,6 +53,13 @@ class CRM_Core_BAO_Setting
     {
         CRM_Core_BAO_Setting::fixParams($params);
 
+        // also set a template url so js files can use this
+        // CRM-6194
+        $params['civiRelativeURL'] = CRM_Utils_System::url( 'CIVI_BASE_TEMPLATE' );
+        $params['civiRelativeURL'] = str_replace( 'CIVI_BASE_TEMPLATE', 
+                                                  '',
+                                                  $params['civiRelativeURL'] );
+
         require_once "CRM/Core/DAO/Domain.php";
         $domain = new CRM_Core_DAO_Domain();
         $domain->id = CRM_Core_Config::domainID( );
@@ -62,6 +69,12 @@ class CRM_Core_BAO_Setting
             CRM_Core_BAO_Setting::formatParams($params, $values);
         }
 
+        // CRM-6151
+        if ( isset( $params['localeCustomStrings'] ) &&
+             is_array( $params['localeCustomStrings'] ) ) {
+            $domain->locale_custom_strings = serialize( $params['localeCustomStrings'] );
+        }
+            
         // unset any of the variables we read from file that should not be stored in the database
         // the username and certpath are stored flat with _test and _live
         // check CRM-1470
@@ -70,7 +83,8 @@ class CRM_Core_BAO_Setting
                            'userFrameworkBaseURL', 'userFrameworkClass', 'userHookClass',
                            'userPermissionClass', 'userFrameworkURLVar',
                            'newBaseURL', 'newBaseDir', 'newSiteName',
-                           'qfKey', 'gettextResourceDir', 'cleanURL' );
+                           'qfKey', 'gettextResourceDir', 'cleanURL',
+                           'locale_custom_strings', 'localeCustomStrings' );
         foreach ( $skipVars as $var ) {
             unset( $params[$var] );
         }
@@ -150,22 +164,20 @@ class CRM_Core_BAO_Setting
         if ( CRM_Utils_Array::value( 'q', $_GET ) == 'civicrm/upgrade' ) {
             $domain->selectAdd( 'config_backend' );
         } else {
-            $domain->selectAdd( 'config_backend, locales' );
+            $domain->selectAdd( 'config_backend, locales, locale_custom_strings' );
         }
         
         $domain->id = CRM_Core_Config::domainID( );
         $domain->find(true);
         if ($domain->config_backend) {
-            $defaults   = unserialize($domain->config_backend);
-
-            // set proper monetary formatting, falling back to en_US and C (CRM-2782)
-            setlocale(LC_MONETARY, $defaults['lcMonetary'].'.utf8', $defaults['lcMonetary'], 'en_US.utf8', 'en_US', 'C');
+            $defaults = unserialize($domain->config_backend);
 
             $skipVars = array( 'dsn', 'templateCompileDir',
                                'userFrameworkDSN', 
                                'userFrameworkBaseURL', 'userFrameworkClass', 'userHookClass',
                                'userPermissionClass', 'userFrameworkURLVar',
-                               'qfKey', 'gettextResourceDir', 'cleanURL' );
+                               'qfKey', 'gettextResourceDir', 'cleanURL',
+                               'locale_custom_strings', 'localeCustomStrings' );
             foreach ( $skipVars as $skip ) {
                 if ( array_key_exists( $skip, $defaults ) ) {
                     unset( $defaults[$skip] );
@@ -177,13 +189,21 @@ class CRM_Core_BAO_Setting
                 return;
             }
 
+
+            // check if there are any locale strings
+            if ( $domain->locale_custom_strings ) {
+                $defaults['localeCustomStrings'] = unserialize($domain->locale_custom_strings);
+            } else {
+                $defaults['localeCustomStrings'] = null;
+            }
+
             // are we in a multi-language setup?
             $multiLang = $domain->locales ? true : false;
 
             // set the current language
             $lcMessages = null;
 
-            $session =& CRM_Core_Session::singleton();
+            $session = CRM_Core_Session::singleton();
 
             // on multi-lang sites based on request and civicrm_uf_match
             if ($multiLang) {
@@ -258,7 +278,8 @@ class CRM_Core_BAO_Setting
             global $tsLocale;
             $tsLocale = $lcMessages;
 
-            // FIXME: as goo^W bad place as any to fix CRM-5428 (to be moved to a sane location along with the above)
+            // FIXME: as bad aplace as any to fix CRM-5428 
+            // (to be moved to a sane location along with the above)
             if (function_exists('mb_internal_encoding')) mb_internal_encoding('UTF-8');
         }
     }

@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -166,7 +166,7 @@ class CRM_Core_Payment_PayPalIPN extends CRM_Core_Payment_BaseIPN {
 
         if ( ! $first ) {
             // create a contribution and then get it processed
-            $contribution =& new CRM_Contribute_DAO_Contribution( );
+            $contribution = new CRM_Contribute_DAO_Contribution( );
             $contribution->contact_id = $ids['contact'];
             $contribution->contribution_type_id  = $objects['contributionType']->id;
             $contribution->contribution_page_id  = $ids['contributionPage'];

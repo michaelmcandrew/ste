@@ -1,6 +1,6 @@
 {*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -51,7 +51,13 @@
         {ts}CiviCRM Profile(s) allow you to aggregate groups of fields and include them in your site as input forms, contact display pages, and search and listings features. They provide a powerful set of tools for you to collect information from constituents and selectively share contact information.{/ts} {help id='profile_overview'}
     </div>
 
+    {if NOT ($action eq 1 or $action eq 2)}
+    <div class="crm-submit-buttons">
+        <a href="{crmURL p='civicrm/admin/uf/group' q="action=add&reset=1"}" id="newCiviCRMProfile-top" class="button"><span><div class="icon add-icon"></div>{ts}Add Profile{/ts}</span></a>
+    </div>
+    {/if}
     {if $rows}
+    <div class="crm-content-block">
     <div id="uf_profile">
         {strip}
         {* handle enable/disable actions*}
@@ -85,16 +91,17 @@
         </table>
         
         {if NOT ($action eq 1 or $action eq 2)}
-        <div class="action-link">
-        <a href="{crmURL p='civicrm/admin/uf/group' q="action=add&reset=1"}" id="newCiviCRMProfile" class="button"><span>&raquo; {ts}New CiviCRM Profile{/ts}</span></a>
+        <div class="crm-submit-buttons">
+            <a href="{crmURL p='civicrm/admin/uf/group' q="action=add&reset=1"}" id="newCiviCRMProfile-bottom" class="button"><span><div class="icon add-icon"></div>{ts}Add Profile{/ts}</span></a>
         </div>
         {/if}
-         {/strip}
+        {/strip}
+    </div>
     </div>
     {else}
     {if $action ne 1} {* When we are adding an item, we should not display this message *}
        <div class="messages status">
-       <img src="{$config->resourceBase}i/Inform.gif" alt="{ts}status{/ts}"/> &nbsp;
+         <div class="icon inform-icon"></div> &nbsp;
          {capture assign=crmURL}{crmURL p='civicrm/admin/uf/group' q='action=add&reset=1'}{/capture}{ts 1=$crmURL}No CiviCRM Profiles have been created yet. You can <a href='%1'>add one now</a>.{/ts}
        </div>
     {/if}

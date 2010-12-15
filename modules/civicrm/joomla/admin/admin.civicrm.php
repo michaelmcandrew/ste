@@ -1,7 +1,7 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -45,7 +45,7 @@ require_once 'CRM/Core/Invoke.php';
 civicrm_invoke( );
 
 function civicrm_init( ) {
-    $config =& CRM_Core_Config::singleton();
+    $config = CRM_Core_Config::singleton();
 }
 
 function plugin_init( ) {

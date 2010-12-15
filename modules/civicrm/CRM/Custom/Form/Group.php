@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -37,13 +37,13 @@
 require_once 'CRM/Core/Form.php';
 
 /**
- * form to process actions on the group aspect of Custom Data
+ * form to process actions on the set aspect of Custom Data
  */
 class CRM_Custom_Form_Group extends CRM_Core_Form 
 {
 
     /**
-     * the group id saved to the session for an update
+     * the set id saved to the session for an update
      *
      * @var int
      * @access protected
@@ -51,7 +51,7 @@ class CRM_Custom_Form_Group extends CRM_Core_Form
     protected $_id;
 
     /**
-     *  group is empty or not
+     *  set is empty or not
      *
      * @var bool
      * @access protected
@@ -59,7 +59,7 @@ class CRM_Custom_Form_Group extends CRM_Core_Form
     protected $_isGroupEmpty = true;
     
     /**
-     * array of existing subtypes set for a custom group
+     * array of existing subtypes set for a custom set 
      *
      * @var array
      * @access protected
@@ -85,7 +85,7 @@ class CRM_Custom_Form_Group extends CRM_Core_Form
     public function preProcess()
     {
         require_once 'CRM/Core/BAO/CustomGroup.php';
-        // current group id
+        // current set id
         $this->_id = $this->get('id');
 
         // setting title for html page
@@ -96,7 +96,7 @@ class CRM_Custom_Form_Group extends CRM_Core_Form
             $title = CRM_Core_BAO_CustomGroup::getTitle($this->_id);
             CRM_Utils_System::setTitle(ts('Preview %1', array(1 => $title)));
         } else {
-            CRM_Utils_System::setTitle(ts('New Custom Data Group'));
+            CRM_Utils_System::setTitle(ts('New Custom Field Set'));
         }
 
         if ( isset($this->_id) ) {
@@ -122,7 +122,7 @@ class CRM_Custom_Form_Group extends CRM_Core_Form
      * @access public
      * @static
      */
-    static function formRule(&$fields, &$files, $self) 
+    static function formRule( $fields, $files, $self) 
     {
         $errors = array();
 
@@ -140,7 +140,7 @@ class CRM_Custom_Form_Group extends CRM_Core_Form
         }
         
         if ( empty( $fields['extends'][0] ) ) {
-            $errors['extends'] = ts("You need to select the type of record that this group of custom fields is applicable for.");
+            $errors['extends'] = ts("You need to select the type of record that this set of custom fields is applicable for.");
         }
 
         $extends = array('Activity','Relationship','Group','Contribution','Membership', 'Event','Participant');
@@ -161,12 +161,12 @@ class CRM_Custom_Form_Group extends CRM_Core_Form
             }
         }
         
-        //checks the given custom group doesnot start with digit
+        //checks the given custom set doesnot start with digit
         $title = $fields['title']; 
         if ( ! empty( $title ) ) {
             $asciiValue = ord( $title{0} );//gives the ascii value
             if( $asciiValue >= 48 && $asciiValue <= 57 ) {
-                $errors['title'] = ts("Group's Name should not start with digit");
+                $errors['title'] = ts("Set's Name should not start with digit");
             } 
         }
 
@@ -203,7 +203,7 @@ class CRM_Custom_Form_Group extends CRM_Core_Form
         $attributes = CRM_Core_DAO::getAttribute( 'CRM_Core_DAO_CustomGroup' );
         
         //title
-        $this->add('text', 'title', ts('Group Name'), $attributes['title'], true);
+        $this->add('text', 'title', ts('Set Name'), $attributes['title'], true);
         $this->addRule( 'title',
                         ts( 'Name already exists in Database.' ),
                         'objectExists',
@@ -317,7 +317,7 @@ class CRM_Custom_Form_Group extends CRM_Core_Form
                 }
             }
 
-            //allow to edit settings if custom group is empty CRM-5258
+            //allow to edit settings if custom set is empty CRM-5258
             $this->_isGroupEmpty = CRM_Core_BAO_CustomGroup::isGroupEmpty( $this->_id );
             if ( !$this->_isGroupEmpty ) {
                 if ( !empty($this->_subtypes) &&
@@ -345,19 +345,19 @@ class CRM_Custom_Form_Group extends CRM_Core_Form
         // display style
         $this->add('select', 'style', ts('Display Style'), CRM_Core_SelectValues::customGroupStyle());
        
-        // is this group collapsed or expanded ?
-        $this->addElement('checkbox', 'collapse_display', ts('Collapse this group on initial display'));
+        // is this set collapsed or expanded ?
+        $this->addElement('checkbox', 'collapse_display', ts('Collapse this set on initial display'));
 
-        // is this group collapsed or expanded ? in advanced search
-        $this->addElement('checkbox', 'collapse_adv_display', ts('Collapse this group in Advanced Search'));
+        // is this set collapsed or expanded ? in advanced search
+        $this->addElement('checkbox', 'collapse_adv_display', ts('Collapse this set in Advanced Search'));
 
-        // is this group active ?
-        $this->addElement('checkbox', 'is_active', ts('Is this Custom Data Group active?') );
+        // is this set active ?
+        $this->addElement('checkbox', 'is_active', ts('Is this Custom Data Set active?') );
         
-        // does this group have multiple record?
+        // does this set have multiple record?
         $multiple = $this->addElement('checkbox', 
                                       'is_multiple', 
-                                      ts('Does this Custom Data Group allow multiple records?'),
+                                      ts('Does this Custom Field Set allow multiple records?'),
                                       null,
                                       array( 'onclick' => "showRange();"));
 
@@ -367,7 +367,7 @@ class CRM_Custom_Form_Group extends CRM_Core_Form
         $max_multiple = $this->add('text', 'max_multiple', ts('Maximum number of multiple records'), $attributes['max_multiple'] );
         $this->addRule('max_multiple', ts('is a numeric field') , 'numeric');
 
-        //allow to edit settings if custom group is empty CRM-5258
+        //allow to edit settings if custom set is empty CRM-5258
         $this->assign( 'isGroupEmpty', $this->_isGroupEmpty );
         if ( !$this->_isGroupEmpty ) {
             $multiple->freeze();
@@ -410,8 +410,8 @@ class CRM_Custom_Form_Group extends CRM_Core_Form
         if ($this->_action == CRM_Core_Action::ADD) {
             $defaults['weight'] = CRM_Utils_Weight::getDefaultWeight('CRM_Core_DAO_CustomGroup');
 
-            $defaults['is_multiple'] = $defaults['min_multiple'] = 0;
-            $defaults['is_active']   = 1;
+            $defaults['is_multiple'] = $defaults['min_multiple']     = 0;
+            $defaults['is_active']   = $defaults['collapse_display'] = 1;
             $defaults['style']       = 'Inline';
         } elseif ( !CRM_Utils_Array::value('max_multiple', $defaults) && !$this->_isGroupEmpty) {
             $this->assign('showMaxMultiple', false);
@@ -465,8 +465,8 @@ class CRM_Custom_Form_Group extends CRM_Core_Form
                 $params['overrideFKConstraint'] = 1;
             }
         } elseif ($this->_action & CRM_Core_Action::ADD) {
-            //new custom group, so lets set the created_id
-            $session =& CRM_Core_Session::singleton( );
+            //new custom set , so lets set the created_id
+            $session = CRM_Core_Session::singleton( );
             $params['created_id']   = $session->get( 'userID' );
             $params['created_date'] = date('YmdHis');
         } 
@@ -478,13 +478,33 @@ class CRM_Custom_Form_Group extends CRM_Core_Form
         CRM_Core_BAO_Cache::deleteGroup( 'contact fields' );
       
         if ($this->_action & CRM_Core_Action::UPDATE) {
-            CRM_Core_Session::setStatus(ts('Your custom data group \'%1 \' has been saved.', array(1 => $group->title)));
+            CRM_Core_Session::setStatus(ts('Your custom field set \'%1 \' has been saved.', array(1 => $group->title)));
         } else {
             $url = CRM_Utils_System::url( 'civicrm/admin/custom/group/field', 'reset=1&action=add&gid=' . $group->id);
-            CRM_Core_Session::setStatus(ts('Your custom data group \'%1\' has been added. You can add custom fields to this group now.',
+            CRM_Core_Session::setStatus(ts('Your custom field set \'%1\' has been added. You can add it custom fields now.',
                                            array(1 => $group->title)));
-            $session =& CRM_Core_Session::singleton( );
+            $session = CRM_Core_Session::singleton( );
             $session->replaceUserContext($url);
+        }
+        
+        // prompt Drupal Views users to update $db_prefix in settings.php, if necessary
+        global $db_prefix;
+        if ( is_array($db_prefix) && CIVICRM_UF == 'Drupal' && module_exists('views') ) {
+            // get table_name for each custom group
+            $tables = array( );
+            $sql = "SELECT table_name FROM civicrm_custom_group WHERE is_active = 1";
+            $result = CRM_Core_DAO::executeQuery( $sql );
+            while ( $result->fetch( ) ) {
+                $tables[$result->table_name] = $result->table_name;
+            }
+            
+            // find out which tables are missing from the $db_prefix array
+            $missingTableNames = array_diff_key( $tables, $db_prefix );
+            
+            if ( !empty( $missingTableNames ) ) {
+                CRM_Core_Session::setStatus( '<br />' . ts('Note:To ensure that all of your custom data groups are available to Views, you may need to add the following key(s) to the $db_prefix array in your settings.php file: \'%1\'.',
+                                                           array( 1 => implode(', ', $missingTableNames ) ) ) );
+            }
         }
     }
 

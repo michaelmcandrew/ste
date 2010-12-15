@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -51,8 +51,12 @@ class CRM_Admin_Form_Setting_Miscellaneous extends  CRM_Admin_Form_Setting
     public function buildQuickForm( ) {
         CRM_Utils_System::setTitle(ts('Settings - Miscellaneous'));
 
+        $this->addYesNo('contactUndelete', ts('Contact Trash & Undelete'));
+
         $this->addYesNo( 'versionCheck'           , ts( 'Version Check & Statistics Reporting' ));
         $this->addElement('text', 'maxAttachments' , ts('Maximum Attachments'),
+                          array( 'size' => 2, 'maxlength' => 8 ) );
+        $this->addElement('text', 'maxFileSize' , ts('Maximum File Size'),
                           array( 'size' => 2, 'maxlength' => 8 ) );
         $this->addElement('text','recaptchaPublicKey' , ts('Public Key'),
                           array( 'size' => 64, 'maxlength' => 64 ) );
@@ -61,6 +65,9 @@ class CRM_Admin_Form_Setting_Miscellaneous extends  CRM_Admin_Form_Setting
 
         $this->addElement('text', 'dashboardCacheTimeout', ts('Dashboard cache timeout'),
                           array( 'size' => 3, 'maxlength' => 5 ) );
+
+        $this->addRule('maxAttachments', ts('Value should be a positive number') , 'positiveInteger');
+        $this->addRule('maxFileSize', ts('Value should be a positive number') , 'positiveInteger');
        
         parent::buildQuickForm();    
     }

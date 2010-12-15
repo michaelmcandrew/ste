@@ -1,7 +1,7 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -53,14 +53,14 @@ class CRM_Dedupe_Finder
      * @return array  array of (cid1, cid2, weight) dupe triples
      */
     function dupes($rgid, $cids = array()) {
-        $rgBao =& new CRM_Dedupe_BAO_RuleGroup();
+        $rgBao = new CRM_Dedupe_BAO_RuleGroup();
         $rgBao->id = $rgid;
         $rgBao->contactIds = $cids;
         if (!$rgBao->find(true)) {
             CRM_Core_Error::fatal("$level rule for $ctype does not exist");
         }
 
-        $dao =& new CRM_Core_DAO();
+        $dao = new CRM_Core_DAO();
         $dao->query($rgBao->tableQuery());
         $dao->query($rgBao->thresholdQuery());
         $dupes = array();
@@ -94,7 +94,7 @@ class CRM_Dedupe_Finder
         if ( ! $params ) {
             return array();
         }
-        $rgBao =& new CRM_Dedupe_BAO_RuleGroup();
+        $rgBao = new CRM_Dedupe_BAO_RuleGroup();
         $rgBao->contact_type = $ctype;
         $rgBao->params = $params;
         $rgBao->level = $level;
@@ -104,7 +104,7 @@ class CRM_Dedupe_Finder
         }
         $params['check_permission'] = CRM_Utils_Array::value( 'check_permission', $params, true );
 
-        $dao =& new CRM_Core_DAO();
+        $dao = new CRM_Core_DAO();
         $dao->query($rgBao->tableQuery());
         $dao->query($rgBao->thresholdQuery($params['check_permission']));
         $dupes = array();
@@ -141,14 +141,14 @@ class CRM_Dedupe_Finder
     function dupesOfContact($cid, $level = 'Strict', $ctype = null) {
         // if not provided, fetch the contact type from the database
         if (!$ctype) {
-            $dao =& new CRM_Contact_DAO_Contact();
+            $dao = new CRM_Contact_DAO_Contact();
             $dao->id = $cid;
             if (!$dao->find(true)) {
                 CRM_Core_Error::fatal("contact id of $cid does not exist");
             }
             $ctype = $dao->contact_type;
         }
-        $rgBao =& new CRM_Dedupe_BAO_RuleGroup();
+        $rgBao = new CRM_Dedupe_BAO_RuleGroup();
         $rgBao->level = $level;
         $rgBao->contact_type = $ctype;
         $rgBao->is_default = 1;

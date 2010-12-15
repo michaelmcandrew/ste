@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -200,8 +200,8 @@ class CRM_Core_Action {
      * @access public
      * @static
      */
-    static function formLink( &$links, $mask, $values ) {
-        $config =& CRM_Core_Config::singleton();
+    static function formLink( &$links, $mask, $values, $more = false ) {
+        $config = CRM_Core_Config::singleton();
         if ( empty( $links ) ) {
             return null;
         }
@@ -216,10 +216,13 @@ class CRM_Core_Action {
                     $extra = self::replace( CRM_Utils_Array::value( 'extra', $link, '' ),  $values );
                 }
                 
+                $frontend = false;
+                if ( isset( $link['fe'] ) ) $frontend = true;
+                
                 $urlPath = null;
                 if ( CRM_Utils_Array::value( 'qs', $link ) && !CRM_Utils_System::isNull( $link['qs'] ) ) {
                     $urlPath = CRM_Utils_System::url( self::replace( $link['url'], $values ),
-                                                      self::replace( $link['qs'] , $values ), true );
+                                                      self::replace( $link['qs'], $values ), true, null, true, $frontend );
                 } else {
                     $urlPath = CRM_Utils_Array::value( 'url', $link );
                 }
@@ -233,17 +236,19 @@ class CRM_Core_Action {
                     $linkClass .= " action-item-first";
                     $firstLink = false;
                 }
-                if ( $urlPath ) {                      
+                if ( $urlPath ) {
+                    if( $frontend ) $extra .= "target=_blank"; 
                     $url[] = sprintf('<a href="%s" class="%s" title="%s" %s ' . $extra . '>%s</a>',
-                                       $urlPath,
-                                       $linkClass,
-                                       $link['title'], $ref, $link['name'] );
+                                     $urlPath,
+                                     $linkClass,
+                                     CRM_Utils_Array::value( 'title', $link )
+                                     , $ref, $link['name'] );
                 } else {
                     $linkClass .= ' '. strtolower( $link['ref'] );
                     $url[] = sprintf('<a title="%s" class="%s" %s ' . $extra . '>%s</a>',
-                                       $link['title'],
-                                       $linkClass,
-                                       $ref, $link['name'] );
+                                     CRM_Utils_Array::value( 'title', $link ),
+                                     $linkClass,
+                                     $ref, $link['name'] );
                 }
             }
             
@@ -259,13 +264,18 @@ class CRM_Core_Action {
         }
         require_once 'CRM/Utils/String.php';
         CRM_Utils_String::append( $resultLink, '', $actionLink );
+        
         if ( $showDiv ) {
             CRM_Utils_String::append( $resultDiv, '</li><li>', $actionDiv );
-            $resultDiv = ts('more')."<ul id='panel_xx' class='panel'><li>{$resultDiv}</li></ul>";
+            $resultDiv  = ts('more')."<ul id='panel_xx' class='panel'><li>{$resultDiv}</li></ul>";
         }
         
         if ($resultDiv) {
-        	$result = "<span>{$resultLink}</span><span class='btn-slide' id=xx>{$resultDiv}</span>";
+            if ($more == true) {
+                $result = "<span class='btn-slide' id=xx>{$resultDiv}</span>";
+            } else {
+                $result = "<span>{$resultLink}</span><span class='btn-slide' id=xx>{$resultDiv}</span>";
+            }
         } else {
         	$result = "<span>{$resultLink}</span>";
         }

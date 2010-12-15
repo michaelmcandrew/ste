@@ -1,7 +1,7 @@
 <?php  
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -90,7 +90,7 @@ abstract class CRM_Core_Payment {
      */  
     static function &singleton( $mode = 'test', $component, &$paymentProcessor, &$paymentForm = null ) {
         if ( self::$_singleton === null ) {
-            $config       =& CRM_Core_Config::singleton( );
+            $config       = CRM_Core_Config::singleton( );
             $paymentClass = "CRM_{$component}_" . $paymentProcessor['class_name'];
             
             $classPath = str_replace( '_', '/', $paymentClass ) . '.php';

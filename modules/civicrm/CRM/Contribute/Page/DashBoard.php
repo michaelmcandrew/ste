@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -60,7 +60,7 @@ class CRM_Contribute_Page_DashBoard extends CRM_Core_Page
         $status = array( 'Valid', 'Cancelled' );
         
         $startDate = null;
-        $config =& CRM_Core_Config::singleton( );
+        $config = CRM_Core_Config::singleton( );
         $currentMonth = date('m');
         $currentDay   = date('d');
         if ( (int ) $config->fiscalYearStart['M']  > $currentMonth ||
@@ -102,6 +102,11 @@ class CRM_Contribute_Page_DashBoard extends CRM_Core_Page
             $this->assign( $aName, $$aName );
         }
         
+        //for contribution tabular View
+        $buildTabularView = CRM_Utils_Array::value( 'showtable', $_GET, false );
+        $this->assign( 'buildTabularView', $buildTabularView );
+        if( $buildTabularView ) return;
+        
         // Check for admin permission to see if we should include the Manage Contribution Pages action link
         $isAdmin = 0;
         require_once 'CRM/Core/Permission.php';
@@ -121,14 +126,21 @@ class CRM_Contribute_Page_DashBoard extends CRM_Core_Page
     function run( ) { 
         $this->preProcess( );
         
-        $controller =& new CRM_Core_Controller_Simple( 'CRM_Contribute_Form_Search', ts('Contributions'), null );
+        $controller = new CRM_Core_Controller_Simple( 'CRM_Contribute_Form_Search', 
+                                                      ts('Contributions'), null );
         $controller->setEmbedded( true ); 
-        $controller->reset( ); 
+        
         $controller->set( 'limit', 10 );
         $controller->set( 'force', 1 );
         $controller->set( 'context', 'dashboard' ); 
         $controller->process( ); 
-        $controller->run( ); 
+        $controller->run( );
+        $chartForm = new CRM_Core_Controller_Simple( 'CRM_Contribute_Form_ContributionCharts', 
+                                                     ts('Contributions Charts'), null );
+        
+        $chartForm->setEmbedded( true );
+        $chartForm->process( );
+        $chartForm->run( );
         
         return parent::run( );
     }

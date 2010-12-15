@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -190,7 +190,7 @@ class CRM_Contact_Form_Domain extends CRM_Core_Form {
      * @static
      * @access public
      */
-    static function formRule( &$fields ) 
+    static function formRule( $fields ) 
     {
         $errors = array( );
         // check for state/country mapping
@@ -269,7 +269,7 @@ class CRM_Contact_Form_Domain extends CRM_Core_Form {
         CRM_Core_OptionValue::addOptionValue( $emailParams, $groupParams, $action, $this->_fromEmailId );
        
         CRM_Core_Session::setStatus( ts('Domain information for \'%1\' has been saved.', array( 1 => $domain->name )) );
-        $session =& CRM_Core_Session::singleton( );
+        $session = CRM_Core_Session::singleton( );
         $session->replaceUserContext(CRM_Utils_System::url('civicrm/admin', 'reset=1' ) );
 
     }

@@ -1,6 +1,6 @@
 {*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -74,4 +74,12 @@ packages/jquery/plugins/jquery.dashboard.js
 packages/jquery/css/dashboard.css
 
 packages/jquery/plugins/jquery.FormNavigate.js
+
+js/rest.js
+
+js/jquery/jquery.crmaccordions.js
+js/jquery/jquery.crmasmselect.js
+js/jquery/jquery.crmtooltip.js
+js/dd_roundies.js
+js/style.js
 

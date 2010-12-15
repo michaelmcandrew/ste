@@ -1,7 +1,7 @@
 <?php
 /*
 +--------------------------------------------------------------------+
-| CiviCRM version 3.1                                                |
+| CiviCRM version 3.2                                                |
 +--------------------------------------------------------------------+
 | Copyright CiviCRM LLC (c) 2004-2010                                |
 +--------------------------------------------------------------------+
@@ -135,6 +135,12 @@ class CRM_Price_DAO_LineItem extends CRM_Core_DAO
      */
     public $line_total;
     /**
+     * Participant count for field
+     *
+     * @var int unsigned
+     */
+    public $participant_count;
+    /**
      * class constructor
      *
      * @access public
@@ -223,6 +229,12 @@ class CRM_Price_DAO_LineItem extends CRM_Core_DAO
                     'type' => CRM_Utils_Type::T_MONEY,
                     'title' => ts('Line Total') ,
                     'required' => true,
+                ) ,
+                'participant_count' => array(
+                    'name' => 'participant_count',
+                    'type' => CRM_Utils_Type::T_INT,
+                    'title' => ts('Participant Count') ,
+                    'default' => 'UL',
                 ) ,
             );
         }

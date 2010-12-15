@@ -1,6 +1,6 @@
 {*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -33,7 +33,7 @@
          {else}
             <div class="icon crm-icon {$item.type}{if $item.subtype}-subtype{/if}-icon"></div>
          {/if}
-         {$item.title|truncate:28:"..":true}</a></li>
+         {if $item.isDeleted}<del>{/if}{$item.title|mb_truncate:25:"..":true}{if $item.isDeleted}</del>{/if}</a></li>
     {/foreach}
    </ul>
 </div>

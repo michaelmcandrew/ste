@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -73,7 +73,7 @@ class CRM_Core_BAO_Navigation extends CRM_Core_DAO_Navigation
         $menus = array( );
 
         require_once "CRM/Core/DAO/Menu.php";
-        $menu  =& new CRM_Core_DAO_Menu( );
+        $menu  = new CRM_Core_DAO_Menu( );
         $menu->domain_id = CRM_Core_Config::domainID( );
         $menu->find();
 
@@ -96,7 +96,7 @@ class CRM_Core_BAO_Navigation extends CRM_Core_DAO_Navigation
     static function add( &$params ) 
     {
         require_once "CRM/Core/DAO/Navigation.php";
-        $navigation  =& new CRM_Core_DAO_Navigation( );
+        $navigation  = new CRM_Core_DAO_Navigation( );
         
         $params['is_active'    ] = CRM_Utils_Array::value( 'is_active', $params, false );
         $params['has_separator'] = CRM_Utils_Array::value( 'has_separator', $params, false );
@@ -141,7 +141,7 @@ class CRM_Core_BAO_Navigation extends CRM_Core_DAO_Navigation
      */
     static function retrieve( &$params, &$defaults ) 
     {
-        $navigation =& new CRM_Core_DAO_Navigation( );
+        $navigation = new CRM_Core_DAO_Navigation( );
         $navigation->copyValues( $params );
 
         $navigation->domain_id = CRM_Core_Config::domainID( );
@@ -288,6 +288,7 @@ ORDER BY parent_id, weight";
              
             // for each menu get their children
             $navigationTree[$navigation->id] = array( 'attributes' => array( 'label'      => $navigation->label,
+                                                                             'name'       => $navigation->name,
                                                                              'url'        => $navigation->url,
                                                                              'permission' => $navigation->permission,
                                                                              'operator'   => $navigation->permission_operator,
@@ -315,6 +316,10 @@ ORDER BY parent_id, weight";
         self::buildNavigationTree( $navigations, $parent = NULL );
         $navigationString = null;
 
+        // run the Navigation  through a hook so users can modify it
+        require_once 'CRM/Utils/Hook.php';
+        CRM_Utils_Hook::navigationMenu( $navigations );
+        
         //skip children menu item if user don't have access to parent menu item
         $skipMenuItems = array( );
         foreach( $navigations as $key => $value ) {
@@ -329,9 +334,13 @@ ORDER BY parent_id, weight";
                 }
                 $navigationString .= ' { attributes: { "id" : "node_'.$key.'"}, data: { title:"'. $data. '"' .$class.'}';
             } else {
-                $name = self::getMenuName( $value, $skipMenuItems );
-                if ( $name ) { 
-                    $navigationString .= '<li class="menumain">' . $name;
+            	// Home is a special case
+                if ($value['attributes']['name'] != 'Home') {
+                    $name = self::getMenuName( $value, $skipMenuItems );
+                    if ( $name ) {
+                        $removeCharacters = array('/','!','&','*',' ','(',')','.'); 
+                        $navigationString .= '<li class="menumain crm-'.str_replace($removeCharacters,'_',$value['attributes']['label']).'">'. $name;
+                    }
                 }
             }
             
@@ -395,8 +404,9 @@ ORDER BY parent_id, weight";
             if ( !empty( $value['child'] ) ) {
                 foreach($value['child'] as $val ) {
                     $name = self::getMenuName( $val, $skipMenuItems );
-                    if ( $name ) { 
-                        $navigationString .= '<li>' . $name;
+                    if ( $name ) {
+                        $removeCharacters = array('/','!','&','*',' ','(',')','.'); 
+                        $navigationString .= '<li class="crm-'.str_replace($removeCharacters,'_',$val['attributes']['label']).'">' . $name;
                         self::recurseNavigation($val, $navigationString, $json, $skipMenuItems );
                     }
                 }
@@ -416,15 +426,33 @@ ORDER BY parent_id, weight";
         // want to use ts() as it would throw the ts-extractor off
         $i18n =& CRM_Core_I18n::singleton();
 
-        $name       = $i18n->crm_translate($value['attributes']['label']);
+        $name       = $i18n->crm_translate($value['attributes']['label'], array('context' => 'menu'));
         $url        = str_replace('&', '&amp;', $value['attributes']['url']);
         $permission = $value['attributes']['permission'];
         $operator   = $value['attributes']['operator'];
         $parentID   = $value['attributes']['parentID'];
         $navID      = $value['attributes']['navID'];
         $active     = $value['attributes']['active'];
+        $menuName   = $value['attributes']['name'];
         
         if ( in_array( $parentID, $skipMenuItems ) || !$active ) {
+            $skipMenuItems[] = $navID;
+            return false;
+        }
+        
+        //we need to check core view/edit or supported acls.
+        if ( in_array( $menuName, array( 'Search...', 'Contacts' ) ) ) {
+            require_once 'CRM/Core/Permission.php';
+            if (!CRM_Core_Permission::giveMeAllACLs( ) ) {
+                $skipMenuItems[] = $navID;
+                return false;
+            }
+        }
+        
+        $config = CRM_Core_Config::singleton( );
+        if ( $menuName == 'Other' && 
+             !in_array( 'CiviCase', $config->enableComponents ) &&
+             !in_array( 'CiviGrant', $config->enableComponents ) ) {
             $skipMenuItems[] = $navID;
             return false;
         }
@@ -438,17 +466,31 @@ ORDER BY parent_id, weight";
             }
             $makeLink = true;
         }
-                    
+        
+        static $allComponents;
+        if ( !$allComponents ) {
+            $allComponents = CRM_Core_Component::getNames( );
+        }
+        
         if ( isset( $permission) && $permission ) {
             $permissions = explode(',', $permission ); 
-            $config  =& CRM_Core_Config::singleton( );
             
             $hasPermission = false;    
             foreach ( $permissions as $key ) {
                 $showItem = true;
                 //hack to determine if it's a component related permission
-                if ( $key != 'access CiviCRM' && substr( $key, 0, 6 ) === 'access' ) {
-                    $componentName = trim(substr( $key, 6 ));
+                
+                $componentName = null;
+                if ( strpos( $key, 'access' ) === 0 ) { 
+                    $componentName = trim( substr( $key, 6 ) );
+                    if ( !in_array( $componentName, $allComponents ) ) {
+                        $componentName = null;
+                    }
+                }
+                if ( !$componentName && in_array( $menuName, array( 'Cases', 'CiviCase', 'Find Cases' ) ) ) { 
+                    $componentName = 'CiviCase';
+                }
+                if ( $componentName ) {
                     if ( !in_array( $componentName, $config->enableComponents ) || 
                          !CRM_Core_Permission::check( $key ) ) {
                         $showItem = false;
@@ -498,7 +540,7 @@ ORDER BY parent_id, weight";
             return;
         }
 
-        $config =& CRM_Core_Config::singleton();
+        $config = CRM_Core_Config::singleton();
         // For Joomla front end user, there is no need to create
         // navigation menu items, CRM-5349
         if ($config->userFramework == 'Joomla' && $config->userFrameworkFrontend ) {
@@ -526,14 +568,25 @@ ORDER BY parent_id, weight";
             $logoutURL       = CRM_Utils_System::url( 'civicrm/logout', 'reset=1');
             $appendSring     = "<li id=\"menu-logout\" class=\"menumain\"><a href=\"{$logoutURL}\">" . ts('Logout') . "</a></li>";
 
-            $homeURL       = CRM_Utils_System::url( 'civicrm/dashboard', 'reset=1');
+            // get home menu from db
+            $homeParams      = array( 'name' => 'Home' );
+            $homeNav         = array( );
+            self::retrieve( $homeParams, $homeNav );
+            if ( $homeNav ) {
+                $homeURL     = CRM_Utils_System::url( $homeNav['url'] );
+                $homeLabel   = $homeNav['label'];
+            } else {
+                $homeURL     = CRM_Utils_System::url( 'civicrm/dashboard', 'reset=1');
+                $homeLabel   = ts('Home');
+            }
 
             if ( ( $config->userFramework == 'Drupal' ) && 
                  function_exists( 'module_exists' ) &&
-                 module_exists('admin_menu') ) {
-                $prepandString = "<li class=\"menumain\">" . ts('Home') . "<ul id=\"civicrm-home\"><li><a href=\"{$homeURL}\">" . ts('CiviCRM Home') . "</a></li><li><a href=\"#\" onclick=\"cj.Menu.closeAll( );cj('#civicrm-menu').toggle( );\">" . ts('Drupal Menu') . "</a></li></ul></li>";
+                 module_exists('admin_menu') &&
+                 user_access('access administration menu') ) {
+                $prepandString = "<li class=\"menumain crm-link-home\">" . $homeLabel . "<ul id=\"civicrm-home\"><li><a href=\"{$homeURL}\">" . $homeLabel . "</a></li><li><a href=\"#\" onclick=\"cj.Menu.closeAll( );cj('#civicrm-menu').toggle( );\">" . ts('Drupal Menu') . "</a></li></ul></li>";
             } else {
-                $prepandString = "<li class=\"menumain\"><a href=\"{$homeURL}\" title=\"" . ts('CiviCRM Home') . "\">" . ts('Home') . "</a></li>";
+                $prepandString = "<li class=\"menumain crm-link-home\"><a href=\"{$homeURL}\" title=\"" . $homeLabel . "\">" . $homeLabel . "</a></li>";
             }
 
             // prepend the navigation with locale info for CRM-5027
@@ -542,12 +595,12 @@ ORDER BY parent_id, weight";
             // before inserting check if contact id exists in db
             // this is to handle wierd case when contact id is in session but not in db
             require_once 'CRM/Contact/DAO/Contact.php';
-            $contact =& new CRM_Contact_DAO_Contact( );
+            $contact = new CRM_Contact_DAO_Contact( );
             $contact->id = $contactID;
             if ( $contact->find(true ) ) {
                 // save in preference table for this particular user
                 require_once 'CRM/Core/DAO/Preferences.php';
-                $preference =& new CRM_Core_DAO_Preferences();
+                $preference = new CRM_Core_DAO_Preferences();
                 $preference->contact_id = $contactID;
                 $preference->domain_id  = CRM_Core_Config::domainID( );
                 $preference->find(true);
@@ -600,7 +653,7 @@ ORDER BY parent_id, weight";
          
          //reset navigation menus
          self::resetNavigation( );
-         exit();
+         CRM_Utils_System::civiExit( );
      }
      
      /**

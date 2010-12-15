@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -59,11 +59,10 @@ class CRM_Pledge_Form_PledgeView extends CRM_Core_Form
                                           $ids );
 
         $values['frequencyUnit'] = ts( '%1(s)', array( 1 => $values['frequency_unit'] ) );
-        $values['eachPaymentAmount'] = floor($values['amount'] / $values['installments']);
         
         if (isset( $values["honor_contact_id"] ) && $values["honor_contact_id"] ) {
             $sql = "SELECT display_name FROM civicrm_contact WHERE id = " . $values["honor_contact_id"];
-            $dao = &new CRM_Core_DAO();
+            $dao = new CRM_Core_DAO();
             $dao->query($sql);
             if ( $dao->fetch() ) {
                 $url = CRM_Utils_System::url( 'civicrm/contact/view', "reset=1&cid=$values[honor_contact_id]" );

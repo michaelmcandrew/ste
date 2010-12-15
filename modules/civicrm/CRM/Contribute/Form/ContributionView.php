@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -94,7 +94,7 @@ class CRM_Contribute_Form_ContributionView extends CRM_Core_Form
         $premiumId = null;
         if ( $id ) {
             require_once 'CRM/Contribute/DAO/ContributionProduct.php';
-            $dao = & new CRM_Contribute_DAO_ContributionProduct();
+            $dao = new CRM_Contribute_DAO_ContributionProduct();
             $dao->contribution_id = $id;
             if ( $dao->find(true) ) {
                $premiumId = $dao->id;
@@ -104,7 +104,7 @@ class CRM_Contribute_Form_ContributionView extends CRM_Core_Form
         
         if ( $premiumId ) {
             require_once 'CRM/Contribute/DAO/Product.php';
-            $productDAO = & new CRM_Contribute_DAO_Product();
+            $productDAO = new CRM_Contribute_DAO_Product();
             $productDAO->id  = $productID;
             $productDAO->find(true);
            

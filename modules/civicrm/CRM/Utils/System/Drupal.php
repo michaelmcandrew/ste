@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -49,12 +49,15 @@ class CRM_Utils_System_Drupal {
      * @access public
      */
     function setTitle( $title, $pageTitle = null ) {
-        if ( $pageTitle ) {
-            $title = $pageTitle;
+        if ( !$pageTitle ) {
+            $pageTitle = $title;
         }
-        drupal_set_title( $title );
+        if ( arg(0) == 'civicrm' )	{
+            //set drupal title 
+            drupal_set_title( $pageTitle ); 
+        }
     }
-
+    
     /**
      * Append an additional breadcrumb tag to the existing breadcrumb
      *
@@ -161,7 +164,7 @@ class CRM_Utils_System_Drupal {
     function url($path = null, $query = null, $absolute = false,
                  $fragment = null, $htmlize = true,
                  $frontend = false ) {
-        $config =& CRM_Core_Config::singleton( );
+        $config = CRM_Core_Config::singleton( );
         $script =  'index.php';
 
         if (isset($fragment)) {
@@ -221,7 +224,7 @@ class CRM_Utils_System_Drupal {
     static function authenticate( $name, $password ) {
         require_once 'DB.php';
 
-        $config =& CRM_Core_Config::singleton( );
+        $config = CRM_Core_Config::singleton( );
         
         $dbDrupal = DB::connect( $config->userFrameworkDSN );
         if ( DB::isError( $dbDrupal ) ) {
@@ -295,6 +298,8 @@ class CRM_Utils_System_Drupal {
         // and en_US will trump other English entries, but works in our case)
         static $prefixes = null;
         if ($prefixes === null) {
+            // seed with Chinese mappings for CRM-6281
+            $prefixes = array('zh-hans' => 'zh_CN', 'zh-hant' => 'zh_TW');
             foreach ($locales as $locale) {
                 $prefixes[substr($locale, 0, 2)] = $locale;
             }
@@ -312,4 +317,95 @@ class CRM_Utils_System_Drupal {
             return null;
         }
     }
+
+    /**
+     * load drupal bootstrap
+     */
+    static function loadBootStrap( ) 
+    {
+        //take the cms root path.
+        $cmsPath = self::cmsRootPath( );
+        
+        if ( !file_exists( "$cmsPath/includes/bootstrap.inc" ) ) {
+            echo '<br />Sorry, could not able to locate bootstrap.inc.';
+            exit( );
+        }
+        
+        chdir($cmsPath);
+        require_once 'includes/bootstrap.inc';
+        @drupal_bootstrap(DRUPAL_BOOTSTRAP_FULL);
+        
+        if ( !function_exists('module_exists') || 
+             !module_exists( 'civicrm' ) ) {
+            echo '<br />Sorry, could not able to load drupal bootstrap.';
+            exit( );
+        }
+        
+        //load user, we need to check drupal permissions.
+        $name = trim( CRM_Utils_Array::value( 'name', $_REQUEST ) );
+        $pass = trim( CRM_Utils_Array::value( 'pass', $_REQUEST ) );
+        if ( $name ) {
+            $user = user_authenticate(  array( 'name' => $name, 'pass' => $pass ) );
+            if ( empty( $user->uid ) ) {
+                echo '<br />Sorry, unrecognized username or password.';
+                exit( );
+            }
+        }
+        
+    }
+    
+    static function cmsRootPath( ) 
+    {
+        $cmsRoot  = $valid = null;
+        $pathVars = explode( '/', str_replace( '\\', '/', $_SERVER['SCRIPT_FILENAME'] ) );
+        
+        //might be windows installation.
+        $firstVar = array_shift( $pathVars );
+        if ( $firstVar ) $cmsRoot = $firstVar;
+        
+        //start w/ csm dir search.
+        foreach ( $pathVars as $var ) {
+            $cmsRoot .= "/$var";
+            $cmsIncludePath = "$cmsRoot/includes";
+            //stop as we found bootstrap.
+            if ( @opendir( $cmsIncludePath ) && 
+                 file_exists( "$cmsIncludePath/bootstrap.inc" ) ) { 
+                $valid = true;
+                break;
+            }
+        }
+        
+        return ( $valid ) ? $cmsRoot : null; 
+    }
+    
+    /**
+     * check is user logged in.
+     *
+     * @return boolean true/false.
+     */
+    public static function isUserLoggedIn( ) {
+        $isloggedIn = false;
+        if ( function_exists( 'user_is_logged_in' ) ) {
+            $isloggedIn = user_is_logged_in( );
+        }
+        
+        return $isloggedIn;
+    }
+    
+    /**
+     * Get currently logged in user uf id.
+     *
+     * @return int $userID logged in user uf id.
+     */
+    public static function getLoggedInUfID( ) {
+        $ufID = null;
+        if ( function_exists( 'user_is_logged_in' ) && 
+             user_is_logged_in( ) && 
+             function_exists( 'user_uid_optional_to_arg' ) ) {
+            $ufID = user_uid_optional_to_arg( array( ) );
+        }
+        
+        return $ufID;
+    }
+    
 }

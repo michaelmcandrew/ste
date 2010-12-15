@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -156,8 +156,8 @@ class CRM_Mailing_Form_ForwardMailing extends CRM_Core_Form
         CRM_Utils_System::setUFMessage( $status );
         
         // always redirect to front page of url
-        $session =& CRM_Core_Session::singleton( );
-        $config  =& CRM_Core_Config::singleton( );
+        $session = CRM_Core_Session::singleton( );
+        $config  = CRM_Core_Config::singleton( );
         $session->pushUserContext( $config->userFrameworkBaseURL );
     }
 }

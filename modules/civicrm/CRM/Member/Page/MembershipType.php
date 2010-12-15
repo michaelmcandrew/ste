@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -125,9 +125,10 @@ class CRM_Member_Page_MembershipType extends CRM_Core_Page_Basic
         // what action to take ?
         if ($action & (CRM_Core_Action::UPDATE | CRM_Core_Action::ADD)) {
             $this->edit($action, $id) ;
-        } 
-        // finally browse the custom groups
-        $this->browse();
+        } else { 
+            // finally browse the custom groups
+            $this->browse();
+        }
         
         // parent run 
         parent::run();
@@ -146,7 +147,7 @@ class CRM_Member_Page_MembershipType extends CRM_Core_Page_Basic
         // get all membership types sorted by weight
         $membershipType = array();
         require_once 'CRM/Member/DAO/MembershipType.php';
-        $dao =& new CRM_Member_DAO_MembershipType();
+        $dao = new CRM_Member_DAO_MembershipType();
 
         $dao->orderBy('weight');
         $dao->find();

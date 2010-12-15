@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -63,7 +63,7 @@ class CRM_Contribute_Form_PCP_Campaign extends CRM_Core_Form
     {
         require_once 'CRM/Contribute/DAO/PCP.php';
         $dafaults = array( );
-        $dao =& new CRM_Contribute_DAO_PCP( );
+        $dao = new CRM_Contribute_DAO_PCP( );
         
         if( $this->_pageId ) {
             $dao->id = $this->_pageId;
@@ -139,7 +139,7 @@ class CRM_Contribute_Form_PCP_Campaign extends CRM_Core_Form
      * @access public  
      * @static  
      */  
-    static function formRule( &$fields, &$files, $self ) 
+    static function formRule( $fields, $files, $self ) 
     {
         $errors = array();
         if ( $fields['goal_amount'] <= 0 ) {
@@ -174,7 +174,7 @@ class CRM_Contribute_Form_PCP_Campaign extends CRM_Core_Form
                 $params[$key] = 0;
             }
         }
-        $session =& CRM_Core_Session::singleton( );
+        $session = CRM_Core_Session::singleton( );
         $contactID = isset( $this->_contactID ) ? $this->_contactID : $session->get('userID');
         if( ! $contactID ) {
             $contactID = $this->get('contactID');

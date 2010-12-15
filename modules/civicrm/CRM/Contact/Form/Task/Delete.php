@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -68,7 +68,20 @@ class CRM_Contact_Form_Task_Delete extends CRM_Contact_Form_Task {
         
         $cid = CRM_Utils_Request::retrieve( 'cid', 'Positive',
                                             $this, false ); 
-        
+
+        $this->_searchKey = CRM_Utils_Request::retrieve( 'key', 'String', $this );
+                
+        // sort out whether it’s a delete-to-trash, delete-into-oblivion or restore (and let the template know)
+        $config =& CRM_Core_Config::singleton();
+        $values = $this->controller->exportValues();
+        require_once 'CRM/Contact/Task.php';
+        $this->_skipUndelete = (CRM_Core_Permission::check('access deleted contacts') and (CRM_Utils_Request::retrieve('skip_undelete', 'Boolean', $this) or $values['task'] == CRM_Contact_Task::DELETE_PERMANENTLY));
+        $this->_restore      = (CRM_Utils_Request::retrieve('restore',       'Boolean', $this) or $values['task'] == CRM_Contact_Task::RESTORE);
+        $this->assign('trash',   $config->contactUndelete and !$this->_skipUndelete);
+        $this->assign('restore', $this->_restore);
+
+        if ($this->_restore) CRM_Utils_System::setTitle(ts('Restore Contact'));
+
         if ( $cid ) { 
             require_once 'CRM/Contact/BAO/Contact/Permission.php';
             if ( !CRM_Contact_BAO_Contact_Permission::allow( $cid, CRM_Core_Permission::EDIT ) ) {
@@ -90,14 +103,16 @@ class CRM_Contact_Form_Task_Delete extends CRM_Contact_Form_Task {
      * @return void
      */
     function buildQuickForm( ) {
+        $label = $this->_restore ? ts('Restore Contact(s)') : ts('Delete Contact(s)');
+
         if ( $this->_single ) {
             // also fix the user context stack in case the user hits cancel
-            $session =& CRM_Core_Session::singleton( );
+            $session = CRM_Core_Session::singleton( );
             $session->replaceUserContext( CRM_Utils_System::url('civicrm/contact/view',
                                                                 'reset=1&cid=' . $this->_contactIds[0] ) );
-            $this->addDefaultButtons( ts('Delete Contacts'), 'done', 'cancel' );
+            $this->addDefaultButtons( $label, 'done', 'cancel' );
         } else {
-            $this->addDefaultButtons( ts('Delete Contacts'), 'done' );
+            $this->addDefaultButtons( $label, 'done' );
         }
     }
 
@@ -108,8 +123,18 @@ class CRM_Contact_Form_Task_Delete extends CRM_Contact_Form_Task {
      * @return None
      */
     public function postProcess() {
-        $session =& CRM_Core_Session::singleton( );
+        $session = CRM_Core_Session::singleton( );
         $currentUserId = $session->get( 'userID' );
+        
+        $context = CRM_Utils_Request::retrieve( 'context', 'String', $this, false, 'basic' );
+        $urlParams = 'force=1';
+        if ( CRM_Utils_Rule::qfKey( $this->_searchKey ) ) {
+            $urlParams .= "&qfKey=$this->_searchKey";
+        } elseif ( $context == 'search' ) {
+            $urlParams .= "&qfKey={$this->controller->_key}";
+        }
+        $urlString = "civicrm/contact/search/$context";
+        if ( $context == 'search' ) $urlString = 'civicrm/contact/search';  
         
         $selfDelete = false;
         $deletedContacts = 0;
@@ -118,15 +143,15 @@ class CRM_Contact_Form_Task_Delete extends CRM_Contact_Form_Task {
                 $selfDelete = true;
                 continue;
             }
-
-            if ( CRM_Contact_BAO_Contact::deleteContact( $contactId ) ) {
+            
+            if ( CRM_Contact_BAO_Contact::deleteContact( $contactId, $this->_restore, $this->_skipUndelete ) ) {
                 $deletedContacts++;
             }
         }
         if ( ! $this->_single ) {
-            $status = array( );
+            $label = $this->_restore ? ts('Restored Contact(s): %1', array(1 => $deletedContacts)) : ts('Deleted Contact(s): %1', array(1 => $deletedContacts));
             $status = array(
-                            ts( 'Deleted Contact(s): %1', array(1 => $deletedContacts)),
+                            $label,
                             ts('Total Selected Contact(s): %1', array(1 => count($this->_contactIds))),
                             );
             
@@ -139,18 +164,14 @@ class CRM_Contact_Form_Task_Delete extends CRM_Contact_Form_Task {
         } else {
             if ( $deletedContacts ) {
                 
-                $isAdvanced      = $session->get( 'isAdvanced' );
-                $isSearchBuilder = $session->get( 'isSearchBuilder' );
+                $session->replaceUserContext( CRM_Utils_System::url( $urlString, $urlParams ) );
                 
-                if ( $isAdvanced == 1 ) {
-                    $session->replaceUserContext( CRM_Utils_System::url( 'civicrm/contact/search/advanced', 'force=1' ) );
-                } else if ( ( $isAdvanced == 2 ) && ( $isSearchBuilder == 1 ) ) {
-                    $session->replaceUserContext( CRM_Utils_System::url( 'civicrm/contact/search/builder', 'force=1' ) );
+                if ($this->_restore) {
+                    $status = ts('Selected contact was restored sucessfully.');
+                    $session->replaceUserContext(CRM_Utils_System::url('civicrm/contact/view', "reset=1&cid={$this->_contactIds[0]}"));
                 } else {
-                    $session->replaceUserContext( CRM_Utils_System::url( 'civicrm/contact/search/basic', 'force=1' ) );
+                    $status = ts('Selected contact was deleted sucessfully.');
                 }
-                
-                $status = ts('Selected contact was deleted sucessfully.');
             } else {
                 $status = array(
                                 ts('Selected contact cannot be deleted.')
@@ -167,6 +188,7 @@ class CRM_Contact_Form_Task_Delete extends CRM_Contact_Form_Task {
         }
 
         CRM_Core_Session::setStatus( $status );
+        $session->replaceUserContext( CRM_Utils_System::url( $urlString, $urlParams ) );
     }//end of function
 
 

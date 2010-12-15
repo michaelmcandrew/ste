@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -101,7 +101,7 @@ class CRM_Dedupe_BAO_Rule extends CRM_Dedupe_DAO_Rule
             break;
         default:
             // custom data tables
-            if (preg_match('/^civicrm_value_/', $this->rule_table)) {
+            if (preg_match('/^civicrm_value_/', $this->rule_table) || preg_match('/^custom_value_/', $this->rule_table)) {
                 $id = 'entity_id';
             } else {
                 CRM_Core_Error::fatal("Unsupported rule_table for civicrm_dedupe_rule.id of {$this->id}");
@@ -169,13 +169,13 @@ class CRM_Dedupe_BAO_Rule extends CRM_Dedupe_DAO_Rule
     function dedupeRuleFields( $params)
     {
         require_once 'CRM/Dedupe/BAO/RuleGroup.php';
-        $rgBao =& new CRM_Dedupe_BAO_RuleGroup();
+        $rgBao = new CRM_Dedupe_BAO_RuleGroup();
         $rgBao->level = $params['level'];
         $rgBao->contact_type = $params['contact_type'];
         $rgBao->is_default = 1;
         $rgBao->find(true);
         
-        $ruleBao =& new CRM_Dedupe_BAO_Rule();
+        $ruleBao = new CRM_Dedupe_BAO_Rule();
         $ruleBao->dedupe_rule_group_id = $rgBao->id;
         $ruleBao->find();
         $ruleFields = array();

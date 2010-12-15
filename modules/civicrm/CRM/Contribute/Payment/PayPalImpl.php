@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -70,7 +70,7 @@ class CRM_Contribute_Payment_PayPalImpl extends CRM_Core_Payment_PayPalImpl {
     static function &singleton( $mode, &$paymentProcessor ) {
         $processorName = $paymentProcessor['name'];
         if (self::$_singleton[$processorName] === null ) { 
-            self::$_singleton[$processorName] =& new CRM_Contribute_Payment_PaypalImpl( $mode, $paymentProcessor );
+            self::$_singleton[$processorName] = new CRM_Contribute_Payment_PaypalImpl( $mode, $paymentProcessor );
         } 
         return self::$_singleton[$processorName]; 
     } 

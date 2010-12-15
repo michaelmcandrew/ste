@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -96,6 +96,9 @@ class CRM_Core_Config_Defaults
         //email notifications to activity Assignees
         $this->activityAssigneeNotification = defined( 'CIVICRM_ACTIVITY_ASSIGNEE_MAIL' ) ? (bool) CIVICRM_ACTIVITY_ASSIGNEE_MAIL : true;
 
+        // IDS enablement
+        $this->useIDS = defined( 'CIVICRM_IDS_ENABLE' ) ? (bool) CIVICRM_IDS_ENABLE : true;
+        
         // 
         $size = trim( ini_get( 'upload_max_filesize' ) );
         if ( $size ) {
@@ -127,7 +130,7 @@ class CRM_Core_Config_Defaults
      */
     public function setValues(&$defaults, $formMode = false) 
     {
-        $config =& CRM_Core_Config::singleton( );
+        $config = CRM_Core_Config::singleton( );
 
         $baseURL = $config->userFrameworkBaseURL;
 
@@ -164,9 +167,11 @@ class CRM_Core_Config_Defaults
                 // the system for a loop on lobo's macosx box
                 // or in modules
                 global $civicrm_root;
-                $civicrmDirName = trim(basename($civicrm_root));
-                $defaults['userFrameworkResourceURL'] = $baseURL . "sites/all/modules/$civicrmDirName/";
-
+                require_once "CRM/Utils/System/Drupal.php";
+                $cmsPath = CRM_Utils_System_Drupal::cmsRootPath( );
+                $defaults['userFrameworkResourceURL'] = $baseURL . str_replace( "$cmsPath/", '',  
+                                                                                str_replace('\\', '/', $civicrm_root ) );
+                
                 if ( strpos( $civicrm_root,
                              DIRECTORY_SEPARATOR . 'sites' .
                              DIRECTORY_SEPARATOR . 'all'   .
@@ -180,6 +185,8 @@ class CRM_Core_Config_Defaults
                         $siteName = substr( $civicrm_root,
                                             $startPos + 7,
                                             $endPos - $startPos - 7 );
+                        
+                        $civicrmDirName = trim(basename($civicrm_root));
                         $defaults['userFrameworkResourceURL'] = $baseURL . "sites/$siteName/modules/$civicrmDirName/";
                         if ( ! isset( $defaults['imageUploadURL'] ) ) {
                             $defaults['imageUploadURL'] = $baseURL . "sites/$siteName/files/civicrm/persist/contribute/";
@@ -214,6 +221,7 @@ class CRM_Core_Config_Defaults
             $uploadDir = $path . "upload/";
             
             CRM_Utils_File::createDir( $uploadDir );
+            CRM_Utils_File::restrictAccess($uploadDir);
             $defaults['uploadDir'] = $uploadDir;
         }
 

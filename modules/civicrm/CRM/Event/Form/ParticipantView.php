@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -89,7 +89,7 @@ class CRM_Event_Form_ParticipantView extends CRM_Core_Form
             $values[$participantID]['lineItem'][] = $lineItem;
         }
         
-        $values[$participantID]['totalAmount'] = $values[$participantID]['fee_amount'];
+        $values[$participantID]['totalAmount'] = CRM_Utils_Array::value( 'fee_amount', $values[$participantID] );
         
         // get the option value for custom data type 	
         $roleCustomDataTypeID      = CRM_Core_OptionGroup::getValue( 'custom_data_type', 'ParticipantRole', 'name' );
@@ -123,6 +123,16 @@ class CRM_Event_Form_ParticipantView extends CRM_Core_Form
         $participantRoles = CRM_Event_PseudoConstant::participantRole();
         $eventTitle  = CRM_Core_DAO::getFieldValue( 'CRM_Event_DAO_Event', $values[$participantID]['event_id'], 'title' );
         $displayName = CRM_Contact_BAO_Contact::displayName( $contactID );
+        
+        $participantCount = array();
+        foreach ( $lineItem  as $k => $v ) {
+            if ( CRM_Utils_Array::value( 'participant_count', $lineItem[$k] ) > 0 ) {
+                $participantCount[] = $lineItem['participant_count'];
+            }
+        }
+        if ( $participantCount ) {
+            $this->assign( 'participantCount', $participantCount );
+        }
         $this->assign( 'displayName', $displayName );
          
         $title = $displayName . ' (' . $participantRoles[$values[$participantID]['role_id']] . ' - ' . $eventTitle . ')' ;
@@ -145,7 +155,7 @@ class CRM_Event_Form_ParticipantView extends CRM_Core_Form
     public function buildQuickForm( ) 
     {
         $this->addButtons(array(  
-                                array ( 'type'      => 'next',  
+                                array ( 'type'      => 'cancel',  
                                         'name'      => ts('Done'),  
                                         'spacing'   => '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;',  
                                         'isDefault' => true   )

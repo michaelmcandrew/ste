@@ -1,7 +1,7 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -32,7 +32,7 @@
  * @subpackage API_utils
  * 
  * @copyright CiviCRM LLC (c) 2004-2010
- * @version $Id: utils.php 26284 2010-02-17 17:58:00Z shot $
+ * @version $Id: utils.php 29681 2010-09-16 16:03:20Z sunny $
  *
  */
 
@@ -43,7 +43,7 @@
 function _civicrm_initialize( ) 
 {
     require_once 'CRM/Core/Config.php';
-    $config =& CRM_Core_Config::singleton( );
+    $config = CRM_Core_Config::singleton( );
 }
 
 /**
@@ -296,6 +296,25 @@ function _civicrm_add_formatted_param(&$values, &$params)
         return true;
     }
     
+    //format the website params.
+    if ( CRM_Utils_Array::value( 'url', $values ) ) {
+        static $websiteFields;
+        if ( !is_array( $websiteFields ) ) {
+            require_once 'CRM/Core/DAO/Website.php';
+            $websiteFields = CRM_Core_DAO_Website::fields( );
+        }
+        if ( !array_key_exists( 'website', $params ) || 
+             !is_array( $params['website'] ) ) {
+            $params['website'] = array( );
+        }
+        
+        $websiteCount = count( $params['website'] );
+        _civicrm_store_values( $websiteFields, $values,
+                               $params['website'][++$websiteCount] );
+        
+        return true;
+    }
+    
     // get the formatted location blocks into params - w/ 3.0 format, CRM-4605
     if ( CRM_Utils_Array::value( 'location_type_id', $values ) ) {
         _civicrm_add_formatted_location_blocks( $values, $params );
@@ -315,7 +334,7 @@ function _civicrm_add_formatted_param(&$values, &$params)
         }
         
         // get the current logged in civicrm user
-        $session          =& CRM_Core_Session::singleton( );
+        $session          = CRM_Core_Session::singleton( );
         $userID           =  $session->get( 'userID' );
 
         if ( $userID ) {
@@ -538,7 +557,7 @@ function _civicrm_validate_formatted_contact(&$params)
     }
     
     /* Validate custom data fields */
-    if (is_array($params['custom'])) {
+    if ( array_key_exists( 'custom', $params ) && is_array($params['custom']) ) {
         foreach ($params['custom'] as $key => $custom) {
             if (is_array($custom)) {
                 $valid = CRM_Core_BAO_CustomValue::typecheck(
@@ -608,7 +627,7 @@ function _civicrm_check_required_fields( &$params, $daoName)
     }
 
     require_once(str_replace('_', DIRECTORY_SEPARATOR, $daoName) . ".php");
-    $dao =& new $daoName();
+    $dao = new $daoName();
     $fields = $dao->fields();
  
     $missing = array();
@@ -682,10 +701,13 @@ function _civicrm_participant_formatted_param( &$params, &$values, $create=false
                 }
             } else if ( $type == 'Select' || $type == 'Radio' ) {
                 $customOption = CRM_Core_BAO_CustomOption::getCustomOption($customFieldID, true);
-                foreach($customOption as $customValue => $customLabel) {
-                    if (( strtolower($customLabel) == strtolower(trim($v1)) ) ||
-                        ( strtolower($customValue) == strtolower(trim($v1)) )) { 
-                        $values[$key] = $customValue;
+                foreach( $customOption as $customFldID => $customValue ) {
+                    $val   = CRM_Utils_Array::value( 'value', $customValue );
+                    $label = CRM_Utils_Array::value( 'label', $customValue );
+                    $label = strtolower( $label );
+                    $value = strtolower( trim( $value ) );
+                    if ( ( $value == $label ) || ( $value == strtolower( $val ) ) ) {
+                        $values[$key] = $val;
                     }
                 }
             }
@@ -696,7 +718,7 @@ function _civicrm_participant_formatted_param( &$params, &$values, $create=false
             if (!CRM_Utils_Rule::integer($value)) {
                 return civicrm_create_error("contact_id not valid: $value");
             }
-            $dao =& new CRM_Core_DAO();
+            $dao = new CRM_Core_DAO();
             $qParams = array();
             $svq = $dao->singleValueQuery("SELECT id FROM civicrm_contact WHERE id = $value",
                                           $qParams);
@@ -719,7 +741,7 @@ function _civicrm_participant_formatted_param( &$params, &$values, $create=false
             if (!CRM_Utils_Rule::integer($value)) {
                 return civicrm_create_error("Event ID is not valid: $value");
             }
-            $dao =& new CRM_Core_DAO();
+            $dao = new CRM_Core_DAO();
             $qParams = array();
             $svq = $dao->singleValueQuery("SELECT id FROM civicrm_event WHERE id = $value",
                                           $qParams);
@@ -819,12 +841,17 @@ function _civicrm_contribute_formatted_param( &$params, &$values, $create=false 
                         }
                     }
                 }
-            } else if ( $type == 'Select' || $type == 'Radio' ) {
+            } else if ( $type == 'Select' || $type == 'Radio' || 
+                        ( $type == 'Autocomplete-Select' && 
+                          $customFields[$customFieldID]['data_type'] == 'String' ) ) {
                 $customOption = CRM_Core_BAO_CustomOption::getCustomOption($customFieldID, true);
-                foreach($customOption as $customValue => $customLabel) {
-                    if (( strtolower($customLabel) == strtolower(trim($v1)) ) ||
-                        ( strtolower($customValue) == strtolower(trim($v1)) )) { 
-                        $values[$key] = $customValue;
+                foreach( $customOption as $customFldID => $customValue ) {
+                    $val   = CRM_Utils_Array::value( 'value', $customValue );
+                    $label = CRM_Utils_Array::value( 'label', $customValue );
+                    $label = strtolower( $label );
+                    $value = strtolower( trim( $value ) );
+                    if ( ( $value == $label ) || ( $value == strtolower( $val ) ) ) {
+                        $values[$key] = $val;
                     }
                 }
             }
@@ -836,7 +863,7 @@ function _civicrm_contribute_formatted_param( &$params, &$values, $create=false 
             if (!CRM_Utils_Rule::integer($value)) {
                 return civicrm_create_error("contact_id not valid: $value");
             }
-            $dao =& new CRM_Core_DAO();
+            $dao = new CRM_Core_DAO();
             $qParams = array();
             $svq = $dao->singleValueQuery("SELECT id FROM civicrm_contact WHERE id = $value",
                                           $qParams);
@@ -851,7 +878,7 @@ function _civicrm_contribute_formatted_param( &$params, &$values, $create=false 
         case 'contact_type':
             //import contribution record according to select contact type
             require_once 'CRM/Contact/DAO/Contact.php';
-            $contactType =& new CRM_Contact_DAO_Contact();
+            $contactType = new CRM_Contact_DAO_Contact();
             //when insert mode check contact id or external identifire
             if ( $params['contribution_contact_id'] || $params['external_identifier'] ) {
                 if ( $params['contribution_contact_id'] ) {
@@ -867,7 +894,7 @@ function _civicrm_contribute_formatted_param( &$params, &$values, $create=false 
             } else if ( $params['contribution_id'] || $params['trxn_id'] ||$params['invoice_id'] ) {
                 //when update mode check contribution id or trxn id or
                 //invoice id
-                $contactId =& new  CRM_Contribute_DAO_Contribution();
+                $contactId = new  CRM_Contribute_DAO_Contribution();
                 if ( $params['contribution_id'] ) {
                     $contactId->id = $params['contribution_id'];
                 } else if ( $params['trxn_id'] ) {
@@ -949,7 +976,7 @@ function _civicrm_contribute_formatted_param( &$params, &$values, $create=false 
             $externalId = CRM_Utils_Array::value( 'external_identifier', $params['soft_credit'] );
             if ( $contactId || $externalId ) {
                 require_once 'CRM/Contact/DAO/Contact.php';
-                $contact =& new CRM_Contact_DAO_Contact();
+                $contact = new CRM_Contact_DAO_Contact();
                 $contact->id = $contactId;
                 $contact->external_identifier = $externalId;
                 
@@ -1009,7 +1036,7 @@ function _civicrm_contribute_formatted_param( &$params, &$values, $create=false 
             //first need to check for update mode  
             if ( $onDuplicate == CRM_Contribute_Import_Parser::DUPLICATE_UPDATE && 
                  ( $params['contribution_id'] || $params['trxn_id'] ||$params['invoice_id'] ) ) {
-                $contribution =& new  CRM_Contribute_DAO_Contribution();
+                $contribution = new  CRM_Contribute_DAO_Contribution();
                 if ( $params['contribution_id'] ) {
                     $contribution->id = $params['contribution_id'];
                 } else if ( $params['trxn_id'] ) {
@@ -1032,7 +1059,7 @@ function _civicrm_contribute_formatted_param( &$params, &$values, $create=false 
                     $contributionContactID = $params['contribution_contact_id'];
                 } else if ( CRM_Utils_Array::value( 'external_identifier', $params ) ) {
                     require_once 'CRM/Contact/DAO/Contact.php';
-                    $contact =& new CRM_Contact_DAO_Contact();
+                    $contact = new CRM_Contact_DAO_Contact();
                     $contact->external_identifier = $params['external_identifier'];
                     if ( $contact->find(true) ) {
                         $contributionContactID = $params['contribution_contact_id'] = $values['contribution_contact_id'] = $contact->id;
@@ -1169,10 +1196,13 @@ function _civicrm_membership_formatted_param( &$params, &$values, $create=false)
                 }
             } else if ( $type == 'Select' || $type == 'Radio' ) {
                 $customOption = CRM_Core_BAO_CustomOption::getCustomOption($customFieldID, true);
-                foreach($customOption as $customValue => $customLabel) {
-                    if (( strtolower($customLabel) == strtolower(trim($v1)) ) ||
-                        ( strtolower($customValue) == strtolower(trim($v1)) )) { 
-                        $values[$key] = $customValue;
+                foreach( $customOption as $customFldID => $customValue ) {
+                    $val   = CRM_Utils_Array::value( 'value', $customValue );
+                    $label = CRM_Utils_Array::value( 'label', $customValue );
+                    $label = strtolower( $label );
+                    $value = strtolower( trim( $value ) );
+                    if ( ( $value == $label ) || ( $value == strtolower( $val ) ) ) {
+                        $values[$key] = $val;
                     }
                 }
             }
@@ -1183,7 +1213,7 @@ function _civicrm_membership_formatted_param( &$params, &$values, $create=false)
             if (!CRM_Utils_Rule::integer($value)) {
                 return civicrm_create_error("contact_id not valid: $value");
             }
-            $dao =& new CRM_Core_DAO();
+            $dao = new CRM_Core_DAO();
             $qParams = array();
             $svq = $dao->singleValueQuery("SELECT id FROM civicrm_contact WHERE id = $value",
                                           $qParams);
@@ -1289,10 +1319,13 @@ function _civicrm_activity_formatted_param( &$params, &$values, $create=false)
                 }
             } else if ( $type == 'Select' || $type == 'Radio' ) {
                 $customOption = CRM_Core_BAO_CustomOption::getCustomOption($customFieldID, true);
-                foreach($customOption as $customValue => $customLabel) {
-                    if (( strtolower($customLabel) == strtolower(trim($v1)) ) ||
-                        ( strtolower($customValue) == strtolower(trim($v1)) )) { 
-                        $values[$key] = $customValue;
+                foreach( $customOption as $customFldID => $customValue ) {
+                    $val   = CRM_Utils_Array::value( 'value', $customValue );
+                    $label = CRM_Utils_Array::value( 'label', $customValue );
+                    $label = strtolower( $label );
+                    $value = strtolower( trim( $value ) );
+                    if ( ( $value == $label ) || ( $value == strtolower( $val ) ) ) {
+                        $values[$key] = $val;
                     }
                 }
             }

@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -117,7 +117,9 @@ class CRM_Utils_File {
             if ( $abort ) {
                 $docLink = CRM_Utils_System::docURL2( 'Moving an Existing Installation to a New Server or Location', false, 'Moving an Existing Installation to a New Server or Location' );
                 echo "Error: Could not create directory: $path.<p>If you have moved an existing CiviCRM installation from one location or server to another there are several steps you will need to follow. They are detailed on this CiviCRM wiki page - {$docLink}. A fix for the specific problem that caused this error message to be displayed is to set the value of the config_backend column in the civicrm_domain table to NULL. However we strongly recommend that you review and follow all the steps in that document.</p>";
-                exit( );
+
+                require_once 'CRM/Utils/System.php';
+                CRM_Utils_System::civiExit( );
             } else {
                 return false;
             }
@@ -171,7 +173,7 @@ class CRM_Utils_File {
         static $config         = null;
         static $legacyEncoding = null;
         if ($config == null) {
-            $config =& CRM_Core_Config::singleton();
+            $config = CRM_Core_Config::singleton();
             $legacyEncoding = $config->legacyEncoding;
         }
 
@@ -214,7 +216,7 @@ class CRM_Utils_File {
     }
 
 
-    function sourceSQLFile( $dsn, $fileName, $prefix = null, $isQueryString = false ) {
+    function sourceSQLFile( $dsn, $fileName, $prefix = null, $isQueryString = false, $dieOnErrors = true ) {
         require_once 'DB.php';
 
         $db  =& DB::connect( $dsn );
@@ -240,7 +242,11 @@ class CRM_Utils_File {
             if ( ! empty( $query ) ) {
                 $res =& $db->query( $query );
                 if ( PEAR::isError( $res ) ) {
-                    die( "Cannot execute $query: " . $res->getMessage( ) );
+                    if ( $dieOnErrors ) {
+                        die( "Cannot execute $query: " . $res->getMessage( ) );
+                    } else {
+                        echo "Cannot execute $query: " . $res->getMessage( ) . "<p>";
+                    }
                 }
             }
         }
@@ -306,6 +312,26 @@ class CRM_Utils_File {
         return $files;
     }
 
+    /**
+     * Restrict access to a given directory (by planting there a restrictive .htaccess file)
+     *
+     * @param string $dir  the directory to be secured
+     */
+    static function restrictAccess($dir)
+    {
+        $htaccess = <<<HTACCESS
+<Files "*">
+  Order allow,deny
+  Deny from all
+</Files>
+
+HTACCESS;
+        $file = $dir . '.htaccess';
+        if (file_put_contents($file, $htaccess) === false) {
+            require_once 'CRM/Core/Error.php';
+            CRM_Core_Error::movedSiteError($file);
+        }
+    }
 }
 
 

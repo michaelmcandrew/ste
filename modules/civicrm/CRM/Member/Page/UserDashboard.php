@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -55,7 +55,7 @@ class CRM_Member_Page_UserDashboard extends CRM_Contact_Page_View_UserDashBoard
 
         $membership = array( );
         require_once "CRM/Member/BAO/Membership.php";
-        $dao =& new CRM_Member_DAO_Membership( );
+        $dao = new CRM_Member_DAO_Membership( );
         $dao->contact_id = $this->_contactId;
         $dao->is_test    = 0;
         $dao->find();

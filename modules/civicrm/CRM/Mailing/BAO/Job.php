@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -59,15 +59,15 @@ class CRM_Mailing_BAO_Job extends CRM_Mailing_DAO_Job {
      * @static
      */
     public static function runJobs($testParams = null) {
-        $job =& new CRM_Mailing_BAO_Job();
+        $job = new CRM_Mailing_BAO_Job();
         
-        $mailing =& new CRM_Mailing_BAO_Mailing();
+        $mailing = new CRM_Mailing_DAO_Mailing();
         
-        $config =& CRM_Core_Config::singleton();
+        $config = CRM_Core_Config::singleton();
         $jobTable     = CRM_Mailing_DAO_Job::getTableName();
         $mailingTable = CRM_Mailing_DAO_Mailing::getTableName();
 
-        if (!empty($testParams)) {
+        if ( ! empty( $testParams ) ) {
             $query = "
 SELECT *
   FROM $jobTable
@@ -100,11 +100,6 @@ ORDER BY j.scheduled_date,
 
         /* TODO We should parallelize or prioritize this */
         while ($job->fetch()) {
-            // fix for cancel job at run time which is in queue, CRM-4246
-            if ( CRM_Core_DAO::getFieldValue( 'CRM_Mailing_DAO_Job', $job->id, 'status' ) == 'Canceled' ) {
-                continue;
-            }
-            
             $lockName = "civimail.job.{$job->id}";
 
             // get a lock on this job id
@@ -113,6 +108,23 @@ ORDER BY j.scheduled_date,
                 continue;
             }
 
+            // for test jobs we do not change anything, since its on a short-circuit path
+            if ( empty( $testParams ) ) {
+                // we've got the lock, but while we were waiting and processing
+                // other emails, this job might have changed under us
+                // lets get the job status again and check
+                $job->status = CRM_Core_DAO::getFieldValue( 'CRM_Mailing_DAO_Job', 
+                                                            $job->id,
+                                                            'status' );
+
+                if ( $job->status != 'Running' &&
+                     $job->status != 'Scheduled' ) {
+                    // this includes Cancelled and other statuses, CRM-4246
+                    $lock->release( );
+                    continue;
+                }
+            }
+          
             /* Queue up recipients for all jobs being launched */
             if ($job->status != 'Running') {
                 require_once 'CRM/Core/Transaction.php';
@@ -137,7 +149,7 @@ ORDER BY j.scheduled_date,
 
             /* Compose and deliver */
             $isComplete = $job->deliver($mailer, $testParams);
-
+            
             require_once 'CRM/Utils/Hook.php';
             CRM_Utils_Hook::post( 'create', 'CRM_Mailing_DAO_Spool', $job->id, $isComplete);
             
@@ -179,7 +191,7 @@ ORDER BY j.scheduled_date,
     public function queue($testParams = null) {
        
         require_once 'CRM/Mailing/BAO/Mailing.php';
-        $mailing =& new CRM_Mailing_BAO_Mailing();
+        $mailing = new CRM_Mailing_BAO_Mailing();
         $mailing->id = $this->mailing_id;
         if (!empty($testParams)) {
             $mailing->getTestRecipients($testParams);
@@ -208,7 +220,7 @@ ORDER BY j.scheduled_date,
      */
     public function getMailingSize() {
         require_once 'CRM/Mailing/BAO/Mailing.php';
-        $mailing =& new CRM_Mailing_BAO_Mailing();
+        $mailing = new CRM_Mailing_BAO_Mailing();
         $mailing->id = $this->mailing_id;
 
         $recipients =& $mailing->getRecipientsObject($this->id, true);
@@ -228,11 +240,11 @@ ORDER BY j.scheduled_date,
      */
     public function deliver(&$mailer, $testParams =null) {
         require_once 'CRM/Mailing/BAO/Mailing.php';
-        $mailing =& new CRM_Mailing_BAO_Mailing();
+        $mailing = new CRM_Mailing_BAO_Mailing();
         $mailing->id = $this->mailing_id;
         $mailing->find(true);
 
-        $eq =& new CRM_Mailing_Event_BAO_Queue();
+        $eq = new CRM_Mailing_Event_BAO_Queue();
         $eqTable        = CRM_Mailing_Event_BAO_Queue::getTableName();
         $emailTable     = CRM_Core_BAO_Email::getTableName();
         $contactTable   = CRM_Contact_BAO_Contact::getTableName();
@@ -260,7 +272,7 @@ ORDER BY j.scheduled_date,
         $mailsProcessed = 0;
 
         if ( $config == null ) {
-            $config =& CRM_Core_Config::singleton();
+            $config = CRM_Core_Config::singleton();
         }
 
         $job_date = CRM_Utils_Date::isoToMysql( $this->scheduled_date );
@@ -310,7 +322,7 @@ ORDER BY j.scheduled_date,
                 $fields = array( );
             }
         }
-        
+
         $isDelivered = $this->deliverGroup( $fields, $mailing, $mailer, $job_date, $attachments );
         return $isDelivered;
     }
@@ -418,9 +430,10 @@ AND    civicrm_activity.source_record_id = %2";
             if ( $activityID ) {
                 $activity['id'] = $activityID;  
             }
-        
+            
             require_once 'api/v2/Activity.php';
-            if ( is_a( civicrm_activity_create($activity, 'Email'), 'CRM_Core_Error' ) ) {
+            $isError = civicrm_activity_create( $activity );
+            if ( civicrm_error( $isError ) ) {
                 return false;
             }
         }
@@ -435,8 +448,10 @@ AND    civicrm_activity.source_record_id = %2";
      * @static
      */
     public static function cancel($mailingId) {
-        $job =& new CRM_Mailing_BAO_Job();
+        $job = new CRM_Mailing_BAO_Job();
         $job->mailing_id = $mailingId;
+        // test mailing should not be included during Cancellation
+        $job->is_test    = 0;
         if ($job->find(true) and in_array($job->status, array('Scheduled', 'Running', 'Paused'))) {
             // fix MySQL dates...
             $job->scheduled_date = CRM_Utils_Date::isoToMysql($job->scheduled_date);

@@ -1,6 +1,6 @@
 {*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -48,10 +48,8 @@
 {/strip}
 {else}
    <div class="messages status">
-    <dl>
-        <dt><img src="{$config->resourceBase}i/Inform.gif" alt="{ts}status{/ts}"/></dt>
-        <dd>{ts 1=$title}There are currently no %1.{/ts}</dd>
-        </dl>
+        <div class="icon inform-icon"></div>&nbsp;
+        {ts 1=$title}There are currently no %1.{/ts}
     </div>    
 {/if}  
 

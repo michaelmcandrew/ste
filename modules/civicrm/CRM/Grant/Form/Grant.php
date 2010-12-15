@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -87,7 +87,7 @@ class CRM_Grant_Form_Grant extends CRM_Core_Form
         $this->_noteId =null;
         if ( $this->_id) {
             require_once 'CRM/Core/BAO/Note.php';
-            $noteDAO               = & new CRM_Core_BAO_Note();
+            $noteDAO               = new CRM_Core_BAO_Note();
             $noteDAO->entity_table = 'civicrm_grant';
             $noteDAO->entity_id    = $this->_id;
             if ( $noteDAO->find(true) ) {
@@ -132,8 +132,8 @@ class CRM_Grant_Form_Grant extends CRM_Core_Form
                             'money_transfer_date',
                             'grant_due_date' );
             
-            foreach( $dates as $key ) {
-                if ( $defaults[$key] ) {
+            foreach( $dates as $key ) { 
+                if ( CRM_Utils_Array::value( $key, $defaults ) ) {
                     list( $defaults[$key] ) = CRM_Utils_Date::setDateDefaults( $defaults[$key] );
                 }
             }
@@ -225,6 +225,7 @@ class CRM_Grant_Form_Grant extends CRM_Core_Form
         if ( $this->_context == 'standalone' ) {
             require_once 'CRM/Contact/Form/NewContact.php';
             CRM_Contact_Form_NewContact::buildQuickForm( $this );
+            $this->addFormRule( array( 'CRM_Grant_Form_Grant', 'formRule' ), $this );
         }
     }
     
@@ -239,7 +240,7 @@ class CRM_Grant_Form_Grant extends CRM_Core_Form
      * @access public  
      * @static  
      */  
-    static function formRule( &$fields, &$files, $self ) {  
+    static function formRule( $fields, $files, $self ) {  
         $errors = array( ); 
         
         if ( isset( $fields['contact_select_id'] ) && !$fields['contact_select_id'] ) {
@@ -312,7 +313,7 @@ class CRM_Grant_Form_Grant extends CRM_Core_Form
         $grant = CRM_Grant_BAO_Grant::create($params, $ids);
 
         $buttonName = $this->controller->getButtonName( );
-        $session =& CRM_Core_Session::singleton( );
+        $session = CRM_Core_Session::singleton( );
         if ( $this->_context == 'standalone' ) {
             if ( $buttonName == $this->getButtonName( 'upload', 'new' ) ) {
                 $session->replaceUserContext(CRM_Utils_System::url('civicrm/grant/add', 

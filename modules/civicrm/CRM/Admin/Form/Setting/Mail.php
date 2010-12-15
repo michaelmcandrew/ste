@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -57,7 +57,7 @@ class CRM_Admin_Form_Setting_Mail extends CRM_Admin_Form_Setting
         $check = true;
         
         // redirect to Administer Section After hitting either Save or Cancel button.
-        $session =& CRM_Core_Session::singleton( );
+        $session = CRM_Core_Session::singleton( );
         $session->pushUserContext( CRM_Utils_System::url( 'civicrm/admin', 'reset=1' ) );
         
         parent::buildQuickForm( $check );

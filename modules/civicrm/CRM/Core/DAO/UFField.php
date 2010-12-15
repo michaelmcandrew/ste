@@ -1,7 +1,7 @@
 <?php
 /*
 +--------------------------------------------------------------------+
-| CiviCRM version 3.1                                                |
+| CiviCRM version 3.2                                                |
 +--------------------------------------------------------------------+
 | Copyright CiviCRM LLC (c) 2004-2010                                |
 +--------------------------------------------------------------------+
@@ -129,6 +129,12 @@ class CRM_Core_DAO_UFField extends CRM_Core_DAO
      */
     public $help_post;
     /**
+     * Description and/or help text to display before this field.
+     *
+     * @var text
+     */
+    public $help_pre;
+    /**
      * In what context(s) is this field visible.
      *
      * @var enum('User and User Admin Only', 'Public Pages', 'Public Pages and Listings')
@@ -254,6 +260,11 @@ class CRM_Core_DAO_UFField extends CRM_Core_DAO
                     'name' => 'help_post',
                     'type' => CRM_Utils_Type::T_TEXT,
                     'title' => ts('Help Post') ,
+                ) ,
+                'help_pre' => array(
+                    'name' => 'help_pre',
+                    'type' => CRM_Utils_Type::T_TEXT,
+                    'title' => ts('Help Pre') ,
                 ) ,
                 'visibility' => array(
                     'name' => 'visibility',

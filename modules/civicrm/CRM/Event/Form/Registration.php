@@ -1,7 +1,7 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -172,7 +172,7 @@ class CRM_Event_Form_Registration extends CRM_Core_Form
     public $_priceSet;
     
     public $_action;
-    
+
     /** 
      * Function to set variables up before form is built 
      *                                                           
@@ -209,7 +209,7 @@ class CRM_Event_Form_Registration extends CRM_Core_Form
         //get the additional participant ids.
         $this->_additionalParticipantIds = $this->get( 'additionalParticipantIds' );
         
-        $config  =& CRM_Core_Config::singleton( );
+        $config  = CRM_Core_Config::singleton( );
         
         if ( ! $this->_values ) {
             // create redirect URL to send folks back to event info page is registration not available
@@ -371,7 +371,7 @@ class CRM_Event_Form_Registration extends CRM_Core_Form
                 CRM_Core_OptionGroup::getAssoc( "civicrm_event.amount.{$eventID}", $this->_values['fee'], true );
                 //fix for non-upgraded price sets.CRM-4256.
                 if ( $isMonetary && empty($this->_values['fee']) ) {
-                    CRM_Core_Error::fatal( ts('No Fee Level(s) or Price Set is configured for this event.<br />Click <a href=\'%1\'>CiviEvent >> Manage Event >> Configure >> Event Fees</a> to configure the Fee Level(s) or Price Set for this event.', array( 1 => CRM_Utils_System::url('civicrm/event/manage', 'reset=1&action=update&subPage=Fee&id='.$this->_eventId ))));  
+                    CRM_Core_Error::fatal( ts('No Fee Level(s) or Price Set is configured for this event.<br />Click <a href=\'%1\'>CiviEvent >> Manage Event >> Configure >> Event Fees</a> to configure the Fee Level(s) or Price Set for this event.', array( 1 => CRM_Utils_System::url('civicrm/event/manage/fee', 'reset=1&action=update&id='.$this->_eventId ))));  
                 }
             }
             
@@ -570,7 +570,7 @@ class CRM_Event_Form_Registration extends CRM_Core_Form
             $button = substr( $this->controller->getButtonName(), -4 );
             require_once 'CRM/Core/BAO/UFGroup.php';
             require_once 'CRM/Profile/Form.php';
-            $session =& CRM_Core_Session::singleton( );
+            $session = CRM_Core_Session::singleton( );
             $contactID = $session->get( 'userID' );
             
             // we don't allow conflicting fields to be
@@ -601,12 +601,13 @@ class CRM_Event_Form_Registration extends CRM_Core_Form
                 CRM_Core_Session::setStatus( "Some of the profile fields cannot be configured for this page." );
             }
             $addCaptcha = false;
+            $fields = array_diff_assoc( $fields, $this->_fields );
             $this->assign( $name, $fields );
             if ( is_array( $fields ) ) {
                 foreach($fields as $key => $field) {
                     if ( $viewOnly &&
                          isset( $field['data_type'] ) &&
-                         $field['data_type'] == 'File' ) {
+                         $field['data_type'] == 'File' || ( $viewOnly && $field['name'] == 'image_URL' ) ) {
                         // ignore file upload fields
                         continue;
                     }
@@ -860,6 +861,30 @@ WHERE  v.option_group_id = g.id
         }
         return parent::getTemplateFileName( );
     }
+    
+    function getContactID( ) 
+    {
+        $tempID = CRM_Utils_Request::retrieve( 'cid', 'Positive', $this );
+        
+        // force to ignore the authenticated user
+        if ( $tempID === '0' ) {
+            return;
+        }
+        
+        //check if this is a checksum authentication
+        $userChecksum = CRM_Utils_Request::retrieve( 'cs', 'String', $this );
+        if ( $userChecksum ) {
+            //check for anonymous user.
+            require_once 'CRM/Contact/BAO/Contact/Utils.php';
+            $validUser = CRM_Contact_BAO_Contact_Utils::validChecksum( $tempID, $userChecksum );
+            if ( $validUser ) return  $tempID;
+        }
+        
+        // check if the user is registered and we have a contact ID
+        $session = CRM_Core_Session::singleton( );
+        return $session->get( 'userID' ); 
+    }
+    
 }
 
 

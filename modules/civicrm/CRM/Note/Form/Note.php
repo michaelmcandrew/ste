@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -71,6 +71,10 @@ class CRM_Note_Form_Note extends CRM_Core_Form
         $this->_entityTable = $this->get( 'entityTable' );
         $this->_entityId    = $this->get( 'entityId'   );
         $this->_id          = $this->get( 'id'    );
+		// set title to "Note - "+Contact Name    
+    	$displayName = CRM_Core_DAO::getFieldValue( 'CRM_Contact_DAO_Contact', $this->_entityId, 'display_name' );
+    	$pageTitle = 'Note - '.$displayName;
+    	$this->assign( 'pageTitle', $pageTitle );
     }
 
     /**
@@ -138,7 +142,7 @@ class CRM_Note_Form_Note extends CRM_Core_Form
         // store the submitted values in an array
         $params = $this->exportValues();
         
-        $session =& CRM_Core_Session::singleton( );
+        $session = CRM_Core_Session::singleton( );
         $params['contact_id'  ] = $session->get( 'userID' );
         $params['entity_table'] = $this->_entityTable;
         $params['entity_id'   ] = $this->_entityId;

@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -228,7 +228,7 @@ class CRM_Case_BAO_Query
      */  
     static function buildSearchForm( &$form ) 
     {
-        $config =& CRM_Core_Config::singleton( );
+        $config = CRM_Core_Config::singleton( );
         require_once 'CRM/Core/OptionGroup.php';
         $caseType = CRM_Core_OptionGroup::values('case_type');
         $form->addElement('select', 'case_type_id',  ts( 'Case Type' ),  

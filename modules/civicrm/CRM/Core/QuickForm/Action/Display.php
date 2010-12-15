@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -117,7 +117,7 @@ class CRM_Core_QuickForm_Action_Display extends CRM_Core_QuickForm_Action {
      */
     function renderForm(&$page, $ret = false) {
         $this->_setRenderTemplates($page);
-        $template =& CRM_Core_Smarty::singleton( );
+        $template = CRM_Core_Smarty::singleton( );
         $template->assign( 'form'   ,  $page->toSmarty());
         $template->assign( 'isForm' , 1 );
 
@@ -149,7 +149,7 @@ class CRM_Core_QuickForm_Action_Display extends CRM_Core_QuickForm_Action {
             } else {
                 echo $html;
             }
-            exit( );
+            CRM_Utils_System::civiExit( );
         }
 
     }
@@ -186,7 +186,7 @@ class CRM_Core_QuickForm_Action_Display extends CRM_Core_QuickForm_Action {
             return;
         }
 
-        $config =& CRM_Core_Config::singleton();
+        $config = CRM_Core_Config::singleton();
         self::$_requiredTemplate = file_get_contents( $config->templateDir . '/CRM/Form/label.tpl' );
         self::$_errorTemplate    = file_get_contents( $config->templateDir . '/CRM/Form/error.tpl' );
     }

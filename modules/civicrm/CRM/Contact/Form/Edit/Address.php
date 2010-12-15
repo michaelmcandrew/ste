@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -50,11 +50,17 @@ class CRM_Contact_Form_Edit_Address
      * @access public
      * @static
      */
-    static function buildQuickForm( &$form ) 
+    static function buildQuickForm( &$form, $addressBlockCount = null ) 
     {
-        $blockId    = ( $form->get( 'Address_Block_Count' ) ) ? $form->get( 'Address_Block_Count' ) : 1;
+
+        // passing this via the session is AWFUL. we need to fix this
+        if ( ! $addressBlockCount ) {
+            $blockId = ( $form->get( 'Address_Block_Count' ) ) ? $form->get( 'Address_Block_Count' ) : 1;
+        } else {
+            $blockId = $addressBlockCount;
+        }
         
-        $config =& CRM_Core_Config::singleton( );
+        $config = CRM_Core_Config::singleton( );
         $countryDefault = $config->defaultContactCountry;
         
         $form->applyFilter('__ALL__','trim');
@@ -166,7 +172,53 @@ class CRM_Contact_Form_Edit_Address
         }
         
         require_once 'CRM/Core/BAO/Address.php';
+        require_once 'CRM/Core/BAO/CustomGroup.php';
         CRM_Core_BAO_Address::addStateCountryMap( $stateCountryMap );
+
+        $entityId = null;
+        if ( !empty( $form->_values['address'] ) ) {
+            $entityId = $form->_values['address'][$blockId]['id'];
+        }
+        // Process any address custom data -
+        $groupTree = CRM_Core_BAO_CustomGroup::getTree( 'Address',
+                                                        $form,
+                                                        $entityId );
+        if ( isset($groupTree) && is_array($groupTree) ) {
+            // use simplified formatted groupTree
+            $groupTree = CRM_Core_BAO_CustomGroup::formatGroupTree( $groupTree, 1, $form );
+
+            // make sure custom fields are added /w element-name in the format - 'address[$blockId][custom-X]'
+            foreach ( $groupTree as $id => $group ) { 
+                foreach ( $group['fields'] as $fldId => $field ) {
+                    $groupTree[$id]['fields'][$fldId]['element_custom_name'] = $field['element_name'];
+                    $groupTree[$id]['fields'][$fldId]['element_name'] = 
+                        "address[$blockId][{$field['element_name']}]";
+                }
+            }
+            $defaults = array( );
+            CRM_Core_BAO_CustomGroup::setDefaults( $groupTree, $defaults );
+            // For some of the custom fields like checkboxes, the defaults doesn't populate 
+            // in proper format due to the different element-name format - 'address[$blockId][custom-X]'.
+            // Below eval() fixes this issue.
+            $address = array();
+            foreach ( $defaults as $key => $val ) {
+                eval("\${$key} = " . (!is_array($val) ? "'{$val}'" : var_export($val, true)) . ";");
+            }
+            $defaults = array( 'address' => $address );
+            $form->setDefaults( $defaults );
+
+            // we setting the prefix to 'dnc_' below, so that we don't overwrite smarty's grouptree var. 
+            // And we can't set it to 'address_' because we want to set it in a slightly different format.
+            CRM_Core_BAO_CustomGroup::buildQuickForm( $form, $groupTree, false, 1, "dnc_" );
+
+            $template  =& CRM_Core_Smarty::singleton( );
+            $tplGroupTree = $template->get_template_vars( 'address_groupTree' );
+            $tplGroupTree = empty($tplGroupTree) ? array() : $tplGroupTree;
+
+            $form->assign( "address_groupTree", $tplGroupTree + array( $blockId => $groupTree ) );
+            $form->assign( "dnc_groupTree", null ); // unset the temp smarty var that got created
+        }
+        // address custom data processing ends ..
     }
     
     /**
@@ -180,7 +232,7 @@ class CRM_Contact_Form_Edit_Address
      * @access public
      * @static
      */
-    static function formRule( &$fields, &$errors )
+    static function formRule( $fields, $errors )
     {
         // check for state/county match if not report error to user.
         if ( is_array( $fields['address'] ) ) {
@@ -209,7 +261,7 @@ class CRM_Contact_Form_Edit_Address
                 
                 //do check for mismatch countries 
                 if ( $stateProvinceId && $countryId ) {
-                    $stateProvinceDAO =& new CRM_Core_DAO_StateProvince();
+                    $stateProvinceDAO = new CRM_Core_DAO_StateProvince();
                     $stateProvinceDAO->id = $stateProvinceId;
                     $stateProvinceDAO->find(true);
                     if ( $stateProvinceDAO->country_id != $countryId ) {
@@ -224,7 +276,7 @@ class CRM_Contact_Form_Edit_Address
                 
                 //state county validation
                 if ( $stateProvinceId && $countyId ) {
-                    $countyDAO =& new CRM_Core_DAO_County();
+                    $countyDAO = new CRM_Core_DAO_County();
                     $countyDAO->id = $countyId;
                     $countyDAO->find(true);
                     

@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -52,7 +52,7 @@ class CRM_Contribute_BAO_ContributionPage extends CRM_Contribute_DAO_Contributio
      */
     public static function &create(&$params) 
     {
-        $dao =& new CRM_Contribute_DAO_ContributionPage( );
+        $dao = new CRM_Contribute_DAO_ContributionPage( );
         $dao->copyValues( $params );
         $dao->save( );
         return $dao;
@@ -176,7 +176,9 @@ class CRM_Contribute_BAO_ContributionPage extends CRM_Contribute_DAO_Contributio
             require_once 'CRM/Contact/BAO/Contact/Location.php';
             if ( !array_key_exists('related_contact', $values) ) {
                 list( $displayName, $email ) = CRM_Contact_BAO_Contact_Location::getEmailDetails( $contactID, false, $billingLocationTypeId );
-            } else {
+            }
+            // get primary location email if no email exist( for billing location).
+            if ( !$email ) {
                 list( $displayName, $email ) = CRM_Contact_BAO_Contact_Location::getEmailDetails( $contactID );
             }
 
@@ -223,6 +225,18 @@ class CRM_Contribute_BAO_ContributionPage extends CRM_Contribute_DAO_Contributio
                 'priceSetID'       => CRM_Utils_Array::value('priceSetID',    $values), // CRM-5095
             );
 
+            if ( $contributionTypeId = CRM_Utils_Array::value('contribution_type_id', $values ) ) {
+                $tplParams['contributionTypeId']   = $contributionTypeId;
+                $tplParams['contributionTypeName'] = CRM_Core_DAO::getFieldValue( 'CRM_Contribute_DAO_ContributionType',
+                                                                                  $contributionTypeId );
+            }
+                        
+            // address required during receipt processing (pdf and email receipt)
+            if ( $displayAddress = CRM_Utils_Array::value('address', $values) ) {
+                $tplParams['address'] = $displayAddress;
+                $tplParams['contributeMode']= null;
+            }
+
             // cc to related contacts of contributor OR the one who
             // signs up. Is used for cases like - on behalf of
             // contribution / signup ..etc  
@@ -256,7 +270,8 @@ class CRM_Contribute_BAO_ContributionPage extends CRM_Contribute_DAO_Contributio
                 list ($sent, $subject, $message, $html) = CRM_Core_BAO_MessageTemplates::sendTemplate($sendTemplateParams);
                 return array( 'subject' => $subject,
                               'body'    => $message,
-                              'to'      => $displayName );
+                              'to'      => $displayName,
+                              'html'    => $html );
             }
             
             if ( $values['is_email_receipt'] ) {
@@ -365,7 +380,7 @@ class CRM_Contribute_BAO_ContributionPage extends CRM_Contribute_DAO_Contributio
                         $groupTitle = $v["groupTitle"];
                     }
                     // suppress all file fields from display
-                    if ( CRM_Utils_Array::value( 'data_type', $v, '' ) == 'File' ) {
+                    if ( CRM_Utils_Array::value( 'data_type', $v, '' ) == 'File' || CRM_Utils_Array::value( 'name', $v, '' ) == 'image_URL' ) {
                         unset( $fields[$k] );
                     }
                 }
@@ -395,7 +410,7 @@ class CRM_Contribute_BAO_ContributionPage extends CRM_Contribute_DAO_Contributio
      */
     static function copy( $id ) 
     {
-        $fieldsFix = array ( 'prefix' => array( 'title' => ts( 'Copy of ' ) ) );
+        $fieldsFix = array('prefix' => array('title' => ts('Copy of') . ' '));
         $copy =& CRM_Core_DAO::copyGeneric( 'CRM_Contribute_DAO_ContributionPage', 
                                             array( 'id' => $id ), 
                                             null, 

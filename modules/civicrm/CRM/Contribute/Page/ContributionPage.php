@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -95,6 +95,7 @@ class CRM_Contribute_Page_ContributionPage extends CRM_Core_Page
                                                                           'url'   => 'civicrm/contribute/transact',
                                                                           'qs'    => 'reset=1&id=%%id%%',
                                                                           'title' => ts('FollowUp'),
+                                                                          'fe'    =>'true',
                                                                           ),
                                         CRM_Core_Action::DISABLE => array(
                                                                           'name'  => ts('Disable'),
@@ -156,29 +157,29 @@ class CRM_Contribute_Page_ContributionPage extends CRM_Core_Page
        
         // what action to take ?
         if ( $action & CRM_Core_Action::ADD ) {
-            $session =& CRM_Core_Session::singleton( ); 
+            $session = CRM_Core_Session::singleton( ); 
             $session->pushUserContext( CRM_Utils_System::url( CRM_Utils_System::currentPath( ),
                                                              'action=browse&reset=1' ) );
             require_once 'CRM/Contribute/Controller/ContributionPage.php';
-            $controller =& new CRM_Contribute_Controller_ContributionPage( null, $action );
+            $controller = new CRM_Contribute_Controller_ContributionPage( null, $action );
             CRM_Utils_System::setTitle( ts('Manage Contribution Page') );
             CRM_Utils_System::appendBreadCrumb( $breadCrumb );
             return $controller->run( );
         } else if ($action & CRM_Core_Action::UPDATE ) {
             CRM_Utils_System::appendBreadCrumb( $breadCrumb );
-            $session =& CRM_Core_Session::singleton( ); 
+            $session = CRM_Core_Session::singleton( ); 
             $session->pushUserContext( CRM_Utils_System::url( CRM_Utils_System::currentPath( ),
                                                              "action=update&reset=1&id={$id}") );
             require_once 'CRM/Contribute/Page/ContributionPageEdit.php';
-            $page =& new CRM_Contribute_Page_ContributionPageEdit( );
+            $page = new CRM_Contribute_Page_ContributionPageEdit( );
             return $page->run( );
         } else if ($action & CRM_Core_Action::PREVIEW) {
             CRM_Utils_System::appendBreadCrumb( $breadCrumb );
             require_once 'CRM/Contribute/Page/ContributionPageEdit.php';
-            $page =& new CRM_Contribute_Page_ContributionPageEdit( );
+            $page = new CRM_Contribute_Page_ContributionPageEdit( );
             return $page->run( );
         } else if ($action & CRM_Core_Action::COPY) {
-            $session =& CRM_Core_Session::singleton();
+            $session = CRM_Core_Session::singleton();
             CRM_Core_Session::setStatus("A copy of the contribution page has been created" );
             $this->copy( );
         } else if ($action & CRM_Core_Action::DELETE) {
@@ -187,13 +188,13 @@ class CRM_Contribute_Page_ContributionPage extends CRM_Core_Page
                                                     $this );
             if ( $subPage == 'AddProductToPage' ) {
                 require_once 'CRM/Contribute/Page/ContributionPageEdit.php';
-                $page =& new CRM_Contribute_Page_ContributionPageEdit( );
+                $page = new CRM_Contribute_Page_ContributionPageEdit( );
                 return $page->run( );
             } else {
                 CRM_Utils_System::appendBreadCrumb( $breadCrumb );
-                $session =& CRM_Core_Session::singleton();
+                $session = CRM_Core_Session::singleton();
                 $session->pushUserContext( CRM_Utils_System::url( CRM_Utils_System::currentPath( ), 'reset=1&action=browse' ) );
-                $controller =& new CRM_Core_Controller_Simple( 'CRM_Contribute_Form_ContributionPage_Delete',
+                $controller = new CRM_Core_Controller_Simple( 'CRM_Contribute_Form_ContributionPage_Delete',
                                                                'Delete Contribution Page',
                                                                CRM_Core_Action::DELETE );
                 $id = CRM_Utils_Request::retrieve('id', 'Positive',
@@ -251,6 +252,9 @@ WHERE cp.contribution_page_id = {$id}";
         $this->_sortByCharacter = CRM_Utils_Request::retrieve( 'sortByCharacter',
                                                                'String',
                                                                $this );
+        $createdId = CRM_Utils_Request::retrieve('cid', 'Positive',
+                                          $this, false, 0);
+
         if ( $this->_sortByCharacter == 1 ||
              ! empty( $_POST ) ) {
             $this->_sortByCharacter = '';
@@ -327,6 +331,12 @@ ORDER BY title asc
         $values  =  array( );
         $clauses = array( );
         $title   = $this->get( 'title' );
+        $createdId = $this->get( 'cid' );
+        
+        if( $createdId ) {
+            $clauses[] = "(created_id = {$createdId})";
+        }
+
         if ( $title ) {
             $clauses[] = "title LIKE %1";
             if ( strpos( $title, '%' ) !== false ) {

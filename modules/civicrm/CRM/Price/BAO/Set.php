@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -63,7 +63,7 @@ class CRM_Price_BAO_Set extends CRM_Price_DAO_Set
      */
     static function create( &$params )
     {
-        $priceSetBAO =& new CRM_Price_BAO_Set( );
+        $priceSetBAO = new CRM_Price_BAO_Set( );
         $priceSetBAO->copyValues( $params );
         if ( defined( 'CIVICRM_EVENT_PRICE_SET_DOMAIN_ID' ) && CIVICRM_EVENT_PRICE_SET_DOMAIN_ID ) {
             $priceSetBAO->domain_id = CRM_Core_Config::domainID( );
@@ -218,7 +218,7 @@ WHERE     ct.id = cp.contribution_type_id AND
         if ( isset( $usedBy['civicrm_event'] ) ) {
             require_once 'CRM/Event/DAO/Event.php';
             foreach ( $usedBy['civicrm_event'] as $eventId => $unused ) {
-                $eventDAO =& new CRM_Event_DAO_Event( );
+                $eventDAO = new CRM_Event_DAO_Event( );
                 $eventDAO->id = $eventId;
                 $eventDAO->find( );
                 while ( $eventDAO->fetch( ) ) {
@@ -228,7 +228,7 @@ WHERE     ct.id = cp.contribution_type_id AND
         }
         
         // delete price fields
-        $priceField =& new CRM_Price_DAO_Field( );
+        $priceField = new CRM_Price_DAO_Field( );
         $priceField->price_set_id = $id;
         $priceField->find( );
         while ( $priceField->fetch( ) ) {
@@ -236,7 +236,7 @@ WHERE     ct.id = cp.contribution_type_id AND
             CRM_Price_BAO_Field::deleteField( $priceField->id );
         }
         
-        $set     =& new CRM_Price_DAO_Set( );
+        $set     = new CRM_Price_DAO_Set( );
         $set->id = $id;
         return $set->delete( );
     }
@@ -252,7 +252,7 @@ WHERE     ct.id = cp.contribution_type_id AND
     public static function addTo( $entityTable, $entityId, $priceSetId ) 
     {
         // verify that the price set exists
-        $dao =& new CRM_Price_DAO_Set( );
+        $dao = new CRM_Price_DAO_Set( );
         $dao->id = $priceSetId;
         if ( !$dao->find( ) ) {
             return false;
@@ -260,7 +260,7 @@ WHERE     ct.id = cp.contribution_type_id AND
         unset( $dao );
         
         require_once 'CRM/Price/DAO/SetEntity.php';
-        $dao =& new CRM_Price_DAO_SetEntity( );
+        $dao = new CRM_Price_DAO_SetEntity( );
         // find if this already exists
         $dao->entity_id    = $entityId;
         $dao->entity_table = $entityTable;
@@ -280,7 +280,7 @@ WHERE     ct.id = cp.contribution_type_id AND
     public static function removeFrom( $entityTable, $entityId ) 
     {
         require_once 'CRM/Price/DAO/SetEntity.php';
-        $dao =& new CRM_Price_DAO_SetEntity( );
+        $dao = new CRM_Price_DAO_SetEntity( );
         $dao->entity_table = $entityTable;
         $dao->entity_id    = $entityId;
         return $dao->delete();
@@ -298,7 +298,7 @@ WHERE     ct.id = cp.contribution_type_id AND
         if ( !$entityTable || !$entityId ) return false;  
         
         require_once 'CRM/Price/DAO/SetEntity.php';
-        $dao =& new CRM_Price_DAO_SetEntity( );
+        $dao = new CRM_Price_DAO_SetEntity( );
         $dao->entity_table = $entityTable;
         $dao->entity_id    = $entityId;
         $dao->find( true );
@@ -405,7 +405,8 @@ WHERE     ct.id = cp.contribution_type_id AND
                              'help_post',
                              'is_display_amounts',
                              'options_per_line',
-                             'is_active'
+                             'is_active',
+                             'visibility_id'
                              );
         if ( $required == true ) {
             $priceFields[] = 'is_required';   
@@ -425,6 +426,8 @@ WHERE     ct.id = cp.contribution_type_id AND
 
         $dao =& CRM_Core_DAO::executeQuery( $sql, $params );
 
+        $visibility = CRM_Core_PseudoConstant::visibility( 'name' );
+        
         while ( $dao->fetch() ) {
             $fieldID = $dao->id;
 
@@ -435,7 +438,11 @@ WHERE     ct.id = cp.contribution_type_id AND
                 if ( $field == 'id' || is_null( $dao->$field) ) {
                     continue;
                 }
-                $setTree[$setID]['fields'][$fieldID][$field] = $dao->$field;
+                
+                if ( $field == 'visibility_id' ) {
+                    $setTree[$setID]['fields'][$fieldID]['visibility'] = $visibility[$dao->$field];
+                }
+                $setTree[$setID]['fields'][$fieldID][$field] = $dao->$field;                    
             }
             $setTree[$setID]['fields'][$fieldID]['options'] = CRM_Price_BAO_Field::getOptions( $fieldID, false );
         }
@@ -464,7 +471,11 @@ WHERE  id = %1";
                 switch ( $entityTable ) {
                 case 'civicrm_event':
                     $entity   = 'participant'; 
-                    $entityId = $form->_participantId;
+                    if ( CRM_Utils_System::getClassName( $form ) == 'CRM_Event_Form_Participant' ) {
+                        $entityId = $form->_id;
+                    } else {
+                        $entityId = $form->_participantId;
+                    }
                     break;
                     
                 case 'civicrm_contribution_page':
@@ -573,8 +584,10 @@ WHERE  id = %1";
         }
         
         $amount_level = array( );
+        $totalParticipant = 0;
         if ( is_array( $lineItem ) ) {
             foreach ( $lineItem as $values ) {
+                $totalParticipant += $values['participant_count'];
                 if ( $values['html_type'] == 'Text' ) {
                     $amount_level[] = $values['label'] . ' - ' . $values['qty'];
                     continue;
@@ -583,10 +596,15 @@ WHERE  id = %1";
             }
         }
         
+        $displayParticipantCount ='';
+        if ( $totalParticipant > 0 ) {
+            $displayParticipantCount = ' Participant Count -'.$totalParticipant;
+        }
+        
         require_once 'CRM/Core/BAO/CustomOption.php';
         $params['amount_level'] =
             CRM_Core_BAO_CustomOption::VALUE_SEPERATOR .
-            implode( CRM_Core_BAO_CustomOption::VALUE_SEPERATOR, $amount_level ) .
+            implode( CRM_Core_BAO_CustomOption::VALUE_SEPERATOR, $amount_level ) . $displayParticipantCount .
             CRM_Core_BAO_CustomOption::VALUE_SEPERATOR; 
         $params['amount']       = $totalPrice;
     }
@@ -606,12 +624,16 @@ WHERE  id = %1";
         $priceSet = self::getSetDetail( $priceSetId, true );
         $form->_priceSet = CRM_Utils_Array::value( $priceSetId, $priceSet );
         $form->assign( 'priceSet',  $form->_priceSet );
+        require_once 'CRM/Core/PseudoConstant.php';
+        $className = CRM_Utils_System::getClassName( $form );
         foreach ( $form->_priceSet['fields'] as $field ) {
-            CRM_Price_BAO_Field::addQuickFormElement( $form, 'price_'.$field['id'], $field['id'], false, 
-                                                      CRM_Utils_Array::value( 'is_required', $field, false ) );
+            if ( CRM_Utils_Array::value( 'visibility', $field ) == 'public' || $className == 'CRM_Contribute_Form_Contribution' ) {
+                CRM_Price_BAO_Field::addQuickFormElement( $form, 'price_'.$field['id'], $field['id'], false, 
+                                                          CRM_Utils_Array::value( 'is_required', $field, false ) );
+            }
         }
     }
-
+    
     /**
      * Get field ids of a price set
      *
@@ -624,7 +646,7 @@ WHERE  id = %1";
      */
     public static function getFieldIds( $id )
     {
-        $priceField =& new CRM_Price_DAO_Field();
+        $priceField = new CRM_Price_DAO_Field();
         $priceField->price_set_id = $id;
         $priceField->find( );
         while ( $priceField->fetch( ) ) {

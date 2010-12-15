@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -90,7 +90,7 @@ class CRM_Report_Page_Instance extends CRM_Core_Page
                     $this->assign( 'reportTitle', $templateInfo['label'] );
                 }
 
-                $wrapper =& new CRM_Utils_Wrapper( );
+                $wrapper = new CRM_Utils_Wrapper( );
                 return $wrapper->run( $templateInfo['name'], null, null );
             }
             

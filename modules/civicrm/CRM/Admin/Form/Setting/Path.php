@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -49,7 +49,7 @@ class CRM_Admin_Form_Setting_Path extends CRM_Admin_Form_Setting
      * @access public
      */
     public function buildQuickForm( ) {
-        CRM_Utils_System::setTitle(ts('Settings - Directories'));
+        CRM_Utils_System::setTitle(ts('Settings - Upload Directories'));
 
         $directories = array( 'uploadDir'           => ts( 'Temporary Files'  ),
                               'imageUploadDir'      => ts( 'Images'           ),

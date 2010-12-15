@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -90,6 +90,8 @@ class CRM_Admin_Form_OptionGroup extends CRM_Admin_Form
      */
     public function postProcess() 
     {
+        CRM_Utils_System::flushCache( );
+        
         $params = $this->exportValues();
         require_once 'CRM/Core/BAO/OptionGroup.php';
         if($this->_action & CRM_Core_Action::DELETE) {

@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -117,7 +117,12 @@ class CRM_Contact_StateMachine_Search extends CRM_Core_StateMachine {
      * @access public
      */
     function getTaskFormName( ) {
-        return CRM_Utils_String::getClassName( $this->_task );
+        if ( is_array( $this->_task ) ) {
+            // return first page
+            return CRM_Utils_String::getClassName( $this->_task[0] );
+        } else {
+            return CRM_Utils_String::getClassName( $this->_task );
+        }
     }
 
 }

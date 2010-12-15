@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -67,7 +67,7 @@ class CRM_Contribute_Page_ContributionPageEdit extends CRM_Core_Page {
         $action = CRM_Utils_Request::retrieve('action', 'String',
                                               $this, false, 'browse'); // default to 'browse'
         
-        $config =& CRM_Core_Config::singleton( );
+        $config = CRM_Core_Config::singleton( );
         if ( in_array("CiviMember", $config->enableComponents) ) {
             $this->assign('CiviMember', true );
         }
@@ -79,7 +79,7 @@ class CRM_Contribute_Page_ContributionPageEdit extends CRM_Core_Page {
                                                  $this, false, 0);
         
         if ( ! $this->_id ) {
-            $dao =& new CRM_Contribute_DAO_ContributionPage( ); 
+            $dao = new CRM_Contribute_DAO_ContributionPage( ); 
             $dao->save( ); 
  
             $this->_id = $dao->id; 
@@ -121,16 +121,16 @@ class CRM_Contribute_Page_ContributionPageEdit extends CRM_Core_Page {
 
         case 'Premium':
             require_once 'CRM/Contribute/Page/Premium.php';
-            $page =& new CRM_Contribute_Page_Premium( 'Configure Premiums' );
-            $session =& CRM_Core_Session::singleton();
+            $page = new CRM_Contribute_Page_Premium( 'Configure Premiums' );
+            $session = CRM_Core_Session::singleton();
             $session->set('singleForm', true);
             return $page->run( );
         }
 
         if ( $form ) {
             require_once 'CRM/Core/Controller/Simple.php'; 
-            $controller =& new CRM_Core_Controller_Simple($form, $subPage, $action); 
-            $session =& CRM_Core_Session::singleton(); 
+            $controller = new CRM_Core_Controller_Simple($form, $subPage, $action); 
+            $session = CRM_Core_Session::singleton(); 
             $session->pushUserContext( CRM_Utils_System::url( CRM_Utils_System::currentPath( ) , 'action=update&reset=1&id=' . $this->_id ) );
             $controller->set('id', $this->_id); 
             $controller->set('single', true );
@@ -154,7 +154,7 @@ class CRM_Contribute_Page_ContributionPageEdit extends CRM_Core_Page {
         
         // get all custom groups sorted by weight
         $donation =  array();
-        $dao      =& new CRM_Contribute_DAO_ContributionPage();
+        $dao      = new CRM_Contribute_DAO_ContributionPage();
 
         $dao->orderBy('title');
         $dao->find();

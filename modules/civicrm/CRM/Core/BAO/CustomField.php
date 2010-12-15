@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -160,7 +160,7 @@ class CRM_Core_BAO_CustomField extends CRM_Core_DAO_CustomField
             if ( $params['option_type'] == 1 ) {
                 // first create an option group for this custom group
                 require_once 'CRM/Core/BAO/OptionGroup.php';
-                $optionGroup            =& new CRM_Core_DAO_OptionGroup( );
+                $optionGroup            = new CRM_Core_DAO_OptionGroup( );
                 $optionGroup->name      =  "{$params['column_name']}_". date( 'YmdHis' );
                 $optionGroup->label     =  $params['label'];
                 $optionGroup->is_active = 1;
@@ -189,7 +189,7 @@ class CRM_Core_BAO_CustomField extends CRM_Core_DAO_CustomField
                             $optionValue->value = floatval( $v );
                             break;
                         default:
-                            $optionValue->value = $v;
+                            $optionValue->value = trim($v);
                         }
                         
                         $optionValue->weight          =  $params['option_weight'][$k];
@@ -224,7 +224,7 @@ class CRM_Core_BAO_CustomField extends CRM_Core_DAO_CustomField
             $params['attributes'] = 'rows=4, cols=60';
         }
 
-        $customField =& new CRM_Core_DAO_CustomField();
+        $customField = new CRM_Core_DAO_CustomField();
         $customField->copyValues( $params );
         $customField->is_required      = CRM_Utils_Array::value( 'is_required'    , $params, false );
         $customField->is_searchable    = CRM_Utils_Array::value( 'is_searchable'  , $params, false );
@@ -539,6 +539,12 @@ class CRM_Core_BAO_CustomField extends CRM_Core_DAO_CustomField
                                             'html_type'        => CRM_Utils_Array::value('html_type', $values),
                                             'is_search_range'  => CRM_Utils_Array::value('is_search_range', $values),
                                             );
+
+            // CRM-6681, pass date and time format when html_type = Select Date 
+            if ( CRM_Utils_Array::value('html_type', $values) == 'Select Date' ) {
+                $importableFields[$key]['date_format'] = CRM_Utils_Array::value('date_format', $values);
+                $importableFields[$key]['time_format'] = CRM_Utils_Array::value('time_format', $values);
+            }
         }
          
         return $importableFields;
@@ -595,7 +601,7 @@ class CRM_Core_BAO_CustomField extends CRM_Core_DAO_CustomField
             $useRequired = 0;
         }
         
-        $field =& new CRM_Core_DAO_CustomField();
+        $field = new CRM_Core_DAO_CustomField();
         
         $field->id = $fieldId;
         if (! $field->find(true)) {
@@ -793,8 +799,7 @@ class CRM_Core_BAO_CustomField extends CRM_Core_DAO_CustomField
 
             static $customUrls = array( );            
             if ( $field->data_type == 'ContactReference' )  {
-                $customUrls[$elementName] = CRM_Utils_System::url( "civicrm/ajax/contactlist",
-                                                                   "reset=1&context=customfield&id={$field->id}",
+                $customUrls[$elementName] = CRM_Utils_System::url( "civicrm/ajax/rest",                                                     "className=CRM_Contact_Page_AJAX&fnName=getContactList&json=1&reset=1&context=customfield&id={$field->id}",
                                                                    false, null, false );                
                
                 $actualElementValue = $qf->_submitValues[ $elementName .'_id'];    
@@ -943,6 +948,8 @@ class CRM_Core_BAO_CustomField extends CRM_Core_DAO_CustomField
             if ( $data_type == 'ContactReference' &&
                  $value ) {
                 $display = CRM_Core_DAO::getFieldValue( 'CRM_Contact_DAO_Contact', $value, 'display_name' );
+            } else {
+                $display = CRM_Utils_Array::value( $value, $option );
             }
             break;
 
@@ -1095,7 +1102,7 @@ class CRM_Core_BAO_CustomField extends CRM_Core_DAO_CustomField
                                         $mode = null ) 
     {
         //get the type of custom field
-        $customField =& new CRM_Core_BAO_CustomField();
+        $customField = new CRM_Core_BAO_CustomField();
         $customField->id = $customFieldId;
         $customField->find(true);
         
@@ -1115,7 +1122,7 @@ class CRM_Core_BAO_CustomField extends CRM_Core_DAO_CustomField
             
             if ( $customField->data_type == 'Country' ) {
                 if ( ! $value ) {
-                    $config =& CRM_Core_Config::singleton();
+                    $config = CRM_Core_Config::singleton();
                     if ( $config->defaultContactCountry ) {
                         $value = $config->defaultContactCountry( );
                     }
@@ -1123,10 +1130,10 @@ class CRM_Core_BAO_CustomField extends CRM_Core_DAO_CustomField
             }
         }
         
-        //set defaults if mode is registration / edit
+        //set defaults if mode is registration
         if ( ! trim( $value ) &&
              ( $value !== 0 ) &&
-             ( $mode != CRM_Profile_Form::MODE_SEARCH ) ) {
+             ( !in_array( $mode, array( CRM_Profile_Form::MODE_EDIT, CRM_Profile_Form::MODE_SEARCH ) ) ) ) {
             $value = $customField->default_value;
         }
 
@@ -1199,8 +1206,16 @@ class CRM_Core_BAO_CustomField extends CRM_Core_DAO_CustomField
                      $fileType == "image/gif"   ||
                      $fileType == "image/x-png" ||
                      $fileType == "image/png" ) { 
+                    $entityId = CRM_Core_DAO::getFieldValue( 'CRM_Core_DAO_EntityFile',
+                                                             $fileID,
+                                                             'entity_id',
+                                                             'id' );
+                    require_once 'CRM/Core/BAO/File.php';
+                    list( $path ) = CRM_Core_BAO_File::path( $fileID, $entityId, null, null);
+                    list( $imageWidth, $imageHeight ) = getimagesize( $path );
+                    list( $imageThumbWidth, $imageThumbHeight ) = CRM_Contact_BAO_Contact::getThumbSize( $imageWidth, $imageHeight );
                     $url = CRM_Utils_System::url( 'civicrm/file', "reset=1&id=$fileID&eid=$contactID" );
-                    $result['file_url'] = "<a href='javascript:imagePopUp(\"$url\");'><img src=\"$url\" width=100 height=100/></a>";
+                    $result['file_url'] = "<a href='javascript:imagePopUp(\"$url\");'><img src=\"$url\" width=$imageThumbWidth height=$imageThumbHeight/></a>";
                 } else { // for non image files
                     $uri = CRM_Core_DAO::getFieldValue( 'CRM_Core_DAO_File',
                                                          $fileID,
@@ -1388,7 +1403,7 @@ SELECT $columnName
                 $fileId = CRM_Core_DAO::singleValueQuery( $query, $params );
             }
             
-            $fileDAO =& new CRM_Core_DAO_File();
+            $fileDAO = new CRM_Core_DAO_File();
             
             if ( $fileId ) {
                 $fileDAO->id = $fileId;
@@ -1541,27 +1556,52 @@ AND    cf.id = %1";
         return $cache[$fieldID];
     }
 
-    public static function &customOptionGroup( )
+    /**
+     * Function to get custom option groups
+     * 
+     * @params array $includeFieldIds ids of custom fields for which  
+     * option groups must be included.
+     * 
+     * Currently this is required in the cases where option groups are to be included 
+     * for inactive fields : CRM-5369
+     *
+     * @access public
+     * @return $customOptionGroup 
+     * @static
+     */
+    public static function &customOptionGroup( $includeFieldIds = null )
     {
         static $customOptionGroup = null;
         
-        if ( ! $customOptionGroup ) {
+        $cacheKey = (empty($includeFieldIds)) ? 'onlyActive':'force';
+        if ( $cacheKey == 'force' ) $customOptionGroup[$cacheKey] = null; 
+        
+        if ( !CRM_Utils_Array::value( $cacheKey, $customOptionGroup ) ) {
+            $whereClause = '( g.is_active = 1 AND f.is_active = 1 )';
+            
+            //support for single as well as array format.
+            if ( !empty( $includeFieldIds )) {
+                if ( is_array( $includeFieldIds )) { 
+                    $includeFieldIds = implode( ',', $includeFieldIds );
+                }
+                $whereClause .= "OR f.id IN ( $includeFieldIds )";
+            }
+            
             $query = "
-SELECT g.id, f.label
-FROM   civicrm_option_group g,
-       civicrm_custom_field f
-WHERE  g.id = f.option_group_id
-AND    g.is_active = 1
-AND    f.is_active = 1";
+    SELECT  g.id, f.label
+      FROM  civicrm_option_group g
+INNER JOIN  civicrm_custom_field f ON ( g.id = f.option_group_id ) 
+     WHERE  {$whereClause}";
+            
             $dao = CRM_Core_DAO::executeQuery( $query );
-            $customOptionGroup = array( );
             while ( $dao->fetch( ) ) {
-                $customOptionGroup[$dao->id] = $dao->label;
+                $customOptionGroup[$cacheKey][$dao->id] = $dao->label;
             }
         }
-        return $customOptionGroup;
+        
+        return $customOptionGroup[$cacheKey];
     }
-
+    
     /**
      * Function to fix orphan groups
      * 

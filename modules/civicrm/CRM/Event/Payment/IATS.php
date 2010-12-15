@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1
+ | CiviCRM version 3.2
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -69,7 +69,7 @@ class CRM_Event_Payment_IATS extends CRM_Core_Payment_IATS {
      */ 
     static function &singleton( $mode, &$paymentProcessor ) {
         if (self::$_singleton === null ) { 
-            self::$_singleton =& new CRM_Event_Payment_IATS( $mode, $paymentProcessor );
+            self::$_singleton = new CRM_Event_Payment_IATS( $mode, $paymentProcessor );
         } 
         return self::$_singleton; 
     } 

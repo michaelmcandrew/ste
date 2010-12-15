@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -158,7 +158,7 @@ class CRM_Admin_Form_PaymentProcessorType extends CRM_Admin_Form
             return $defaults;
         }
 
-        $dao =& new CRM_Core_DAO_PaymentProcessorType( );
+        $dao = new CRM_Core_DAO_PaymentProcessorType( );
         $dao->id        = $this->_id;
 
         if ( ! $dao->find( true ) ) {
@@ -178,6 +178,8 @@ class CRM_Admin_Form_PaymentProcessorType extends CRM_Admin_Form
      */
     public function postProcess() 
     {
+        CRM_Utils_System::flushCache( 'CRM_Core_DAO_PaymentProcessorType' );
+
         if ( $this->_action & CRM_Core_Action::DELETE ) {
             CRM_Core_BAO_PaymentProcessorType::del( $this->_id );
             return;
@@ -191,7 +193,7 @@ UPDATE civicrm_payment_processor SET is_default = 0";
             CRM_Core_DAO::executeQuery( $query, CRM_Core_DAO::$_nullArray );
         }
 
-        $dao =& new CRM_Core_DAO_PaymentProcessorType( );
+        $dao = new CRM_Core_DAO_PaymentProcessorType( );
 
         $dao->id         = $this->_id;
         $dao->is_default = CRM_Utils_Array::value( 'is_default', $values, 0 );

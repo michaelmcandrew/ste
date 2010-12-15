@@ -26,4 +26,9 @@
      <access_arguments>access CiviCRM</access_arguments>
      <page_type>3</page_type>
   </item>  
+  <item>
+     <path>civicrm/activity/search</path>
+     <title>Find Activities</title>
+     <page_callback>CRM_Activity_Controller_Search</page_callback>
+  </item>
 </menu>

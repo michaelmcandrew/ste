@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -69,7 +69,7 @@ class CRM_Member_BAO_MembershipType extends CRM_Member_DAO_MembershipType
      */
     static function retrieve( &$params, &$defaults ) 
     {
-        $membershipType =& new CRM_Member_DAO_MembershipType( );
+        $membershipType = new CRM_Member_DAO_MembershipType( );
         $membershipType->copyValues( $params );
         if ( $membershipType->find( true ) ) {
             CRM_Core_DAO::storeValues( $membershipType, $defaults );
@@ -107,7 +107,7 @@ class CRM_Member_BAO_MembershipType extends CRM_Member_DAO_MembershipType
         $params['is_active'] =  CRM_Utils_Array::value( 'is_active', $params, false );
         
         // action is taken depending upon the mode
-        $membershipType               =& new CRM_Member_DAO_MembershipType( );
+        $membershipType               = new CRM_Member_DAO_MembershipType( );
         
         $membershipType->copyValues( $params );
         
@@ -149,7 +149,7 @@ class CRM_Member_BAO_MembershipType extends CRM_Member_DAO_MembershipType
         }
         if ($check) {
 
-            $session =& CRM_Core_Session::singleton();
+            $session = CRM_Core_Session::singleton();
             $cnt = 1;
             $message = ts('This membership type cannot be deleted due to following reason(s):' ); 
             if ( in_array( 'Membership', $status) ) {
@@ -169,7 +169,7 @@ class CRM_Member_BAO_MembershipType extends CRM_Member_DAO_MembershipType
         
         //delete from membership Type table
         require_once 'CRM/Member/DAO/MembershipType.php';
-        $membershipType =& new CRM_Member_DAO_MembershipType( );
+        $membershipType = new CRM_Member_DAO_MembershipType( );
         $membershipType->id = $membershipTypeId;
         
         //fix for membership type delete api
@@ -230,7 +230,7 @@ class CRM_Member_BAO_MembershipType extends CRM_Member_DAO_MembershipType
     {
         require_once 'CRM/Member/DAO/Membership.php';
         $membershipTypes = array();
-        $membershipType =& new CRM_Member_DAO_MembershipType( );
+        $membershipType = new CRM_Member_DAO_MembershipType( );
         $membershipType->is_active = 1;
         if (  $public ){
             $membershipType->visibility = 'Public';
@@ -255,7 +255,7 @@ class CRM_Member_BAO_MembershipType extends CRM_Member_DAO_MembershipType
         require_once 'CRM/Member/DAO/Membership.php';
         $membershipTypeDetails = array();
         
-        $membershipType =& new CRM_Member_DAO_MembershipType( );
+        $membershipType = new CRM_Member_DAO_MembershipType( );
         $membershipType->is_active = 1;
         $membershipType->id = $membershipTypeId;
         if ( $membershipType->find(true) ) {
@@ -457,7 +457,7 @@ class CRM_Member_BAO_MembershipType extends CRM_Member_DAO_MembershipType
         require_once 'CRM/Member/BAO/MembershipStatus.php';
         $params = array('id' => $membershipId);
         
-        $membership =& new CRM_Member_BAO_Membership( );
+        $membership = new CRM_Member_BAO_Membership( );
         
         //$membership->copyValues( $params );
         $membership->id = $membershipId;
@@ -503,7 +503,10 @@ class CRM_Member_BAO_MembershipType extends CRM_Member_DAO_MembershipType
             $today = date( 'Y-m-d' );
         } else {
             //get date in 'Ymd' format, CRM-5795
-            $today = CRM_Utils_Date::processDate( $changeToday, null, false, 'Ymd' );
+            $today = date( 'Ymd' );
+            if ( $changeToday ) {
+                $today = CRM_Utils_Date::processDate( $changeToday, null, false, 'Ymd' );
+            }
             
             $rollover = false;
                         
@@ -628,7 +631,7 @@ class CRM_Member_BAO_MembershipType extends CRM_Member_DAO_MembershipType
     static function getMembershipTypesByOrg( $orgID )
     {
         $membershipTypes = array();
-        $dao =& new CRM_Member_DAO_MembershipType();
+        $dao = new CRM_Member_DAO_MembershipType();
         $dao->member_of_contact_id = $orgID;
         $dao->find();
         while($dao->fetch()) {

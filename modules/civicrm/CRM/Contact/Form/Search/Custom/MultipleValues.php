@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -149,7 +149,7 @@ contact_a.sort_name    as sort_name,
         $customFrom = array( );
         if ( !empty( $this->_tables ) ) {
             foreach ( $this->_tables as $tableName => $fields ) {
-                $customFrom[ ] = " LEFT JOIN $tableName ON {$tableName}.entity_id = contact_a.id ";
+                $customFrom[ ] = " INNER JOIN $tableName ON {$tableName}.entity_id = contact_a.id ";
             }
             return $from . implode( ' ', $customFrom );
         }

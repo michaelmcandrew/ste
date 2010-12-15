@@ -1963,8 +1963,11 @@ class HTML_QuickForm extends HTML_Common
                              'pay_later_receipt',
                              'label', // This is needed for FROM Email Address configuration. dgg
                              'url',  // This is needed for navigation items urls
+                             'details',
                              'msg_text', // message templates’ text versions
                              'text_message', // (send an) email to contact’s and CiviMail’s text version
+                             'data', // data i/p of persistent table
+                             'sqlQuery' // CRM-6673
                              );
                                     
         $values = array();
@@ -1986,8 +1989,8 @@ class HTML_QuickForm extends HTML_Common
                 
                 // hack to fix extra <br /> injected by CKEDITOR, we should remove this code
                 // once the bug is fixed and is part of release https://dev.fckeditor.net/ticket/5293
-                if ( is_a( $this->_elements[$key], 'HTML_QuickForm_CKeditor' ) ) {
-                    $value[$fldName] = rtrim( $value[$fldName], '<br />');
+                if ( is_a( $this->_elements[$key], 'HTML_QuickForm_CKeditor' ) && ( CRM_Utils_Array::value( $fldName, $value ) == '<br />' ) ) {
+                    $value[$fldName] = rtrim( CRM_Utils_Array::value( $fldName, $value ), '<br />');
                 }
                 
                 if (is_array($value)) {

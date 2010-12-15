@@ -2,7 +2,7 @@
 
 /* 
  +--------------------------------------------------------------------+ 
- | CiviCRM version 3.1                                                | 
+ | CiviCRM version 3.2                                                | 
  +--------------------------------------------------------------------+ 
  | Copyright CiviCRM LLC (c) 2004-2010                                | 
  +--------------------------------------------------------------------+ 
@@ -96,7 +96,7 @@ class CRM_Core_BAO_CustomQuery
      *    
      * @var array    
      */ 
-    protected $_fields;
+    public $_fields;
 
     /**
      * This stores custom data group types and tables that it extends
@@ -117,7 +117,8 @@ class CRM_Core_BAO_CustomQuery
                                'Event'        => 'civicrm_event',
                                'Activity'     => 'civicrm_activity',
                                'Pledge'       => 'civicrm_pledge',
-                               'Grant'        => 'civicrm_grant'
+                               'Grant'        => 'civicrm_grant',
+                               'Address'      => 'civicrm_address',
                                );
 
     /**
@@ -225,7 +226,10 @@ SELECT label, value
                     }
                 }
                 require_once 'CRM/Utils/Hook.php';
-                CRM_Utils_Hook::customFieldOptions( $dao->id, $this->_options[$dao->id], false );
+                $options = $this->_options[$dao->id];
+                //unset attributes to avoid confussion
+                unset( $options['attributes']);
+                CRM_Utils_Hook::customFieldOptions( $dao->id, $options, false );
             }
         }
     }
@@ -268,6 +272,8 @@ SELECT label, value
                 $joinTable = 'civicrm_relationship';
             } else  if ( $field['extends'] == 'civicrm_grant' ) {
                 $joinTable = 'civicrm_grant';
+            } else  if ( $field['extends'] == 'civicrm_address' ) {
+                $joinTable = 'civicrm_address';
             }
             
             if ( $joinTable ) {
@@ -399,8 +405,7 @@ SELECT label, value
                     } 
                     continue;
                 case 'ContactReference':
-                    $label = $value;
-                    $value = CRM_Core_DAO::getFieldValue( 'CRM_Contact_DAO_Contact', str_replace( '\\', '', $value), 'id', 'sort_name' );
+                    $label = CRM_Core_DAO::getFieldValue( 'CRM_Contact_DAO_Contact', $value,  'sort_name');
                     $this->_where[$grouping][] = CRM_Contact_BAO_Query::buildClause( $fieldName, $op, $value, 'String' );
                     $this->_qill[$grouping][]  = $field['label'] . " $op $label";                    
                     continue;
@@ -466,18 +471,14 @@ SELECT label, value
                         } 
                         
                         // hack to handle yy format during search
-                        $actualValue = $value;
                         if ( is_numeric( $value ) && strlen( $value) == 4 ) {
                             $value = "01-01-{$value}";
                         }
                         
                         $date = CRM_Utils_Date::processDate( $value ); 
                         $this->_where[$grouping][] = CRM_Contact_BAO_Query::buildClause( $fieldName, $op, $date, 'String' );
-                        $this->_qill[$grouping][]  = $field['label'] . " {$op} " . CRM_Utils_Date::customFormat( $actualValue ); 
+                        $this->_qill[$grouping][]  = $field['label'] . " {$op} " . CRM_Utils_Date::customFormat( $date ); 
                     } else {
-                        // hack to handle yy format during search
-                        $actualFromValue = $fromValue;
-                        $actualToValue   = $toValue;
                         if ( is_numeric( $fromValue ) && strlen( $fromValue ) == 4 ) {
                             $fromValue = "01-01-{$fromValue}";
                         }
@@ -495,12 +496,12 @@ SELECT label, value
                         if ( $fromDate ) {
                             $this->_where[$grouping][] = "$fieldName >= $fromDate";
                             $this->_qill[$grouping][]  = $field['label'] . ' >= ' .
-                                CRM_Utils_Date::customFormat( $actualFromValue );
+                                CRM_Utils_Date::customFormat( $fromDate );
                         }
                         if ( $toDate ) {
                             $this->_where[$grouping][] = "$fieldName <= $toDate";
                             $this->_qill[$grouping][]  = $field['label'] . ' <= ' .
-                                CRM_Utils_Date::customFormat( $actualToValue );
+                                CRM_Utils_Date::customFormat( $toDate );
                         }
                     }
                     continue;

@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -104,22 +104,18 @@ class CRM_Contact_Form_Edit_Individual {
         $form->assign('housholdDataURL',$housholdDataURL );
         $form->add( 'text', 'shared_household', ts( 'Select Household' ) );
         $form->add( 'hidden', 'shared_household_id', '', array( 'id' => 'shared_household_id' ));
-        
-        //Home Url Element
-        $form->addElement('text', 'home_URL', ts('Website'),
-                          array_merge( CRM_Core_DAO::getAttribute('CRM_Contact_DAO_Contact', 'home_URL'),
-                                       array('onfocus' => "if (!this.value) this.value='http://'; else return false",
-                                             'onblur'=> "if ( this.value == 'http://') this.value=''; else return false")
-                                       ));
-        $form->addRule('home_URL', ts('Enter a valid web location beginning with \'http://\' or \'https://\'. EXAMPLE: http://www.mysite.org/'), 'url');
-        
+                
         //Current Employer Element
-        $employerDataURL =  CRM_Utils_System::url( 'civicrm/ajax/contactlist', 'org=1', false, null, false );
+        $employerDataURL =  CRM_Utils_System::url( 'civicrm/ajax/rest', 'className=CRM_Contact_Page_AJAX&fnName=getContactList&json=1&context=contact&org=1', false, null, false );
         $form->assign('employerDataURL',$employerDataURL );
         
         $form->addElement('text', 'current_employer', ts('Current Employer'), '' );
         $form->addElement('hidden', 'current_employer_id', '', array( 'id' => 'current_employer_id') );
         $form->addElement('text', 'contact_source', ts('Source'));
+
+        $checkSimilar = defined( 'CIVICRM_CONTACT_AJAX_CHECK_SIMILAR' ) ? CIVICRM_CONTACT_AJAX_CHECK_SIMILAR : true;
+        $form->assign('checkSimilar',$checkSimilar );
+ 
 
         //External Identifier Element
         $form->add('text', 'external_identifier', ts('External Id'), 
@@ -129,7 +125,7 @@ class CRM_Contact_Form_Edit_Individual {
                         ts('External ID already exists in Database.'), 
                         'objectExists', 
                         array( 'CRM_Contact_DAO_Contact', $form->_contactId, 'external_identifier' ) );
-        $config =& CRM_Core_Config::singleton();
+        $config = CRM_Core_Config::singleton();
         CRM_Core_ShowHideBlocks::links($form, 'demographics', '' , '');
     }
 
@@ -144,7 +140,7 @@ class CRM_Contact_Form_Edit_Individual {
      * @access public
      * @static
      */
-    static function formRule( &$fields, &$files, $contactID = null ) 
+    static function formRule( $fields, $files, $contactID = null ) 
     {
         $errors = array( );
         //FIXME 
@@ -218,7 +214,11 @@ class CRM_Contact_Form_Edit_Individual {
             $values['address'][1]['state_province_id']=0;
         }
       
-        $params['address'][1] = $values['address'][1];
+        foreach ( $values['address'][1] as $key => $val ) {
+            if ( ! in_array( $key, array( 'location_type_id', 'is_billing', 'is_primary' ) ) ) {
+                $params['address'][1][$key] = $values['address'][1][$key];
+            }
+        }
 
         // unset all the ids and unwanted fields
         $unsetFields = array( 'id', 'location_id', 'timezone', 'note' );
@@ -289,7 +289,7 @@ class CRM_Contact_Form_Edit_Individual {
             $relID  = CRM_Core_DAO::getFieldValue( 'CRM_Contact_DAO_RelationshipType', 'Household Member of', 'id', 'name_a_b' );
             
             if ( CRM_Utils_Array::value( 'old_mail_to_household_id', $params ) ) {
-                $relationship =& new CRM_Contact_DAO_Relationship( );
+                $relationship = new CRM_Contact_DAO_Relationship( );
                 $relationship->contact_id_b         = $params['old_mail_to_household_id'];
                 $relationship->contact_id_a         = $contactID;
                 $relationship->relationship_type_id = $relID;
@@ -305,7 +305,7 @@ class CRM_Contact_Form_Edit_Individual {
                 $relationshipParams['relationship_type_id'] = $relID.'_b_a';
                 $relationshipParams['is_active']            = 1;
                 
-                $relationship =& new CRM_Contact_DAO_Relationship( );
+                $relationship = new CRM_Contact_DAO_Relationship( );
                 $relationship->contact_id_b         = $params['mail_to_household_id'];
                 $relationship->contact_id_a         = $contactID;
                 $relationship->relationship_type_id = $relID;

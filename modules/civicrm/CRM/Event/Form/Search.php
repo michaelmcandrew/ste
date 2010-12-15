@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -135,6 +135,13 @@ class CRM_Event_Form_Search extends CRM_Core_Form
 
     protected $_defaults;
 
+    /**
+     * the saved search ID retrieved from the GET vars
+     *
+     * @var int
+     * @access protected
+     */
+    protected $_ssID;
 
     /** 
      * processing needed for buildForm and later 
@@ -162,7 +169,7 @@ class CRM_Event_Form_Search extends CRM_Core_Form
         $this->_force   = CRM_Utils_Request::retrieve( 'force', 'Boolean',  $this, false ); 
         $this->_limit   = CRM_Utils_Request::retrieve( 'limit', 'Positive', $this );
         $this->_context = CRM_Utils_Request::retrieve( 'context', 'String', $this, false, 'search' );
-
+        $this->_ssID    = CRM_Utils_Request::retrieve( 'ssID',  'Positive', $this );
         $this->assign( "context", $this->_context );
         
         // get user submitted values  
@@ -192,7 +199,7 @@ class CRM_Event_Form_Search extends CRM_Core_Form
 
         require_once 'CRM/Contact/BAO/Query.php';
         $this->_queryParams =& CRM_Contact_BAO_Query::convertFormValues( $this->_formValues ); 
-        $selector =& new CRM_Event_Selector_Search( $this->_queryParams,
+        $selector = new CRM_Event_Selector_Search( $this->_queryParams,
                                                     $this->_action,
                                                     null,
                                                     $this->_single,
@@ -206,7 +213,7 @@ class CRM_Event_Form_Search extends CRM_Core_Form
         $this->assign( "{$prefix}limit", $this->_limit );
         $this->assign( "{$prefix}single", $this->_single );
         
-        $controller =& new CRM_Core_Selector_Controller($selector ,  
+        $controller = new CRM_Core_Selector_Controller($selector ,  
                                                         $this->get( CRM_Utils_Pager::PAGE_ID ),  
                                                         $sortID,  
                                                         CRM_Core_Action::VIEW, 
@@ -270,7 +277,7 @@ class CRM_Event_Form_Search extends CRM_Core_Form
             $permission = CRM_Core_Permission::getPermission( );
             
             require_once 'CRM/Event/Task.php';
-            $tasks = array( '' => ts('- more actions -') ) + CRM_Event_Task::permissionedTaskTitles( $permission );
+            $tasks = array( '' => ts('- actions -') ) + CRM_Event_Task::permissionedTaskTitles( $permission );
             if ( isset( $this->_ssID ) ) {
                 if ( $permission == CRM_Core_Permission::EDIT ) {
                     require_once "CRM/Contact/Task.php";
@@ -382,12 +389,15 @@ class CRM_Event_Form_Search extends CRM_Core_Form
         require_once 'CRM/Contact/BAO/Query.php';
         $this->_queryParams =& CRM_Contact_BAO_Query::convertFormValues( $this->_formValues );
         
-        $selector =& new CRM_Event_Selector_Search( $this->_queryParams,
-                                                    $this->_action,
-                                                    null,
-                                                    $this->_single,
-                                                    $this->_limit,
-                                                    $this->_context ); 
+        $selector = new CRM_Event_Selector_Search( $this->_queryParams,
+                                                   $this->_action,
+                                                   null,
+                                                   $this->_single,
+                                                   $this->_limit,
+                                                   $this->_context ); 
+        
+        $selector->setKey( $this->controller->_key );
+        
         $prefix = null;
         if ( $this->_context == 'user') {
             $prefix = $this->_prefix;
@@ -396,7 +406,7 @@ class CRM_Event_Form_Search extends CRM_Core_Form
         $this->assign( "{$prefix}limit", $this->_limit );
         $this->assign( "{$prefix}single", $this->_single );
 
-        $controller =& new CRM_Core_Selector_Controller($selector , 
+        $controller = new CRM_Core_Selector_Controller($selector , 
                                                         $this->get( CRM_Utils_Pager::PAGE_ID ), 
                                                         $sortID, 
                                                         CRM_Core_Action::VIEW,
@@ -436,7 +446,7 @@ class CRM_Event_Form_Search extends CRM_Core_Form
      * @static
      * @access public
      */
-    static function formRule( &$fields )
+    static function formRule( $fields )
     {
         $errors = array( );
        

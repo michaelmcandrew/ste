@@ -11,7 +11,7 @@
 /**
  * @package CRM
  * @author Marshal Newrock <marshal@idealso.com>
- * $Id: Dummy.php 10862 2007-08-13 04:45:46Z shot $
+ * $Id: Dummy.php 26018 2010-01-25 09:00:59Z deepak $
  **/
 
 require_once 'CRM/Core/Payment/Dummy.php';
@@ -47,7 +47,7 @@ class CRM_Event_Payment_Dummy extends CRM_Core_Payment_Dummy {
      */
     static function &singleton( $mode, &$paymentProcessor ) {
         if (self::$_singleton === null ) {
-            self::$_singleton =& new CRM_Event_Payment_Dummy( $mode, $paymentProcessor );
+            self::$_singleton = new CRM_Event_Payment_Dummy( $mode, $paymentProcessor );
         }
         return self::$_singleton;
     }

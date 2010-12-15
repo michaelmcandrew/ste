@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -41,6 +41,7 @@ class CRM_Contact_Form_Search_Custom extends CRM_Contact_Form_Search {
     protected $_customClass = null;
 
     public function preProcess( ) {
+        $this->set('context', 'custom' );
         require_once 'CRM/Contact/BAO/SearchCustom.php';
 
         $csID = CRM_Utils_Request::retrieve( 'csid', 'Integer', $this );
@@ -101,9 +102,8 @@ class CRM_Contact_Form_Search_Custom extends CRM_Contact_Form_Search {
 
     function postProcess( ) 
     {
-        $session =& CRM_Core_Session::singleton();
-        $session->set('isAdvanced', '3');
-        $session->set('isCustom'  , '1');
+        $this->set('isAdvanced', '3');
+        $this->set('isCustom'  , '1');
 
         // get user submitted values
         // get it from controller only if form has been submitted, else preProcess has set this

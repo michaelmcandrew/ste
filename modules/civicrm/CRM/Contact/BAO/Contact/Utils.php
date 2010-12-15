@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -45,19 +45,20 @@ class CRM_Contact_BAO_Contact_Utils
      * @access public
      * @static
      */
-    static function getImage( $contactType, $urlOnly = false ) 
+    static function getImage( $contactType, $urlOnly = false, $contactId = null ) 
     {
         static $imageInfo = array( );
         if ( ! array_key_exists( $contactType, $imageInfo ) ) {
             $imageInfo[$contactType] = array( );
             
+            $typeInfo = array( );
             $params = array( 'name' => $contactType );
             require_once 'CRM/Contact/BAO/ContactType.php';
             CRM_Contact_BAO_ContactType::retrieve( $params, $typeInfo );
 
             if (  CRM_Utils_Array::value( 'image_URL', $typeInfo ) ) {
                 $imageUrl = $typeInfo['image_URL'];
-                $config   =& CRM_Core_Config::singleton( );
+                $config   = CRM_Core_Config::singleton( );
                 
                 if ( ! preg_match("/^(\/|(http(s)?:)).+$/i", $imageUrl) ) {
                     $imageUrl = $config->resourceBase . $imageUrl;
@@ -74,12 +75,21 @@ class CRM_Contact_BAO_Contact_Utils
                 } else {
                     $type = $typeInfo['name'];
                 }
+           		
+
                 $imageInfo[$contactType]['image'] = 
-                    "<div class=\"icon crm-icon {$type}-icon\"></div>";
+                 	"<div class=\"icon crm-icon {$type}-icon\"></div>";
                 $imageInfo[$contactType]['url']   = null;
             }
         }
-        return $urlOnly ? $imageInfo[$contactType]['url'] : $imageInfo[$contactType]['image'];
+        
+        $summaryOvelayProfileId = CRM_Core_DAO::getFieldValue( 'CRM_Core_DAO_UFGroup', 'summary_overlay', 'id', 'name' );
+        
+        $profileURL = CRM_Utils_System::url('civicrm/profile/view', "reset=1&gid={$summaryOvelayProfileId}&id={$contactId}&snippet=4");
+        
+        $imageInfo[$contactType]['summary-link'] = '<a href="'.$profileURL.'" class="crm-summary-link">'.$imageInfo[$contactType]["image"].'</a>';
+        
+        return $urlOnly ? $imageInfo[$contactType]['url'] : $imageInfo[$contactType]['summary-link'];
     }
     
     /**
@@ -313,7 +323,7 @@ UNION
         //we do not know that triggered relationship record is active.
         if ( $duplicate ) {
             require_once 'CRM/Contact/DAO/Relationship.php';
-            $relationship =& new CRM_Contact_DAO_Relationship( );
+            $relationship = new CRM_Contact_DAO_Relationship( );
             $relationship->contact_id_a = $contactID;
             $relationship->contact_id_b = $employerID;
             $relationship->relationship_type_id = $relationshipParams['relationship_type_id'];
@@ -396,7 +406,7 @@ WHERE id={$contactId}; ";
             //get relationship id.
             if ( CRM_Contact_BAO_Relationship::checkDuplicateRelationship( $relMembershipParams, $contactId, $employerId ) ) {
                 require_once 'CRM/Contact/DAO/Relationship.php';
-                $relationship =& new CRM_Contact_DAO_Relationship( );
+                $relationship = new CRM_Contact_DAO_Relationship( );
                 $relationship->contact_id_a = $contactId;
                 $relationship->contact_id_b = $employerId;
                 $relationship->relationship_type_id = $relTypeId;
@@ -435,7 +445,7 @@ WHERE id={$contactId}; ";
         }
 
         require_once 'CRM/Contact/Form/Location.php';
-        $config =& CRM_Core_Config::singleton( );
+        $config = CRM_Core_Config::singleton( );
 
         $form->assign( 'contact_type' , $contactType );
         $form->assign( 'fieldSetTitle', $title );
@@ -445,7 +455,7 @@ WHERE id={$contactId}; ";
 
         switch ( $contactType ) {
         case 'Organization':
-            $session   =& CRM_Core_Session::singleton( );
+            $session   = CRM_Core_Session::singleton( );
             $contactID = $session->get( 'userID' );
 
             if ( $contactID ) {
@@ -472,7 +482,12 @@ WHERE id={$contactId}; ";
                 $form->addRadio( 'org_option', ts('options'),  $orgOptions, $orgOptionExtra );
                 $form->assign( 'relatedOrganizationFound', true );
             }
-            $form->add('text', 'organization_name', ts('Organization Name'), $attributes['organization_name']);
+            
+            $isRequired = false;
+            if ( CRM_Utils_Array::value( 'is_for_organization',  $form->_values ) == 2 ) {
+                $isRequired =  true;
+            }
+            $form->add('text', 'organization_name', ts('Organization Name'), $attributes['organization_name'], $isRequired);
             break;
         case 'Household':
             $form->add('text', 'household_name', ts('Household Name'), 
@@ -623,7 +638,7 @@ LEFT JOIN  civicrm_email ce ON ( ce.contact_id=c.id AND ce.is_primary = 1 )
                 }
             }
             if( !empty( $originalId ) && array_key_exists( 'merge', $hasPermissions ) ) {
-        	    $rgBao =& new CRM_Dedupe_BAO_RuleGroup( );
+        	    $rgBao = new CRM_Dedupe_BAO_RuleGroup( );
         	    $rgBao->contact_type = $dao->contact_type;
         	    $rgBao->level = 'Fuzzy';
         	    $rgBao->is_default = 1;
@@ -657,7 +672,7 @@ LEFT JOIN  civicrm_email ce ON ( ce.contact_id=c.id AND ce.is_primary = 1 )
     {
         $contactDetails = array( );
         if ( empty( $componentIds ) || 
-             !in_array( $componentName, array( 'CiviContribute', 'CiviMember', 'CiviEvent' ) ) ) {
+             !in_array( $componentName, array( 'CiviContribute', 'CiviMember', 'CiviEvent', 'Activity' ) ) ) {
             return $contactDetails;
         }
         
@@ -673,6 +688,8 @@ LEFT JOIN  civicrm_email ce ON ( ce.contact_id=c.id AND ce.is_primary = 1 )
             $compTable = 'civicrm_contribution';
         } elseif ( $componentName == 'CiviMember' ) {
             $compTable = 'civicrm_membership';
+        } elseif ( $componentName == 'Activity' ) {
+            $compTable = 'civicrm_activity';
         } else {
             $compTable = 'civicrm_participant';
         }
@@ -683,7 +700,11 @@ LEFT JOIN  civicrm_email ce ON ( ce.contact_id=c.id AND ce.is_primary = 1 )
             switch ( $property ) {
             case 'sort_name' :
                 $select[] = "$property as $property";
-                $from[$value] = "INNER JOIN civicrm_contact contact ON ( contact.id = $compTable.contact_id )"; 
+                if ( $componentName == 'Activity' )  { 
+                    $from[$value] ="INNER JOIN civicrm_contact contact ON ( contact.id = $compTable.source_contact_id )";  
+                } else {
+                    $from[$value] = "INNER JOIN civicrm_contact contact ON ( contact.id = $compTable.contact_id )"; 
+                }
                 break;
                 
             case 'email' :

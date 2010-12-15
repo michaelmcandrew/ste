@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -65,7 +65,7 @@ class CRM_Core_Payment_Google extends CRM_Core_Payment {
      * @public 
      */ 
     function checkConfig( ) {
-        $config =& CRM_Core_Config::singleton( );
+        $config = CRM_Core_Config::singleton( );
 
         $error = array( );
 
@@ -159,7 +159,7 @@ class CRM_Core_Payment_Google extends CRM_Core_Payment {
         require_once 'HTTP/Request.php';
         $params = array( 'method' => HTTP_REQUEST_METHOD_POST,
                          'allowRedirects' => false );
-        $request =& new HTTP_Request( $url, $params );
+        $request = new HTTP_Request( $url, $params );
         foreach ( $googleParams as $key => $value ) {
             $request->addPostData($key, $value);
         }

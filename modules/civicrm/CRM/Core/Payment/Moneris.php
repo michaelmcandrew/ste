@@ -2,7 +2,7 @@
  
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -57,7 +57,7 @@ class CRM_Core_Payment_Moneris extends CRM_Core_Payment {
             CRM_Core_Error::fatal( ts( 'Please download and put the Moneris mpgClasses.php file in packages/Services directory to enable Moneris Support.' ) );
         }
 
-        $config =& CRM_Core_Config::singleton( ); // get merchant data from config
+        $config = CRM_Core_Config::singleton( ); // get merchant data from config
         $this->_profile['mode']     = $mode; // live or test
         $this->_profile['storeid']  = $this->_paymentProcessor['signature'];
         $this->_profile['apitoken'] = $this->_paymentProcessor['password' ];

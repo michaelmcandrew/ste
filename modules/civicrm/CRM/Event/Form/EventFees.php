@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -96,8 +96,8 @@ class CRM_Event_Form_EventFees
                     $form->assign( 'discount', $discounts[$defaults[$form->_pId]['discount_id']] );
                 }
                 
-                $form->assign( 'fee_amount', $defaults[$form->_pId]['fee_amount'] );
-                $form->assign( 'fee_level', $defaults[$form->_pId]['fee_level'] );
+                $form->assign( 'fee_amount', CRM_Utils_Array::value( 'fee_amount', $defaults[$form->_pId] ) );
+                $form->assign( 'fee_level', CRM_Utils_Array::value( 'fee_level', $defaults[$form->_pId] ) );
             }
             $defaults[$form->_pId]['send_receipt'] = 0;
         } else {
@@ -145,6 +145,13 @@ class CRM_Event_Form_EventFees
                 if ( ! empty( $form->_defaults[$name] ) ) {
                     $defaults[$form->_pId]["billing_" . $name] = $form->_defaults[$name];
                 }
+            }
+            
+            require_once 'CRM/Core/Config.php';
+            $config = CRM_Core_Config::singleton( );
+            // set default country from config if no country set
+            if ( !CRM_Utils_Array::value("billing_country_id-{$form->_bltID}", $defaults[$form->_pId] ) ) { 
+                $defaults[$form->_pId]["billing_country_id-{$form->_bltID}"] = $config->defaultContactCountry;
             }
         }
 
@@ -291,7 +298,7 @@ class CRM_Event_Form_EventFees
         // CRM-4395 
         if ( $contriId = $form->get( 'onlinePendingContributionId' ) ) {
             require_once 'CRM/Contribute/DAO/Contribution.php';
-            $contribution =& new CRM_Contribute_DAO_Contribution( );
+            $contribution = new CRM_Contribute_DAO_Contribution( );
             $contribution->id = $contriId;
             $contribution->find( true );
             foreach( array('contribution_type_id', 'payment_instrument_id','contribution_status_id', 'receive_date', 'total_amount' ) as $f ) {
@@ -520,6 +527,7 @@ SELECT  id, label, name, option_group_id
                           'send_receipt', 
                           ts('Send Confirmation?'), null, 
                           array('onclick' =>"return showHideByValue('send_receipt','','notice','table-row','radio',false);") );
+
         $form->add('textarea', 'receipt_text', ts('Confirmation Message') );
         
         // Retrieve the name and email of the contact - form will be the TO for receipt email ( only if context is not standalone)        

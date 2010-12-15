@@ -1,7 +1,7 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -37,7 +37,7 @@ class CRM_ParticipantProcessor
 {
     function __construct( ) 
     {
-        $config =& CRM_Core_Config::singleton();
+        $config = CRM_Core_Config::singleton();
         
         //this does not return on failure
         require_once 'CRM/Utils/System.php';
@@ -45,7 +45,15 @@ class CRM_ParticipantProcessor
         
         CRM_Utils_System::authenticateScript( true );
         $config->cleanURL = 1;
-    }
+
+        //log the execution time of script
+        CRM_Core_Error::debug_log_message( 'ParticipantProcessor.php' );
+ 
+	//load bootstrap to call hooks
+	require_once 'CRM/Utils/System.php';
+	CRM_Utils_System::loadBootStrap(  );
+
+   }
     
     public function updateParticipantStatus( )
     {
@@ -226,7 +234,7 @@ LEFT JOIN  civicrm_event event ON ( event.id = participant.event_id )
     }
 }
 
-$obj =& new CRM_ParticipantProcessor( );
+$obj = new CRM_ParticipantProcessor( );
 echo "Updating..";
 $obj->updateParticipantStatus( );
 echo "<br />Participant records updated. (Done)";

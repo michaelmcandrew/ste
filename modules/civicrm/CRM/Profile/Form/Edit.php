@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -79,7 +79,7 @@ class CRM_Profile_Form_Edit extends CRM_Profile_Form
             $this->_mode = CRM_Profile_Form::MODE_EDIT;
             
             // make sure we have right permission to edit this user
-            $session =& CRM_Core_Session::singleton();
+            $session = CRM_Core_Session::singleton();
             $userID = $session->get( 'userID' );
             $id = CRM_Utils_Request::retrieve( 'id', 'Positive', $this, false, $userID );
             
@@ -87,7 +87,7 @@ class CRM_Profile_Form_Edit extends CRM_Profile_Form
             if ( $id != $userID ) {
                 // do not allow edit for anon users in joomla frontend, CRM-4668, unless u have checksum CRM-5228
                 require_once 'CRM/Contact/BAO/Contact/Permission.php';
-                $config =& CRM_Core_Config::singleton( );
+                $config = CRM_Core_Config::singleton( );
                 if ( $config->userFrameworkFrontend ) {
                     CRM_Contact_BAO_Contact_Permission::validateOnlyChecksum( $id, $this );
                 } else {
@@ -131,7 +131,7 @@ SELECT module
         // add the hidden field to redirect the postProcess from
         require_once 'CRM/UF/Form/Group.php';
         require_once 'CRM/Core/DAO/UFGroup.php';
-        $ufGroup =& new CRM_Core_DAO_UFGroup( );
+        $ufGroup = new CRM_Core_DAO_UFGroup( );
         
         $ufGroup->id = $this->_gid;
         if ( ! $ufGroup->find(true) ) {
@@ -186,7 +186,7 @@ SELECT module
             }
             
             // replace the session stack in case user cancels (and we dont go into postProcess)
-            $session =& CRM_Core_Session::singleton(); 
+            $session = CRM_Core_Session::singleton(); 
             $session->replaceUserContext( $this->_postURL ); 
         }
 
@@ -235,12 +235,12 @@ SELECT module
                                   'newContactSuccess' => true );
                     
             echo json_encode( $returnArray );
-            exit();
+            CRM_Utils_System::civiExit( );
         }
 
         CRM_Core_Session::setStatus(ts('Thank you. Your information has been saved.'));
 
-        $session =& CRM_Core_Session::singleton( );
+        $session = CRM_Core_Session::singleton( );
         // only replace user context if we do not have a postURL
         if ( ! $this->_postURL  ) {
             $url = CRM_Utils_System::url( 'civicrm/profile/view',

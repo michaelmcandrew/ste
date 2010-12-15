@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -47,17 +47,17 @@ class CRM_Contact_Form_Search_Builder extends CRM_Contact_Form_Search
      * number of columns in where
      *
      * @var int
-     * @access protected
+     * @access public
      */
-    protected $_columnCount;
+    public $_columnCount;
 
     /**
      * number of blocks to be shown
      *
      * @var int
-     * @access protected
+     * @access public
      */
-    protected $_blockCount;
+    public $_blockCount;
     
     /**
      * Function to actually build the form
@@ -66,8 +66,9 @@ class CRM_Contact_Form_Search_Builder extends CRM_Contact_Form_Search
      * @access public
      */
     public function preProcess() {
+        $this->set('context', 'builder' );
         parent::preProcess( );
-
+        
         //get the block count
         $this->_blockCount = $this->get('blockCount');
         if ( !$this->_blockCount ) {
@@ -96,9 +97,9 @@ class CRM_Contact_Form_Search_Builder extends CRM_Contact_Form_Search
     public function buildQuickForm( ) {
         //get the saved search mapping id
         $mappingId = null;
-            if ( $this->_ssID ) {
-                $mappingId = CRM_Core_DAO::getFieldValue( 'CRM_Contact_DAO_SavedSearch', $this->_ssID, 'mapping_id' );
-            }
+        if ( $this->_ssID ) {
+            $mappingId = CRM_Core_DAO::getFieldValue( 'CRM_Contact_DAO_SavedSearch', $this->_ssID, 'mapping_id' );
+        }
 
         CRM_Core_BAO_Mapping::buildMappingForm($this, 'Search Builder', $mappingId, $this->_columnCount, $this->_blockCount);
         
@@ -125,7 +126,7 @@ class CRM_Contact_Form_Search_Builder extends CRM_Contact_Form_Search
      * @static
      * @access public
      */
-    static function formRule( &$values ) {
+    static function formRule( $values ) {
         //CRM_Core_Error::debug('s', $values);
         if ( CRM_Utils_Array::value('addMore',$values) || CRM_Utils_Array::value('addBlock',$values) ) {
             return true;
@@ -136,7 +137,9 @@ class CRM_Contact_Form_Search_Builder extends CRM_Contact_Form_Search
         
         require_once 'CRM/Core/Component.php';
         $compomentFields =& CRM_Core_Component::getQueryFields( );
-        
+        require_once 'CRM/Activity/BAO/Activity.php';
+        $activityFields = CRM_Activity_BAO_Activity::exportableFields( );
+        $compomentFields = array_merge( $compomentFields, $activityFields );
         $fields = array_merge( $fields, $compomentFields );
 
         $fld = array ();
@@ -282,13 +285,11 @@ class CRM_Contact_Form_Search_Builder extends CRM_Contact_Form_Search
      * @access public
      */
     public function postProcess( ) {
-        $session =& CRM_Core_Session::singleton();
-        $session->set('isAdvanced', '2');
-        $session->set('isSearchBuilder', '1');
+        $this->set('isAdvanced', '2');
+        $this->set('isSearchBuilder', '1');
         $this->set('showSearchForm', false);
 
         $params = $this->controller->exportValues( $this->_name );
-
         if (!empty($params)) {
             if ( CRM_Utils_Array::value('addBlock',$params) )  { 
                 $this->_blockCount = $this->_blockCount + 1;

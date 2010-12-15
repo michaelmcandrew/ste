@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -61,7 +61,10 @@ class CRM_Contact_Task {
         LABEL_CONTACTS        =    16,
         BATCH_UPDATE          =    17,
         ADD_EVENT             =    18,
-        PRINT_FOR_CONTACTS    =    19;
+        PRINT_FOR_CONTACTS    =    19,
+        EMAIL_UNHOLD          =    22,
+        RESTORE               =    23,
+        DELETE_PERMANENTLY    =    24;
 
 
 
@@ -132,9 +135,19 @@ class CRM_Contact_Task {
                                   19    => array( 'title'  => ts( 'Print PDF Letter for Contacts' ),
                                                   'class'  => 'CRM_Contact_Form_Task_PDF',
                                                   'result' => true ),
-                                  21    => array( 'title'  => ts( 'Merge Contacts' ),
-                                                  'class'  => 'CRM_Contact_Form_Task_Merge',
+                                  22    => array( 'title'  => ts('Unhold Emails'),
+                                                  'class'  => 'CRM_Contact_Form_Task_Unhold',
                                                   'result' => true ),
+                                  self::RESTORE => array(
+                                      'title'  => ts('Restore Contacts'),
+                                      'class'  => 'CRM_Contact_Form_Task_Delete',
+                                      'result' => false,
+                                  ),
+                                  self::DELETE_PERMANENTLY => array(
+                                      'title'  => ts('Delete Permanently'),
+                                      'class'  => 'CRM_Contact_Form_Task_Delete',
+                                      'result' => false,
+                                  ),
                                   );
             if( CRM_Contact_BAO_ContactType::isActive( 'Household' ) ) {
                 $label = CRM_Contact_BAO_ContactType::getLabel( 'Household' );
@@ -152,13 +165,19 @@ class CRM_Contact_Task {
                                            'result' => true
                                            );
             }
+            if ( CRM_Core_Permission::check( 'merge duplicate contacts' ) ) {
+                self::$_tasks[21] = array( 'title'  => ts( 'Merge Contacts' ),
+                                           'class'  => 'CRM_Contact_Form_Task_Merge',
+                                           'result' => true 
+                                           );
+            }
             //CRM-4418, check for delete 
             if ( !CRM_Core_Permission::check( 'delete contacts' ) ) {
                 unset( self::$_tasks[8] );
             }
-
+            
             //show map action only if map provider and key is set
-            $config =& CRM_Core_Config::singleton( );
+            $config = CRM_Core_Config::singleton( );
 
             if ( $config->mapProvider && $config->mapAPIKey ) {
                 self::$_tasks[12] = array( 'title'  => ts( 'Map Contacts'),
@@ -215,7 +234,7 @@ class CRM_Contact_Task {
         unset( $titles[14] );
         unset( $titles[15] );
 
-        $config =& CRM_Core_Config::singleton( );
+        $config = CRM_Core_Config::singleton( );
 
         require_once 'CRM/Utils/Mail.php';
         if ( !CRM_Utils_Mail::validOutBoundMail() ) { 
@@ -227,6 +246,11 @@ class CRM_Contact_Task {
             unset( $titles[7] );
         }
 
+        // CRM-6806
+        if (!CRM_Core_Permission::check('access deleted contacts')) {
+            unset($titles[self::DELETE_PERMANENTLY]);
+        }
+
         return $titles;
     }
 
@@ -235,13 +259,22 @@ class CRM_Contact_Task {
      * of the user
      *
      * @param int $permission
+     * @param bool $deletedContacts  are these tasks for operating on deleted contacts?
      *
      * @return array set of tasks that are valid for the user
      * @access public
      */
-    static function &permissionedTaskTitles( $permission ) {
+    static function &permissionedTaskTitles($permission, $deletedContacts = false)
+    {
         $tasks = array( );
-        if ( $permission == CRM_Core_Permission::EDIT ) {
+        if ($deletedContacts) {
+            if (CRM_Core_Permission::check('access deleted contacts')) {
+                $tasks = array(
+                    self::RESTORE            => self::$_tasks[self::RESTORE           ]['title'],
+                    self::DELETE_PERMANENTLY => self::$_tasks[self::DELETE_PERMANENTLY]['title'],
+                );
+            }
+        } elseif ($permission == CRM_Core_Permission::EDIT) {
             $tasks = self::taskTitles( );
         } else {
             $tasks = array( 

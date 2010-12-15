@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -292,7 +292,7 @@ class CRM_Utils_Date
         $fullMonths = self::getFullMonthNames();
 
         if ( ! $format ) {
-            $config =& CRM_Core_Config::singleton();
+            $config = CRM_Core_Config::singleton();
 
             if ($dateParts) {
                 if (array_intersect(array('h', 'H'), $dateParts)) {
@@ -621,11 +621,16 @@ class CRM_Utils_Date
         return true;
     }
 
+    static function currentDBDate( $timeStamp = null ) {
+        return $timeStamp ?
+            date( 'YmdHis', $timeStamp ) : date( 'YmdHis' );
+    }
+
     static function overdue( $date, $now = null ) 
     {
         $mysqlDate = self::isoToMysql( $date );
         if ( ! $now ) {
-            $now = date( 'YmdHis' );
+            $now = self::currentDBDate( );
         } else {
             $now = self::isoToMysql( $now );
         }
@@ -783,6 +788,10 @@ class CRM_Utils_Date
         case 'day':
             $date   =   mktime ($hour, $minute, $second, $month, $day+$interval, $year);
             break;
+         
+        case 'second':
+            $date   =   mktime ($hour, $minute, $second+$interval, $month, $day, $year);   
+            break;
         }
               
         $scheduleDate = explode ( "-", date("n-j-Y-H-i-s", $date ) );
@@ -888,11 +897,22 @@ class CRM_Utils_Date
                 $from['Y'] = $now['year'];
                 unset($to);
                 break;
+                
+            case 'ending':
+                $to['d'] = $now['mday'];
+                $to['M'] = $now['mon'];
+                $to['Y'] = $now['year'];
+                $to['H'] = 23;
+                $to['i'] = $to['s'] = 59;
+                $from = self::intervalAdd( 'year', -1, $to );
+                $from = self::intervalAdd( 'second', 1, $from );
+                break;
+                
             }
             break;
             
         case 'fiscal_year':
-            $config =& CRM_Core_Config::singleton();
+            $config = CRM_Core_Config::singleton();
             $from['d'] = $config->fiscalYearStart['d'];
             $from['M'] = $config->fiscalYearStart['M'];
             $fYear     = self::calculateFiscalYear( $from['d'],$from['M'] );
@@ -1016,6 +1036,16 @@ class CRM_Utils_Date
                 $from['Y'] = $now['year'];
                 unset($to);
                 break;
+
+            case 'ending':
+                $to['d'] = $now['mday'];
+                $to['M'] = $now['mon'];
+                $to['Y'] = $now['year'];
+                $to['H'] = 23;
+                $to['i'] = $to['s'] = 59;
+                $from = self::intervalAdd( 'month', -3, $to );
+                $from = self::intervalAdd( 'second', 1, $from );
+                break;
             }
             break;
             
@@ -1095,6 +1125,16 @@ class CRM_Utils_Date
                 $from['Y'] = $now['year'];
                 unset($to);
                 break;
+
+            case 'ending':
+                $to['d'] = $now['mday'];
+                $to['M'] = $now['mon'];
+                $to['Y'] = $now['year'];
+                $to['H'] = 23;
+                $to['i'] = $to['s'] = 59;
+                $from = self::intervalAdd( 'month', -1, $to );
+                $from = self::intervalAdd( 'second', 1, $from );
+                break;
             }
             break;
             
@@ -1146,6 +1186,16 @@ class CRM_Utils_Date
                 $from['Y'] = $now['year'];
                 $from = self::intervalAdd( 'day', -1*($now['wday']), $from );
                 unset($to);
+                break;
+
+            case 'ending':
+                $to['d'] = $now['mday'];
+                $to['M'] = $now['mon'];
+                $to['Y'] = $now['year'];
+                $to['H'] = 23;
+                $to['i'] = $to['s'] = 59;
+                $from = self::intervalAdd( 'day', -7, $to );
+                $from = self::intervalAdd( 'second', 1, $from );
                 break;
             }
             break;
@@ -1279,7 +1329,7 @@ class CRM_Utils_Date
             $mysqlDate = date( 'Y-m-d G:i:s' ) ;
         }
 
-        $config =& CRM_Core_Config::singleton();
+        $config = CRM_Core_Config::singleton();
         if ( $formatType ) {
             // get actual format
             $params = array( 'name' => $formatType );

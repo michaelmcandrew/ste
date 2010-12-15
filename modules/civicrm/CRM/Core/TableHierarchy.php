@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -67,7 +67,8 @@ class CRM_Core_TableHierarchy {
                          'civicrm_case_contact'         => '29',
                          'civicrm_case'                 => '30',
                          'case_relationship'            => '31',
-                         'case_relation_type'           => '32'
+                         'case_relation_type'           => '32',
+                         'civicrm_activity'             => '33'
                          );
 
     static function &info( ) {

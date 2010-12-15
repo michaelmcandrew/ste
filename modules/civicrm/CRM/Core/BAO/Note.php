@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -98,9 +98,11 @@ class CRM_Core_BAO_Note extends CRM_Core_DAO_Note
             return CRM_Core_DAO::$_nullObject;
         }
 
-        $note =& new CRM_Core_BAO_Note( );
+        $note = new CRM_Core_BAO_Note( );
         
-        $params['modified_date'] = date("Ymd");
+        if ( !isset($params['modified_date']) ) {
+            $params['modified_date'] = date("Ymd");
+        }
         
         $note->copyValues( $params );
         if ( ! $params['contact_id'] ) {
@@ -175,7 +177,7 @@ class CRM_Core_BAO_Note extends CRM_Core_DAO_Note
         if ( empty( $params ) ) {
             return null;
         }
-        $note =& new CRM_Core_BAO_Note( );
+        $note = new CRM_Core_BAO_Note( );
         $note->entity_id    = $params['contact_id'] ;        
         $note->entity_table = 'civicrm_contact';
 
@@ -217,7 +219,7 @@ class CRM_Core_BAO_Note extends CRM_Core_DAO_Note
     static function del( $id ) 
     {
         $return   = null;
-        $note     =& new CRM_Core_DAO_Note( );
+        $note     = new CRM_Core_DAO_Note( );
         $note->id = $id;
         $return   = $note->delete();
         CRM_Core_Session::setStatus( ts('Selected Note has been Deleted Successfully.') );
@@ -246,13 +248,13 @@ class CRM_Core_BAO_Note extends CRM_Core_DAO_Note
     public static function deleteContact( $id )
     {
         // need to delete for both entity_id
-        $dao =& new CRM_Core_DAO_Note();
+        $dao = new CRM_Core_DAO_Note();
         $dao->entity_table = 'civicrm_contact';
         $dao->entity_id   = $id;
         $dao->delete();
 
         // and the creator contact id
-        $dao =& new CRM_Core_DAO_Note();
+        $dao = new CRM_Core_DAO_Note();
         $dao->contact_id = $id;        
         $dao->delete();
     }

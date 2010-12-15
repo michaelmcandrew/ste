@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -35,6 +35,7 @@
  */
 
 require_once 'CRM/Contact/Page/View.php';
+require_once 'CRM/Contact/BAO/Contact.php';
 
 /**
  * Main page for viewing contact.
@@ -53,7 +54,12 @@ class CRM_Contact_Page_View_Summary extends CRM_Contact_Page_View {
     function preProcess( ) 
     {
         parent::preProcess( );
-
+		
+		// actions buttom contextMenu
+		$menuItems = CRM_Contact_BAO_Contact::contextMenu( );
+		
+		$this->assign('actionsMenuList',$menuItems);
+		
         //retrieve inline custom data
         $entityType    = $this->get('contactType');
         $entitySubType = $this->get('contactSubtype');
@@ -142,7 +148,10 @@ class CRM_Contact_Page_View_Summary extends CRM_Contact_Page_View {
                                     'im'      => array( 
                                                         'type' => 'IMProvider', 
                                                         'id'   => 'provider'  ),
-                                    'address' => array( 'skip' => true ),
+                                    'website' => array( 
+                                                        'type' => 'websiteType', 
+                                                        'id'   => 'website_type' ),                                                        
+                                    'address' => array( 'skip' => true, 'customData' => 1 ),
 									'email'   => array( 'skip' => true ),
 									'openid'  => array( 'skip' => true )
                             ); 
@@ -155,6 +164,18 @@ class CRM_Contact_Page_View_Summary extends CRM_Contact_Page_View {
                         eval( '$pseudoConst = CRM_Core_PseudoConstant::'.$value['type'].'( );' );
                         CRM_Utils_Array::lookupValue( $val, $value['id'], $pseudoConst, false );
                     }
+                }
+                if ( isset($value['customData']) ) {
+                    foreach( $defaults[$key] as $blockId => $blockVal ) {
+                        $groupTree = CRM_Core_BAO_CustomGroup::getTree( ucfirst($key),
+                                                                        $this,
+                                                                        $blockVal['id'] );
+                        // we setting the prefix to dnc_ below so that we don't overwrite smarty's grouptree var. 
+                        $defaults[$key][$blockId]['custom'] = 
+                            CRM_Core_BAO_CustomGroup::buildCustomDataView( $this, $groupTree, false, null, "dnc_" );
+                    }
+                    // reset template variable since that won't be of any use, and could be misleading
+                    $this->assign( "dnc_viewCustomData", null );
                 }
             }
         }
@@ -272,7 +293,7 @@ class CRM_Contact_Page_View_Summary extends CRM_Contact_Page_View {
                        'log'           => ts('Change Log')    ,
                        );
 
-        $config =& CRM_Core_Config::singleton( );
+        $config = CRM_Core_Config::singleton( );
         if ( isset( $config->sunlight ) &&
              $config->sunlight ) {
             $title = ts('Elected Officials');
@@ -356,8 +377,8 @@ class CRM_Contact_Page_View_Summary extends CRM_Contact_Page_View {
         if ( $this->_contactId ) {
             $csType = $this->get('contactSubtype');
             if ( $csType ) {
-                $templateFile = "CRM/Contact/Page/View/{$csType}.tpl";
-                $template     =& CRM_Core_Page::getTemplate( );
+                $templateFile = "CRM/Contact/Page/View/SubType/{$csType}.tpl";
+                $template     = CRM_Core_Page::getTemplate( );
                 if ( $template->template_exists( $templateFile ) ) {
                     return $templateFile;
                 }

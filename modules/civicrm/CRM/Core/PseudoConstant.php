@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -96,6 +96,13 @@ class CRM_Core_PseudoConstant
      */
     private static $imProvider;
 
+    /**
+     * website protocols
+     * @var array
+     * @static
+     */
+    private static $websiteType;
+    
     /**
      * im protocols
      * @var array
@@ -427,7 +434,10 @@ class CRM_Core_PseudoConstant
      *
      * @return array - array reference of all activty types.
      */
-    public static function &activityType( $all = true, $includeCaseActivities = false, $reset = false, $returnColumn = 'label' )
+    public static function &activityType( $all = true, 
+                                          $includeCaseActivities = false, 
+                                          $reset = false,
+                                          $returnColumn = 'label' )
     {
         $index        = (int) $all . '_' . $returnColumn . '_' . (int) $includeCaseActivities;
         
@@ -579,6 +589,31 @@ class CRM_Core_PseudoConstant
         return self::$imProvider;
     }
 
+
+    /**
+     * Get all the website types from database.
+     *
+     * The static array websiteType is returned, and if it's
+     * called the first time, the <b>Website DAO</b> is used 
+     * to get all the Website Types.
+     *
+     * Note: any database errors will be trapped by the DAO.
+     *
+     * @access public
+     * @static
+     *
+     * @return array - array reference of all Website types.
+     *
+     */
+    public static function &websiteType( ) 
+    {
+        if ( ! self::$websiteType ) {
+            require_once 'CRM/Core/OptionGroup.php';
+            self::$websiteType = CRM_Core_OptionGroup::values('website_type');
+        }        
+        return self::$websiteType;
+    }
+
     /**
      * Get the all From Email Address from database.
      *
@@ -645,7 +680,7 @@ class CRM_Core_PseudoConstant
     {
         if ( ( $id && !CRM_Utils_Array::value( $id, self::$stateProvince ) ) || !self::$stateProvince || !$id ) {
             $whereClause = false;
-            $config =& CRM_Core_Config::singleton();
+            $config = CRM_Core_Config::singleton();
             if ( $limit ) {
                 // limit the state/province list to the countries specified in CIVICRM_PROVINCE_LIMIT
                 $countryIsoCodes =& self::countryIsoCode();
@@ -666,7 +701,7 @@ class CRM_Core_PseudoConstant
             global $tsLocale;
             if ($tsLocale != '' and $tsLocale != 'en_US') {
                 $i18n =& CRM_Core_I18n::singleton();
-                $i18n->localizeArray(self::$stateProvince);
+                $i18n->localizeArray(self::$stateProvince, array('context' => 'province'));
                 asort(self::$stateProvince);
             }
         }
@@ -708,7 +743,7 @@ WHERE  id = %1";
             $whereClause = false;
 
             if ( $limit ) {
-                $config =& CRM_Core_Config::singleton();
+                $config = CRM_Core_Config::singleton();
                 $countryIsoCodes =& self::countryIsoCode();
                 $limitCodes = $config->provinceLimit( );
                 $limitIds = array();
@@ -758,7 +793,7 @@ WHERE  id = %1";
     {
         if ( ( $id && !CRM_Utils_Array::value( $id, self::$country ) ) || !self::$country || !$id  ) {
 
-            $config =& CRM_Core_Config::singleton();
+            $config = CRM_Core_Config::singleton();
             $limitCodes = array( );
             
             if ( $applyLimit ) {
@@ -795,7 +830,7 @@ WHERE  id = %1";
             global $tsLocale;
             if ($tsLocale != '' and $tsLocale != 'en_US') {
                 $i18n =& CRM_Core_I18n::singleton();
-                $i18n->localizeArray(self::$country);
+                $i18n->localizeArray(self::$country, array('context' => 'country'));
                 asort(self::$country);
             }
         }
@@ -1144,7 +1179,7 @@ WHERE  id = %1";
     {
         if (!self::$county) {
 
-            $config =& CRM_Core_Config::singleton();
+            $config = CRM_Core_Config::singleton();
             // order by id so users who populate civicrm_county can have more control over sort by the order they load the counties
             self::populate( self::$county, 'CRM_Core_DAO_County', true, 'name', null, null, 'id');
         }
@@ -1344,11 +1379,11 @@ WHERE  id = %1";
      * @return array - array reference of all Visibility levels.
      *
      */
-    public static function &visibility( )
+    public static function &visibility( $column = 'label' )
     {
         if ( ! self::$visibility ) {
             require_once 'CRM/Core/OptionGroup.php';
-            self::$visibility = CRM_Core_OptionGroup::values('visibility');
+            self::$visibility = CRM_Core_OptionGroup::values( 'visibility',false,false, false, null, $column );
         }
         return self::$visibility;
     }
@@ -1433,6 +1468,26 @@ ORDER BY name";
 																	$filterCondition, $columnName );
         }
         return self::$greeting[$index];
+    }
+
+    /**
+     * Get all the Languages from database.
+     *
+     * @access public
+     * @static
+     *
+     * @return array self::languages - array reference of all languages
+     *
+     */
+    public static function &languages( ) 
+    {
+        static $_languages = null;
+
+        if ( ! $_languages ) {
+            require_once 'CRM/Core/OptionGroup.php';
+            $_languages = CRM_Core_OptionGroup::values('languages');
+        }        
+        return $_languages;
     }
 
 }

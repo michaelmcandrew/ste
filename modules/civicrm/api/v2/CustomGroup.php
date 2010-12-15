@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -33,7 +33,7 @@
  * @subpackage API_CustomGroup
  *
  * @copyright CiviCRM LLC (c) 2004-2010
- * @version $Id: CustomGroup.php 26284 2010-02-17 17:58:00Z shot $
+ * @version $Id: CustomGroup.php 28934 2010-07-28 18:44:12Z mover $
  */
 
 /**
@@ -142,7 +142,7 @@ function civicrm_custom_group_delete($params)
     }
     // convert params array into Object
     require_once 'CRM/Core/DAO/CustomGroup.php';
-    $values =& new CRM_Core_DAO_CustomGroup( );
+    $values = new CRM_Core_DAO_CustomGroup( );
     $values->id = $params['id'];
     $values->find(true);
     
@@ -234,7 +234,7 @@ function civicrm_custom_field_delete( $params )
     }
 
     require_once 'CRM/Core/DAO/CustomField.php';
-    $field =& new CRM_Core_DAO_CustomField( );
+    $field = new CRM_Core_DAO_CustomField( );
     $field->id = $params['result']['customFieldId'];
     $field->find(true);
     

@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -154,7 +154,7 @@ class CRM_Event_Form_Registration_AdditionalParticipant extends CRM_Event_Form_R
      */ 
     public function buildQuickForm( ) 
     {  
-        $config =& CRM_Core_Config::singleton( );
+        $config = CRM_Core_Config::singleton( );
         $button = substr( $this->controller->getButtonName(), -4 );
         
         $this->add('hidden','scriptFee',null);
@@ -187,6 +187,7 @@ class CRM_Event_Form_Registration_AdditionalParticipant extends CRM_Event_Form_R
                     ts( 'Email Address' ),
                     array( 'size' => 30, 'maxlength' => 60 ),
                     $required );
+        $this->addRule( "email-{$this->_bltID}", ts('Email is not valid.'), 'email' );
         //add buttons
         $js = null;
         if ( $this->isLastParticipant( true ) && !CRM_Utils_Array::value('is_monetary', $this->_values['event']) ) {
@@ -304,7 +305,7 @@ class CRM_Event_Form_Registration_AdditionalParticipant extends CRM_Event_Form_R
      * @access public 
      * @static 
      */ 
-    static function formRule(&$fields, &$files, &$self) 
+    static function formRule( $fields, $files, $self) 
     {
         $errors = array( );
         //get the button name.
@@ -388,7 +389,11 @@ class CRM_Event_Form_Registration_AdditionalParticipant extends CRM_Event_Form_R
                 $this->_lineItem[$addParticipantNum] = 'skip';
             }
         } else {
-            $params = $this->controller->exportValues( $this->_name );  
+            $params = $this->controller->exportValues( $this->_name );
+            
+            $config = CRM_Core_Config::singleton( );
+            $params['currencyID'] = $config->defaultCurrency;            
+            
             if ( $this->_values['event']['is_monetary'] ) {
 
                 //added for discount

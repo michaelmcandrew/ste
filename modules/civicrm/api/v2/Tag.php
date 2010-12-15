@@ -1,7 +1,7 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -32,7 +32,7 @@
  * @subpackage API_Tag
  * 
  * @copyright CiviCRM LLC (c) 2004-2010
- * @version $Id: Tag.php 26284 2010-02-17 17:58:00Z shot $
+ * @version $Id: Tag.php 28934 2010-07-28 18:44:12Z mover $
  */
 
 /**
@@ -62,10 +62,16 @@ function civicrm_tag_create( &$params )
         return civicrm_create_error( ts( 'No input parameters present' ) );
     }
     
+    if ( !array_key_exists ('used_for', $params)) {
+      $params ['used_for'] = "civicrm_contact";
+    }
     $error = _civicrm_check_required_fields($params, 'CRM_Core_DAO_Tag');
     
     if ( $error['is_error'] ) {
         return civicrm_create_error( $error['error_message'] );
+    }
+    if( ! CRM_Utils_Array::value( 'name',$params )  ) {
+        return civicrm_create_error( 'Missing required parameter' );
     }
     
     require_once 'CRM/Core/BAO/Tag.php';
@@ -126,7 +132,7 @@ function civicrm_tag_get($params)
 {
     _civicrm_initialize( );
     require_once 'CRM/Core/BAO/Tag.php';
-    $tagBAO =& new CRM_Core_BAO_Tag();
+    $tagBAO = new CRM_Core_BAO_Tag();
     
     if ( ! is_array($params) ) {
         return civicrm_create_error('Params is not an array.');
@@ -135,7 +141,8 @@ function civicrm_tag_get($params)
         return civicrm_create_error('Required parameters missing.');
     }
     
-    $properties = array('id', 'name', 'description', 'parent_id');
+    $properties = array('id', 'name', 'description', 'parent_id','is_selectable','is_hidden',
+                        'is_reserved','used_for');
     foreach ( $properties as $name) {
         if (array_key_exists($name, $params)) {
             $tagBAO->$name = $params[$name];

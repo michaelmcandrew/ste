@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -76,7 +76,7 @@ class CRM_Contact_Form_Edit_Household
      * @static
      * @public
      */
-    static function formRule( &$fields ,&$files, $contactID = null ) 
+    static function formRule( $fields, $files, $contactID = null ) 
     {
         $errors = array( );
         

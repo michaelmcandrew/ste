@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -76,7 +76,7 @@ class CiviMailProcessor {
             throw new Exception("Could not find entry named $name in civicrm_mail_settings");
         }
 
-        $config =& CRM_Core_Config::singleton();
+        $config = CRM_Core_Config::singleton();
         $verpSeperator = preg_quote( $config->verpSeparator );
         $twoDigitStringMin = $verpSeperator . '(\d+)' . $verpSeperator . '(\d+)';
         $twoDigitString    = $twoDigitStringMin . $verpSeperator;
@@ -121,6 +121,11 @@ class CiviMailProcessor {
                 // CRM-5471: if $matches is empty, it still might be a soft bounce sent
                 // to another address, so scan the body for ‘Return-Path: …bounce-pattern…’
                 if (!$matches and preg_match($rpRegex, $mail->generateBody(), $matches)) {
+                    list($match, $action, $job, $queue, $hash) = $matches;
+                }
+
+                // if all else fails, check Delivered-To for possible pattern
+                if (!$matches and preg_match($regex, $mail->getHeader('Delivered-To'), $matches)) {
                     list($match, $action, $job, $queue, $hash) = $matches;
                 }
 
@@ -200,9 +205,16 @@ class CiviMailProcessor {
 session_start();
 require_once '../civicrm.config.php';
 require_once 'CRM/Core/Config.php';
-$config =& CRM_Core_Config::singleton();
+$config = CRM_Core_Config::singleton();
 
 CRM_Utils_System::authenticateScript(true);
+
+//log the execution of script
+CRM_Core_Error::debug_log_message( 'CiviMailProcessor.php' );
+
+//load bootstrap to call hooks
+require_once 'CRM/Utils/System.php';
+CRM_Utils_System::loadBootStrap(  );
 
 require_once 'CRM/Core/Lock.php';
 $lock = new CRM_Core_Lock('CiviMailProcessor');

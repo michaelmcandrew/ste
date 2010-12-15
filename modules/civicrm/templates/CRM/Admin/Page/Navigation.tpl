@@ -1,6 +1,6 @@
 {*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -29,7 +29,8 @@
     <div id="help">
         {ts}Customize the CiviCRM navigation menu bar for your users here.{/ts} {help id="id-navigation"}
     </div>
-    <div class="spacer"></div>
+
+<div class="crm-block crm-content-block">
     <div id="new-menu-item">
         <a href="{crmURL p="civicrm/admin/menu" q="action=add&reset=1"}" class="button" style="margin-left: 6px;"><span>&raquo; {ts}New Menu Item{/ts}</span></a>&nbsp;&nbsp;&nbsp;&nbsp;
         <span id="reset-menu" class="success-status" style="display:none">
@@ -40,6 +41,7 @@
     <div class="spacer"></div>
     <div id="navigation-tree" class="navigation-tree" style="height:auto; border-collapse:separate;"></div>
     <div class="spacer"></div>
+</div>
     {literal}
     <script type="text/javascript">
     cj(function () {
@@ -47,7 +49,7 @@
             data  : {
                 type  : "json",
                 async : true, 
-                url : {/literal}"{crmURL p='civicrm/ajax/menu' h=0 }?key={crmKey name='civicrm/ajax/menu'}"{literal}
+                url : {/literal}"{crmURL p='civicrm/ajax/menu' h=0 }&key={crmKey name='civicrm/ajax/menu'}"{literal}
             },
             rules : {
                 droppable : [ "tree-drop" ],
@@ -90,7 +92,7 @@
             },                
             callback : {
                 onmove  : function( node, reference, type ) {
-                    var postURL = {/literal}"{crmURL p='civicrm/ajax/menutree' h=0 }?key={crmKey name='civicrm/ajax/menutree'}"{literal};
+                    var postURL = {/literal}"{crmURL p='civicrm/ajax/menutree' h=0 }&key={crmKey name='civicrm/ajax/menutree'}"{literal};
                     cj.get( postURL + '&type=move&id=' + node.id + '&ref_id=' + (reference === -1 ? 0 : reference.id) + '&move_type=' + type, 
                         function (data) {
             			    cj("#reset-menu").show( );
@@ -98,7 +100,7 @@
             		);                		                    
                 },
                 onrename : function( node ) {
-                    var postURL = {/literal}"{crmURL p='civicrm/ajax/menutree' h=0 }?key={crmKey name='civicrm/ajax/menutree'}"{literal};
+                    var postURL = {/literal}"{crmURL p='civicrm/ajax/menutree' h=0 }&key={crmKey name='civicrm/ajax/menutree'}"{literal};
                     cj.get( postURL + '&type=rename&id=' + node.id + '&data=' + cj( node ).children("a:visible").text(), 
                         function (data) {
             			    cj("#reset-menu").show( );
@@ -112,7 +114,7 @@
     				return confirm( deleteMsg );
     			},
     			ondelete : function ( node ) {
-                    var postURL = {/literal}"{crmURL p='civicrm/ajax/menutree' h=0 }?key={crmKey name='civicrm/ajax/menutree'}"{literal};
+                    var postURL = {/literal}"{crmURL p='civicrm/ajax/menutree' h=0 }&key={crmKey name='civicrm/ajax/menutree'}"{literal};
                     cj.get( postURL + '&type=delete&id=' + node.id, 
                         function (data) {
             			    cj("#reset-menu").show( );

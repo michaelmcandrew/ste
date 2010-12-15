@@ -1,6 +1,6 @@
 {*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -28,36 +28,36 @@
 {* @var $blockId Contains the current address block id, and assigned in the  CRM/Contact/Form/Location.php file *}
 
 {if $title and $className eq 'CRM_Contact_Form_Contact'}
-<h3 class="head"> 
-    <span class="ui-icon ui-icon-triangle-1-e"></span><a href="#">{$title}</a>
-</h3>
-
-<div id="addressBlock" class="ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom">
+<div class="crm-accordion-wrapper crm-address-accordion crm-accordion-closed">
+ <div class="crm-accordion-header">
+  <div class="icon crm-accordion-pointer"></div> 
+	{$title}
+ </div><!-- /.crm-accordion-header -->
+ <div class="crm-accordion-body" id="addressBlock">
 {/if}
 
-{if $blockId gt 1}<div class="spacer"></div>{/if}
-
- <div id="Address_Block_{$blockId}" {if $className eq 'CRM_Contact_Form_Contact'} class="boxBlock" {/if}>
-  <table class="form-layout-compressed">
+ <div id="Address_Block_{$blockId}" {if $className eq 'CRM_Contact_Form_Contact'} class="boxBlock crm-edit-address-block" {/if}>
+  {if $blockId gt 1}<fieldset><legend>Additional Address</legend>{/if}
+  <table class="form-layout-compressed crm-edit-address-form">
      <tr>
 	 {if $className eq 'CRM_Contact_Form_Contact'}
         <td id='Address-Primary-html' colspan="2">
-           {$form.address.$blockId.location_type_id.label}
-           {$form.address.$blockId.location_type_id.html}
-           {$form.address.$blockId.is_primary.html}
-           {$form.address.$blockId.is_billing.html}
+           <span class="crm-address-element location_type_id-address-element">{$form.address.$blockId.location_type_id.label}
+           {$form.address.$blockId.location_type_id.html}</span>
+           <span class="crm-address-element is_primary-address-element">{$form.address.$blockId.is_primary.html}</span>
+           <span class="crm-address-element is_billing-address-element">{$form.address.$blockId.is_billing.html}</span>
         </td>
 	 {/if}
         {if $blockId gt 1}
             <td>
-                <a href="#" title="{ts}Delete Address Block{/ts}" onClick="removeBlock( 'Address', '{$blockId}' ); return false;">{ts}delete{/ts}</a>
+                <a href="#" title="{ts}Delete Address Block{/ts}" onClick="removeBlock( 'Address', '{$blockId}' ); return false;">{ts}Delete this address{/ts}</a>
             </td>
         {/if}
      </tr>
      {if $form.use_household_address} 
      <tr>
         <td>
-            {$form.use_household_address.html}{$form.use_household_address.label}{help id="id-usehousehold"}<br />
+            {$form.use_household_address.html}{$form.use_household_address.label}{help id="id-usehousehold" file="CRM/Contact/Form/Contact.hlp"}<br />
             <div id="share_household" style="display:none">
                 {$form.shared_household.label}<br />
                 {$form.shared_household.html|crmReplace:class:huge}&nbsp;&nbsp;<span id="show_address"></span>
@@ -77,16 +77,21 @@
      </table>
 
      </td></tr>
-     {if $className eq 'CRM_Contact_Form_Contact'}
-     <tr id="addMoreAddress{$blockId}" >
-        <td><a href="#" onclick="buildAdditionalBlocks( 'Address', '{$className}' );return false;">{ts}add address{/ts}</a></td>
-     </tr>
-     {/if}
   </table>
- </div>
+  <div class="crm-edit-address-custom_data"> 
+  {include file="CRM/Contact/Form/Edit/Address/CustomData.tpl"}
+  </div> 
+
+  {if $className eq 'CRM_Contact_Form_Contact'}
+      <div id="addMoreAddress{$blockId}" class="crm-add-address-wrapper">
+          <a href="#" class="button" onclick="buildAdditionalBlocks( 'Address', '{$className}' );return false;"><span><div class="icon add-icon"></div>{ts}Another Address{/ts}</span></a>
+      </div>
+  {/if}
 
 {if $title and $className eq 'CRM_Contact_Form_Contact'}
 </div>
+ </div><!-- /.crm-accordion-body -->
+</div><!-- /.crm-accordion-wrapper -->
 {/if}
 {literal}
 <script type="text/javascript">
@@ -135,9 +140,23 @@ cj('#shared_household').autocomplete( dataUrl, { width : 320, selectFirst : fals
         cj( "#shared_household_id" ).val( data[0] );
         cj( 'table#address_1' ).toggle( ); 
     } else {
+        var locationTypeId = 'address_'+{/literal}{$blockId}{literal}+'_location_type_id';
+        var isPrimary      = 'Address_'+{/literal}{$blockId}{literal}+'_IsPrimary';
+        var isBilling      = 'Address_'+{/literal}{$blockId}{literal}+'_IsBilling';
         cj( 'table#address_1' ).hide( ); 
         cj( "span#show_address" ).html( data[0] ); 
         cj( "#shared_household_id" ).val( data[1] );
+        cj( "#"+locationTypeId ).val(data[2]); 
+        if( data[3] == 1 ) {
+            cj( "#"+isPrimary ).attr("checked","checked");
+        } else {
+            cj( "#"+isPrimary ).removeAttr("checked");
+        }
+        if( data[4] == 1 ) {
+            cj( "#"+isBilling ).attr("checked","checked");
+        } else {
+            cj( "#"+isBilling ).removeAttr("checked");
+        } 
     }
 }).bind( 'change blur', function( ) {
     if ( !parseInt( cj( "#shared_household_id" ).val( ) ) ) {
@@ -154,7 +173,7 @@ function checkLocation( object, noAlert ) {
 		element = cj(this).attr('id');
 		if ( cj(this).val() && element != object && selectedText == cj( '#' + element + ' :selected').text() ) {
 			if ( ! noAlert ) {
-			    var alertText = "{/literal}{ts}Location type{/ts} {literal}" + selectedText + "{/literal} {ts}has already been assigned to another address. Please select another location type for this address.{/ts}{literal}";
+			    var alertText = "{/literal}{ts escape='js'}Location type{/ts} {literal}" + selectedText + "{/literal} {ts escape='js'}has already been assigned to another address. Please select another location type for this address.{/ts}{literal}";
 			    alert( alertText );
 			}
 			cj( '#' + object ).val('');
@@ -163,3 +182,11 @@ function checkLocation( object, noAlert ) {
 }
 </script>
 {/literal}
+{literal}
+<script type="text/javascript">
+cj(function() {
+   cj().crmaccordions(); 
+});
+</script>
+{/literal}
+

@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -73,7 +73,7 @@ class CRM_Contribute_Form_ContributionPage_Delete extends CRM_Contribute_Form_Co
         }
         
         require_once 'CRM/Contribute/DAO/Contribution.php';
-        $dao =& new CRM_Contribute_DAO_Contribution();
+        $dao = new CRM_Contribute_DAO_Contribution();
         $dao->contribution_page_id = $this->_id;
         
         if ( $dao->find(true) ) {
@@ -125,7 +125,7 @@ class CRM_Contribute_Form_ContributionPage_Delete extends CRM_Contribute_Form_Co
         
         // first delete the join entries associated with this contribution page
         require_once 'CRM/Core/DAO/UFJoin.php';
-        $dao =& new CRM_Core_DAO_UFJoin( );
+        $dao = new CRM_Core_DAO_UFJoin( );
         
         $params = array( 'entity_table' => 'civicrm_contribution_page',
                          'entity_id'    => $this->_id );
@@ -138,14 +138,14 @@ class CRM_Contribute_Form_ContributionPage_Delete extends CRM_Contribute_Form_Co
         
         //next delete the membership block fields
         require_once 'CRM/Member/DAO/MembershipBlock.php';
-        $dao =& new CRM_Member_DAO_MembershipBlock( );
+        $dao = new CRM_Member_DAO_MembershipBlock( );
         $dao->entity_table = 'civicrm_contribution_page';
         $dao->entity_id    = $this->_id;
         $dao->delete( );
 
         //next delete the pcp block fields
         require_once 'CRM/Contribute/DAO/PCPBlock.php';
-        $dao =& new CRM_Contribute_DAO_PCPBlock( );
+        $dao = new CRM_Contribute_DAO_PCPBlock( );
         $dao->entity_table = 'civicrm_contribution_page';
         $dao->entity_id    = $this->_id;
         $dao->delete( );
@@ -160,7 +160,7 @@ class CRM_Contribute_Form_ContributionPage_Delete extends CRM_Contribute_Form_Co
         
         // finally delete the contribution page
         require_once 'CRM/Contribute/DAO/ContributionPage.php';
-        $dao =& new CRM_Contribute_DAO_ContributionPage( );
+        $dao = new CRM_Contribute_DAO_ContributionPage( );
         $dao->id = $this->_id;
         $dao->delete( );
 

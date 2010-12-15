@@ -1,6 +1,6 @@
 {*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -25,24 +25,21 @@
 *}
 <h2>{$title}</h2>                                
 <div class="messages status">
-    <dl>
     {if $is_active}
-        <dt><img src="{$config->resourceBase}i/traffic_green.gif" alt="{ts}status{/ts}"/></dt>
-        <dd><p><a href="{crmURL p='civicrm/contribute/transact' q="reset=1&id=`$id`"}">&raquo; {ts}Go to this LIVE Online Contribution page{/ts}</a></p>
+        <img src="{$config->resourceBase}i/traffic_green.gif" alt="{ts}status{/ts}"/>
+        <a href="{crmURL p='civicrm/contribute/transact' q="reset=1&id=`$id`" fe='true'}" target="_blank">&raquo; {ts}Go to this LIVE Online Contribution page{/ts}</a>
         {if $config->userFramework EQ 'Drupal'}
             <p>{ts}Create links to this contribution page by copying and pasting the following URL into any web page.{/ts}:<br />
             <a href="{crmURL p='civicrm/contribute/transact' q="reset=1&id=`$id`"}">{crmURL a=true p='civicrm/contribute/transact' q="reset=1&id=`$id`"}</a>
         {elseif $config->userFramework EQ 'Joomla'}
-            {ts 1=$id}Create front-end links to this contribution page using the Menu Manager. Select <strong>Online Contribution</strong> and enter <strong>%1</strong> for the Contribution id.{/ts}
+            {ts 1=$id}Create front-end links to this contribution page using the Menu Manager. Select <strong>Online Contribution</strong> and choose your desired contribution page from the parameters section.{/ts}
         {/if}
-        </dd>
     {else}
-        <dt><img src="{$config->resourceBase}i/traffic_red.gif" alt="{ts}status{/ts}"/></dt>
-        <dd><p>{ts}This page is currently <strong>inactive</strong> (not accessible to visitors).{/ts}</p>
+        <img src="{$config->resourceBase}i/traffic_red.gif" alt="{ts}status{/ts}"/>
+        <p>{ts}This page is currently <strong>inactive</strong> (not accessible to visitors).{/ts}</p>
         {capture assign=crmURL}{crmURL q="reset=1&action=update&id=`$id`&subPage=Settings"}{/capture}
-        <p>{ts 1=$crmURL}When you are ready to make this page live, click <a href='%1'>Title and Settings</a> and update the <strong>Active?</strong> checkbox.{/ts}</p></dd>
+        <p>{ts 1=$crmURL}When you are ready to make this page live, click <a href='%1'>Title and Settings</a> and update the <strong>Active?</strong> checkbox.{/ts}</p>
     {/if}
-    </dl>
 </div>
 
 <div id="help">
@@ -100,13 +97,13 @@
 </tr>
 {if $is_active}
 <tr>
-    <td class="nowrap"><a href="{crmURL p='civicrm/contribute/transact' q="reset=1&id=`$id`"}" id="idLive">&raquo; {ts}Live Contribution Page{/ts}</a></td>
+    <td class="nowrap"><a href="{crmURL p='civicrm/contribute/transact' q="reset=1&id=`$id`" fe='true'}" id="idLive" target="_blank">&raquo; {ts}Live Contribution Page{/ts}</a></td>
     <td>{ts}Review your customized <strong>LIVE</strong> online contribution page here.{/ts}
         {if $config->userFramework EQ 'Drupal'}
             {ts}Use the following URL in links and buttons on any website to send visitors to this live page{/ts}:<br />
             <strong>{crmURL a=true p='civicrm/contribute/transact' q="reset=1&id=`$id`"}</strong>
         {elseif $config->userFramework EQ 'Joomla'}
-            {ts 1=$id}When your page is active, create front-end links to the contribution page using the Menu Manager. Select <strong>Online Contribution</strong> and enter <strong>%1</strong> for the Contribution id.{/ts}
+            {ts 1=$id}When your page is active, create front-end links to the contribution page using the Menu Manager. Select <strong>Online Contribution</strong> and choose your desired contribution page from the parameters section.{/ts}
         {/if}
     </td>
 </tr>

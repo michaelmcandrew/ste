@@ -1,7 +1,7 @@
 <?php
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | This file is a part of CiviCRM.                                    |
  |                                                                    |
@@ -68,7 +68,7 @@ class CRM_Contribute_Payment_PaymentExpress extends CRM_Core_Payment_PaymentExpr
     static function &singleton( $mode, &$paymentProcessor ) {
         $processorName = $paymentProcessor['name'];
         if (self::$_singleton[$processorName] === null ) {
-            self::$_singleton[$processorName] =& new CRM_Contribute_Payment_PaymentExpress( $mode, $paymentProcessor );
+            self::$_singleton[$processorName] = new CRM_Contribute_Payment_PaymentExpress( $mode, $paymentProcessor );
         }
         return self::$_singleton[$processorName];
     } 

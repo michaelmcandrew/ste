@@ -2,7 +2,7 @@
 
 /*
  +--------------------------------------------------------------------+
- | CiviCRM version 3.1                                                |
+ | CiviCRM version 3.2                                                |
  +--------------------------------------------------------------------+
  | Copyright CiviCRM LLC (c) 2004-2010                                |
  +--------------------------------------------------------------------+
@@ -80,7 +80,7 @@ class CRM_Mailing_Page_Event extends CRM_Core_Page {
         $this->assign('title',$selector->getTitle());
         $this->assign('mailing_id',$mailing_id);
         
-        $controller =& new CRM_Core_Selector_Controller(
+        $controller = new CRM_Core_Selector_Controller(
                         $selector ,
                         $this->get( CRM_Utils_Pager::PAGE_ID ),
                         $this->get( CRM_Utils_Sort::SORT_ID  ),
