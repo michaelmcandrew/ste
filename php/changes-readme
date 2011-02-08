@@ -1,0 +1,36 @@
+Michael Lenahan, 8 February 2011
+
+The file:
+
+modules/civicrm/drupal/modules/views/civicrm.views.inc
+
+... has been amended to roll-back changes applied in CRM-6709
+
+the old file and the newly amended file are in the changes folder.
+
+the newly amended file has changes commented with:
+// ML 2011-02-08 roll back CRM-6709
+
+--------------------------------------------
+why is this amendment not in the php folder?
+--------------------------------------------
+
+I tried to do it in the php folder, but the changes weren't being picked up.
+
+----------------------
+why the change anyway?
+----------------------
+
+CRM-6709 caused a problem in Views when applying a filter based on a multi-value custom field.
+
+In this case, it was admin/build/views/edit/Events - the Events view in St Ethelburga's.
+
+We want to filter by event type, but the event type is a multivalue field.
+
+These pages describe the issue:
+
+http://forum.civicrm.org/index.php/topic,16404.msg70052.html#msg70052
+
+http://issues.civicrm.org/jira/browse/CRM-7093
+
+http://issues.civicrm.org/jira/browse/CRM-7292?page=com.atlassian.jira.plugin.system.issuetabpanels%3Aall-tabpanel
