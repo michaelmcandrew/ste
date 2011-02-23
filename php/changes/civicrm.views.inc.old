@@ -4980,11 +4980,11 @@ function civicrm_views_custom_data_cache($data, $entity_type, $groupID, $subType
                 $handler = civicrm_get_field_handler( $currentfield['data_type'] );
             }
             
-            //if ( $currentfield['option_group_id'] ) { // ML 2011-02-08 roll back CRM-6709
-            //    $filter_handler = 'civicrm_handler_filter_custom_option';
-            //} else {
-            //    $filter_handler = civicrm_get_filter_handler( $currentfield['data_type'] );
-            //}
+            if ( $currentfield['option_group_id'] ) {
+                $filter_handler = 'civicrm_handler_filter_custom_option';
+            } else {
+                $filter_handler = civicrm_get_filter_handler( $currentfield['data_type'] );
+            }
             
             //Create the Views Field
             $data[$currentgroup['table_name']][$currentfield['column_name']] = array(
@@ -5000,7 +5000,7 @@ function civicrm_views_custom_data_cache($data, $entity_type, $groupID, $subType
                                                                                                          ),
 
                                                                                      'filter' => array(
-                                                                                                       'handler' => civicrm_get_filter_handler($currentfield['data_type']), // $filter_handler ML 2011-02-08 roll back CRM-6709
+                                                                                                       'handler' => $filter_handler
                                                                                                        ),
 
                                                                                      'sort' => array(

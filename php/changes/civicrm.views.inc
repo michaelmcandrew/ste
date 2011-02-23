@@ -5000,7 +5000,7 @@ function civicrm_views_custom_data_cache($data, $entity_type, $groupID, $subType
                                                                                                          ),
 
                                                                                      'filter' => array(
-                                                                                                       'handler' => civicrm_get_filter_handler($currentfield['data_type']), // $filter_handler ML 2011-02-08 roll back CRM-6709
+                                                                                                       'handler' => civicrm_get_filter_handler($currentfield['data_type']), // $filter_handler ML 2011-02-08
                                                                                                        ),
 
                                                                                      'sort' => array(
