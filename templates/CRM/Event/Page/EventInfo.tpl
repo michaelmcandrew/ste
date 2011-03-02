@@ -26,14 +26,23 @@
 {* this template is used for displaying event information *}
 
 <div class="vevent">
-	<div class="event-info">
-	
+	<div class="event-info">	
 	{if $event.summary}
 	    <div class="section event_summary-section">{$event.summary}</div>
 	{/if}
+	{if $allowRegistration}
+      <div class="action-link section register_link-section">
+         <strong><a href="{$registerURL}" title="{$registerText}">&raquo; {$registerText}</a></strong>
+      </div>
+  {/if}
 	{if $event.description}
 	    <div class="section event_description-section summary">{$event.description}</div>
 	{/if}
+	{if $allowRegistration}
+      <div class="action-link section register_link-section">
+         <strong><a href="{$registerURL}" title="{$registerText}">&raquo; {$registerText}</a></strong>
+      </div>
+  {/if}
 	<div class="section event_date_time-section">
 	    <div class="label"><label>{ts}When{/ts}</label></div>
 	    <div class="content">
@@ -132,15 +141,7 @@
 	        <div class="clear"></div>
 	    </div>
 	{/if}
-
-
-    {include file="CRM/Custom/Page/CustomDataView.tpl"}
         
-	{if $allowRegistration}
-        <div class="action-link section register_link-section">
-            <strong><a href="{$registerURL}" title="{$registerText}">&raquo; {$registerText}</a></strong>
-        </div>
-    {/if}
     { if $event.is_public }
         <br />{include file="CRM/Event/Page/iCalLinks.tpl"}
     {/if}
