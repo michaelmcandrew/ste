@@ -15,8 +15,6 @@
   <body<?php print phptemplate_body_class($left, $right); ?>>
   
   <!-- Layout -->
-
-
       <div id="header">
       <?php if (isset($primary_links)) : ?>
       <!--
@@ -25,18 +23,25 @@
           print theme('nice_menu_primary_links'); ?>
         <?php endif; ?>
         
-   <a href="/"><img src="/sites/all/themes/ethelburgas/images/logo.png" /></a>
-        <a href="/"><img id="eban"src="/sites/all/themes/ethelburgas/images/banner<?php 
-if($is_front) {
-  echo '0';
-} elseif($node->path=='themes/world-music') {
-  echo '7';
-} else {
-  echo rand(1,6);
-}
+   		<a href="/"><img src="/sites/all/themes/ethelburgas/images/logo.png" /></a>
+		
+	<?php if(substr($node->path, 0, 7)=='gallery/' ) : ?>
+        <a href="/"><img id="eban"src="/sites/all/themes/ethelburgas/images/banner
+			<?php 
+			if($is_front) {
+			  echo '0';
+			} elseif($node->path=='themes/world-music') {
+			  echo '7';
+			} else {
+			  echo rand(1,6);
+			}
 
-?>.jpg" /></a>
-        <a href="/themes/reconciliation-resources"><img src="/sites/all/themes/ethelburgas/images/reconciliation.png" /></a>
+			?>
+		.jpg" /></a>
+		<div>
+       
+</div>
+<a href="/themes/reconciliation-resources"><img src="/sites/all/themes/ethelburgas/images/reconciliation.png" /></a>
         <a href="/themes/facilitation-and-dialogue"><img src="/sites/all/themes/ethelburgas/images/facilitation.png" /></a>
         <a href="/themes/power-of-stories"><img src="/sites/all/themes/ethelburgas/images/stories.png" /></a>
         <a href="/themes/refusing-violence"><img src="/sites/all/themes/ethelburgas/images/violence.png" /></a>
@@ -44,14 +49,18 @@ if($is_front) {
         <a href="/themes/world-music"><img src="/sites/all/themes/ethelburgas/images/music.png" /></a>
 
 
+	<?php elseif(substr($node->path, 0, 7)=='narrative-resource/' ): ?>
+		<div id="nr-banner">
+			<img src="/sites/all/themes/ethelburgas/images/nr-banner.jpg" alt="narrative resource" width="850" height="70" />
+	    </div>
+	<?php endif; ?>
       </div> <!-- /header -->
-
-
       
 
 
       <div id="center"> <?php if($node->content['field_bg'] != null) { ?>style="background-image:<?php print $node->field_background[0]['view']; ?>"<?php } ?>
       
+<?php if(substr($node->path, 0, 7)=='gallery/' ) : ?>
             <div id="etside">
                   <?php if ($left): ?>
                       <?php if ($search_box): ?><div class="block block-theme"><?php print $search_box ?></div><?php endif; ?>
@@ -63,6 +72,7 @@ if($is_front) {
 
       
       </div>
+<?php endif; ?>
       
       <div class="optionscaa right-corner"><div class="left-corner">
           <?php print $breadcrumb; ?>
