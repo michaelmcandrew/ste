@@ -25,7 +25,7 @@
         
    		<a href="/"><img src="/sites/all/themes/ethelburgas/images/logo.png" /></a>
 		
-	<?php if(substr($node->path, 0, 7)=='gallery/' ) : ?>
+	<?php if(substr($node->path, 0, 7)!='gallery/' ) : ?>
         <a href="/"><img id="eban"src="/sites/all/themes/ethelburgas/images/banner
 			<?php 
 			if($is_front) {
