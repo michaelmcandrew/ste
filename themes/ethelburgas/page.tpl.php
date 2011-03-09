@@ -1,11 +1,11 @@
-<?php
+<?php 
 // $Id: page.tpl.php,v 1.18.2.1 2009/04/30 00:13:31 goba Exp $
 ?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="<?php print $language->language ?>" lang="<?php print $language->language ?>" dir="<?php print $language->dir ?>">
   <head>
     <?php print $head ?>
-    <title><?php print $head_title ?></title>
+    <title><?php print $head_title ;print $node->path?></title>
     <?php print $styles ?>
     <?php print $scripts ?>
     <!--[if lt IE 7]>
@@ -15,6 +15,8 @@
   <body<?php print phptemplate_body_class($left, $right); ?>>
   
   <!-- Layout -->
+
+
       <div id="header">
       <?php if (isset($primary_links)) : ?>
       <!--
@@ -23,44 +25,38 @@
           print theme('nice_menu_primary_links'); ?>
         <?php endif; ?>
         
-   		<a href="/"><img src="/sites/all/themes/ethelburgas/images/logo.png" /></a>
+   <a href="/"><img src="/sites/all/themes/ethelburgas/images/logo.png" /></a>
+        <a href="/"><img id="eban"src="/sites/all/themes/ethelburgas/images/banner<?php 
+		if($is_front) {
+		  echo '0';
+		} elseif($node->path=='themes/world-music') {
+		  echo '7';
+		} elseif(substr($node->path, 0, 18)=='narrative-resource') {
+		  echo 'nr';
+		} else {
+		  echo rand(1,6);
+		}
+
+		?>.jpg" /></a>
 		
-	<?php if(substr($node->path, 0, 7)!='gallery/' ) : ?>
-        <a href="/"><img id="eban"src="/sites/all/themes/ethelburgas/images/banner
-			<?php 
-			if($is_front) {
-			  echo '0';
-			} elseif($node->path=='themes/world-music') {
-			  echo '7';
-			} else {
-			  echo rand(1,6);
-			}
-
-			?>
-		.jpg" /></a>
-		<div>
-       
-</div>
-<a href="/themes/reconciliation-resources"><img src="/sites/all/themes/ethelburgas/images/reconciliation.png" /></a>
-        <a href="/themes/facilitation-and-dialogue"><img src="/sites/all/themes/ethelburgas/images/facilitation.png" /></a>
-        <a href="/themes/power-of-stories"><img src="/sites/all/themes/ethelburgas/images/stories.png" /></a>
-        <a href="/themes/refusing-violence"><img src="/sites/all/themes/ethelburgas/images/violence.png" /></a>
-        <a href="/themes/multifaith"><img src="/sites/all/themes/ethelburgas/images/multifaith.png" /></a>
-        <a href="/themes/world-music"><img src="/sites/all/themes/ethelburgas/images/music.png" /></a>
+		<?php if (substr($node->path, 0, 18)!='narrative-resource') : ?>
+	        <a href="/themes/reconciliation-resources"><img src="/sites/all/themes/ethelburgas/images/reconciliation.png" /></a>
+	        <a href="/themes/facilitation-and-dialogue"><img src="/sites/all/themes/ethelburgas/images/facilitation.png" /></a>
+	        <a href="/themes/power-of-stories"><img src="/sites/all/themes/ethelburgas/images/stories.png" /></a>
+	        <a href="/themes/refusing-violence"><img src="/sites/all/themes/ethelburgas/images/violence.png" /></a>
+	        <a href="/themes/multifaith"><img src="/sites/all/themes/ethelburgas/images/multifaith.png" /></a>
+	        <a href="/themes/world-music"><img src="/sites/all/themes/ethelburgas/images/music.png" /></a>
+    	<?php endif; ?>
 
 
-	<?php elseif(substr($node->path, 0, 7)=='narrative-resource/' ): ?>
-		<div id="nr-banner">
-			<img src="/sites/all/themes/ethelburgas/images/nr-banner.jpg" alt="narrative resource" width="850" height="70" />
-	    </div>
-	<?php endif; ?>
       </div> <!-- /header -->
+
+
       
 
 
       <div id="center"> <?php if($node->content['field_bg'] != null) { ?>style="background-image:<?php print $node->field_background[0]['view']; ?>"<?php } ?>
       
-<?php if(substr($node->path, 0, 7)=='gallery/' ) : ?>
             <div id="etside">
                   <?php if ($left): ?>
                       <?php if ($search_box): ?><div class="block block-theme"><?php print $search_box ?></div><?php endif; ?>
@@ -72,7 +68,6 @@
 
       
       </div>
-<?php endif; ?>
       
       <div class="optionscaa right-corner"><div class="left-corner">
           <?php print $breadcrumb; ?>

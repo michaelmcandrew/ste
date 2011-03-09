@@ -165,9 +165,9 @@ color: #1A8563;
  
  
  
-/* .optionscaa {
+ .optionscaa {
  	margin-left:225px;
- }*/
+ }
  
  
  
@@ -338,11 +338,9 @@ margin:0;
  * Generic elements
  */
 body {
-  border: 10px solid #ff6c00;
   margin: 0;
   padding: 0;
   background: url(images/bg.png) #edf5fa;
-
   font: 12px/170% Verdana, sans-serif;
   color: #494949;
 }
@@ -1230,112 +1228,3 @@ table.system-status-report tr.ok, table.system-status-report tr.ok th {
 span.inline .caption {
   font-size: 80%;
 }
-
-
-/*.......Photogallery styles......*/
-
-h2.albums
-{
-	font-size: 240%;
-    line-height: 130%;
-	margin-bottom: 35px;
-}
-
-.views-row
-{
-	width: 220px;
-	float: left;
-	margin: 0 20px 20px 0;
-
-}
-
-.views-row-1
-{
-	clear: left;
-}
-
-.view-content h3
-{
-	clear: left;
-	float: left;
-	margin-bottom: 10px;
-	color: #96C956;
-	font-weight: normal;
-}
-
-.views-field-title a
-{
-	height: 40px;
-	color: #404045;
-}
-
-.views-field-body
-{
-	width: 200px;
-}
-
-.field-content
-{
-	display: block;
-	margin-bottom: 15px;
-}
-
-.field-content a
-{
-	text-decoration: none;
-	font-size: 110%;
-}
-
-.field-content a:hover
-{
-	text-decoration: underline;
-}
-
-.field-content p
-{
-	color: #999;
-	font-size: 90%;
-	line-height: 140%;
-}
-
-.field-content img.imagecache-Thumbnail
-{
-	/*margin-left: 25%;*/
-	border: 1px solid #404045;
-}
-
-
-/*......Album page....*/
-
-.field-field-images .field-item
-{
-	height: 130px;
-	float: left;
-	margin: 0 20px 20px 0;
-}
-
-.field-field-images .field-item img
-{
-	display: block;
-	border: 1px solid #404045;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
