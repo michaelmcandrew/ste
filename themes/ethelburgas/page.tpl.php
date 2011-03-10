@@ -50,7 +50,7 @@
 	        <a href="/themes/world-music"><img src="/sites/all/themes/ethelburgas/images/music.png" /></a>
     	<?php endif; ?>
 	<?php endif; ?>
-
+	<?php endif; ?>
       </div> <!-- /header -->
 
 
