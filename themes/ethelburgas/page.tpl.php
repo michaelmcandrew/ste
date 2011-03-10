@@ -26,6 +26,8 @@
         <?php endif; ?>
         
    <a href="/"><img src="/sites/all/themes/ethelburgas/images/logo.png" /></a>
+   
+<?php if (substr($node->path, 0, 7)!='gallery') : ?>
         <a href="/"><img id="eban"src="/sites/all/themes/ethelburgas/images/banner<?php 
 		if($is_front) {
 		  echo '0';
@@ -47,7 +49,7 @@
 	        <a href="/themes/multifaith"><img src="/sites/all/themes/ethelburgas/images/multifaith.png" /></a>
 	        <a href="/themes/world-music"><img src="/sites/all/themes/ethelburgas/images/music.png" /></a>
     	<?php endif; ?>
-
+	<?php endif; ?>
 
       </div> <!-- /header -->
 
@@ -57,17 +59,21 @@
 
       <div id="center"> <?php if($node->content['field_bg'] != null) { ?>style="background-image:<?php print $node->field_background[0]['view']; ?>"<?php } ?>
       
-            <div id="etside">
-                  <?php if ($left): ?>
-                      <?php if ($search_box): ?><div class="block block-theme"><?php print $search_box ?></div><?php endif; ?>
-                     <?php print $left ?>
-                           <?php endif; ?>
-                                <?php if (isset($secondary_links)) : ?>
-          <?php // print theme('links', $secondary_links, array('id' => 'secnav')) ?>
-        <?php endif; ?>
-
-      
-      </div>
+		<?php if (substr($node->path, 0, 7)!='gallery') : ?>
+			<div id="etside">
+				<?php if ($left): ?>
+					<?php if ($search_box): ?>
+						<div class="block block-theme">
+							<?php print $search_box ?>
+						</div>
+					<?php endif; ?>
+					<?php print $left ?>
+				<?php endif; ?>
+				<?php if (isset($secondary_links)) : ?>
+					<?php // print theme('links', $secondary_links, array('id' => 'secnav')) ?>
+				<?php endif; ?>
+			</div>
+		<?php endif; ?>
       
       <div class="optionscaa right-corner"><div class="left-corner">
           <?php print $breadcrumb; ?>
