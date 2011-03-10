@@ -204,6 +204,7 @@ padding: 2px 0;
 
 #etside li a.active {
 color: #555;
+font-weight: bold;
 }
 
 
@@ -450,16 +451,13 @@ ul li, ul.menu li, .item-list ul li, li.leaf {
   padding: 0 0 .2em 0em;
   list-style-type: none;
   list-style-image: none;
-
 }
 
-
-
-
-
-ul li.expanded {
-
+#etside div ul li.expanded ul.menu{
+	padding-left: 18px;
+	list-style: disc inside none;
 }
+
 
 ul li.collapsed {
 
