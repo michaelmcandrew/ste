@@ -65,10 +65,10 @@ ADDING LIGHTBOX FUNCTIONALITY TO YOUR IMAGES
 --------------------------------------------
 No Grouping
 ===========
-Add rel="lightbox" attribute to any link tag to activate the lightbox.
+Add rel="lightshow" attribute to any link tag to activate the lightbox.
 For example:
-<a href="images/image-1.jpg" rel="lightbox">image #1</a>
-<a href="images/image-1.jpg" rel="lightbox[][my caption]">image #1</a>
+<a href="images/image-1.jpg" rel="lightshow">image #1</a>
+<a href="images/image-1.jpg" rel="lightshow[][my caption]">image #1</a>
 
 Optional: To show a caption either use the title attribute or put in the second
 set of [] of the rel attribute.
@@ -79,9 +79,9 @@ If you have a set of related images that you would like to group, follow step
 one but additionally include a group name between square brackets in the rel
 attribute. For example:
 
-<a href="images/image-1.jpg" rel="lightbox[roadtrip]">image #1</a>
-<a href="images/image-2.jpg" rel="lightbox[roadtrip][caption 2]">image #2</a>
-<a href="images/image-3.jpg" rel="lightbox[roadtrip][caption 3]">image #3</a>
+<a href="images/image-1.jpg" rel="lightshow[roadtrip]">image #1</a>
+<a href="images/image-2.jpg" rel="lightshow[roadtrip][caption 2]">image #2</a>
+<a href="images/image-3.jpg" rel="lightshow[roadtrip][caption 3]">image #3</a>
 
 No limits to the number of image sets per page or how many images are allowed
 in each set. Go nuts!
@@ -91,9 +91,9 @@ lightbox, but only wish for one of these images to be visible on your page, you
 can assign the "lightbox_hide_image" class to hide the additional images.  For
 example:
 
-<a href="images/image-1.jpg" rel="lightbox[roadtrip]">image #1</a>
-<a href="images/image-2.jpg" rel="lightbox[roadtrip]" class="lightbox_hide_image">image #2</a>
-<a href="images/image-3.jpg" rel="lightbox[roadtrip]" class="lightbox_hide_image">image #3</a>
+<a href="images/image-1.jpg" rel="lightshow[roadtrip]">image #1</a>
+<a href="images/image-2.jpg" rel="lightshow[roadtrip]" class="lightbox_hide_image">image #2</a>
+<a href="images/image-3.jpg" rel="lightshow[roadtrip]" class="lightbox_hide_image">image #3</a>
 
 Slideshow
 =========
@@ -216,7 +216,7 @@ Turning the Image Caption into a Link
 If you wish to turn the caption into a link, format your caption in the
 following way:
 
-<a href="images/image-1.jpg" rel="lightbox[][&lt;a href=\"http://www.yourlink.com\"&gt;Clicky Visit Link&lt;/a&gt;'>image #1</a>
+<a href="images/image-1.jpg" rel="lightshow[][&lt;a href=\"http://www.yourlink.com\"&gt;Clicky Visit Link&lt;/a&gt;'>image #1</a>
 
 Note, the < and > characters have been changed to their HTML entities, and the "
 have been escaped.

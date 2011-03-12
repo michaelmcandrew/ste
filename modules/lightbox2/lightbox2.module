@@ -39,7 +39,7 @@ function lightbox2_help($path, $arg) {
       $output .= '<li>'. t('Visual Effects: fancy pre-loader and transition when you click on the image.') .'</li>';
       $output .= '<li>'. t('Keyboard Shortcuts: useful <a href="http://drupal.org/node/249827">keyboard shortcuts</a> for switching between images, toggling play / pause, etc.') .'</li>';
       $output .= '<li>'. t('Zoom Capability: larger images are reduced in size so they fit snugly inside the browser window.  A zoom button can then be clicked on to see it in its original size.') .'</li>';
-      $output .= '<li>'. t('Automatic Image Detection: configurable automatic re-formatting of image thumbnails, so there is no need to add \'rel="lightbox"\' to each image link on your site. ');
+      $output .= '<li>'. t('Automatic Image Detection: configurable automatic re-formatting of image thumbnails, so there is no need to add \'rel="lightshow"\' to each image link on your site. ');
       $output .= t('<a href="!image">Image</a>, <a href="!inline">Inline</a>, <a href="!flickr">Flickr</a>, <a href="!img_assist">Image Assist</a> and <a href="!imagefield">CCK Imagefield</a> modules are all supported. ', array('!image' => 'http://drupal.org/project/image', '!inline' => 'http://drupal.org/project/inline', '!flickr' => 'http://drupal.org/project/flickr', '!img_assist' => 'http://drupal.org/project/img_assist', '!imagefield' => 'http://drupal.org/project/imagefield'));
       $output .= t('It\'s also possible to configure a custom list of image classes which should trigger the lightbox functionality.');
       $output .='</li>';
@@ -60,14 +60,14 @@ function lightbox2_help($path, $arg) {
       // Grouping Images
       $output .= '<h5 style="text-decoration: underline;">'. t('Grouping Images') .'</h5>';
       $output .= '<p>'. t('If you have a set of related images that you would like to group, follow step one but additionally include a group name between square brackets in the rel attribute. For example:') .'</p>';
-      $output .= '<code>'. t('&lt;a href="images/image-1.jpg" rel="lightbox[roadtrip]"&gt;image #1&lt;/a&gt;<br />
-                              &lt;a href="images/image-2.jpg" rel="lightbox[roadtrip][caption 2]"&gt;image#2&lt;/a&gt;<br />
-                              &lt;a href="images/image-3.jpg" rel="lightbox[roadtrip][caption 3]"&gt;image#3&lt;/a&gt;') .'</code>';
+      $output .= '<code>'. t('&lt;a href="images/image-1.jpg" rel="lightshow[roadtrip]"&gt;image #1&lt;/a&gt;<br />
+                              &lt;a href="images/image-2.jpg" rel="lightshow[roadtrip][caption 2]"&gt;image#2&lt;/a&gt;<br />
+                              &lt;a href="images/image-3.jpg" rel="lightshow[roadtrip][caption 3]"&gt;image#3&lt;/a&gt;') .'</code>';
       $output .= '<p>'. t('No limits to the number of image sets per page or how many images are allowed in each set.') .'</p>';
       $output .= '<p>'. t('If you have a set of images that you would like to group together in a lightbox, but only wish for one of these images to be visible on your page, you can assign the "lightbox_hide_image" class to hide the additional images. For example:') .'</p>';
-      $output .= '<p><code>'. t('&lt;a href="images/image-1.jpg" rel="lightbox[roadtrip]"&gt;image #1&lt;/a&gt;<br />
-                              &lt;a href="images/image-2.jpg" rel="lightbox[roadtrip]" class="lightbox_hide_image"&gt;image #2&lt;/a&gt;<br />
-                              &lt;a href="images/image-3.jpg" rel="lightbox[roadtrip][caption 3]" class="lightbox_hide_image"&gt;image #3&lt;/a&gt;') .'</code></p>';
+      $output .= '<p><code>'. t('&lt;a href="images/image-1.jpg" rel="lightshow[roadtrip]"&gt;image #1&lt;/a&gt;<br />
+                              &lt;a href="images/image-2.jpg" rel="lightshow[roadtrip]" class="lightbox_hide_image"&gt;image #2&lt;/a&gt;<br />
+                              &lt;a href="images/image-3.jpg" rel="lightshow[roadtrip][caption 3]" class="lightbox_hide_image"&gt;image #3&lt;/a&gt;') .'</code></p>';
       // Slideshow
       $output .= '<h5 style="text-decoration: underline;">'. t('Slideshow') .'</h5>';
       $output .= '<p>'. t('This is very similar to the grouping functionality described above. The only difference is that "rel" attribute should be set to "lightshow" instead of "lightbox". Using the same example as above, we could launch the images in a slideshow by doing:') .'</p>';
@@ -277,15 +277,15 @@ function lightbox2_init() {
 function lightbox2_filter_tips($delta, $format, $long = FALSE) {
   if ($delta == 0) {
     if (!$long) {
-      return t('Image links with \'rel="lightbox"\' in the &lt;a&gt; tag will appear in a Lightbox when clicked on.');
+      return t('Image links with \'rel="lightshow"\' in the &lt;a&gt; tag will appear in a Lightbox when clicked on.');
     }
     else {
-      $output = '<p>'. t('To add a lightbox to your images, add rel="lightbox" attribute to any link tag to activate the lightbox. For example:') .'</p>';
-      $output .= '<p>'. t('<code>&lt;a href="image-1.jpg" rel="lightbox"&gt;image #1&lt;/a&gt;</code>') .'</p>';
-      $output .= '<p>'. t('<code>&lt;a href="image-1.jpg" rel="lightbox[][my caption]"&gt;image #1&lt;/a&gt;</code>') .'</p>';
+      $output = '<p>'. t('To add a lightbox to your images, add rel="lightshow" attribute to any link tag to activate the lightbox. For example:') .'</p>';
+      $output .= '<p>'. t('<code>&lt;a href="image-1.jpg" rel="lightshow"&gt;image #1&lt;/a&gt;</code>') .'</p>';
+      $output .= '<p>'. t('<code>&lt;a href="image-1.jpg" rel="lightshow[][my caption]"&gt;image #1&lt;/a&gt;</code>') .'</p>';
       $output .= '<p>'. t('To show a caption either use the title attribute or put in the second set of square brackets of the rel attribute.') .'</p>';
       $output .= '<p>'. t('If you have a set of related images that you would like to group, then you will need to include a group name between square brackets in the rel attribute. For example:') .'</p>';
-      $output .= '<p>'. t('<code>&lt;a href="image-1.jpg" rel="lightbox[roadtrip]"&gt;image #1&lt;/a&gt;<br /> &lt;a href="image-2.jpg" rel="lightbox[roadtrip][caption 2]"&gt;image #2&lt;/a&gt;<br /> &lt;a href="image-3.jpg" rel="lightbox[roadtrip][caption 3]"&gt;image #3&lt;/a&gt;<br /> </code>') .'</p>';
+      $output .= '<p>'. t('<code>&lt;a href="image-1.jpg" rel="lightshow[roadtrip]"&gt;image #1&lt;/a&gt;<br /> &lt;a href="image-2.jpg" rel="lightshow[roadtrip][caption 2]"&gt;image #2&lt;/a&gt;<br /> &lt;a href="image-3.jpg" rel="lightshow[roadtrip][caption 3]"&gt;image #3&lt;/a&gt;<br /> </code>') .'</p>';
       $output .= '<p>'. t('There are no limits to the number of image sets per page or how many images are allowed in each set.') .'</p>';
       $output .= '<p>'. t('If you wish to turn the caption into a link, format your caption in the following way:') .'</p>';
       $output .= '<p>'. t('<code>&lt;a href="image-1.jpg" rel=\'lightbox[][&lt;a href="http://www.yourlink.com"&gt;View Image Details&lt;/a&gt;]\' &gt;image #1&lt;/a&gt;</code>') .'</p>';
@@ -381,7 +381,7 @@ function lightbox2_filter($op, $delta = 0, $format = -1, $text = '') {
 
     case 'description':
       if ($delta == 0) {
-        return t('Image links with \'rel="lightbox"\' in the &lt;a&gt; tag will appear in a Lightbox when clicked on.');
+        return t('Image links with \'rel="lightshow"\' in the &lt;a&gt; tag will appear in a Lightbox when clicked on.');
       }
       elseif ($delta == 1) {
         return t('Turns g2_filter links into Lightbox2 appropriate links');
@@ -406,7 +406,7 @@ function lightbox2_filter($op, $delta = 0, $format = -1, $text = '') {
       if ($delta == 1) {
         $text = ' '. $text .' ';
         $text = preg_replace('/ShowItem/', 'DownloadItem', $text);
-        $text = preg_replace('/<img\s+([^>]*?)src="/', '<img \1rel="lightbox" src="', $text);
+        $text = preg_replace('/<img\s+([^>]*?)src="/', '<img \1rel="lightshow" src="', $text);
         $text = drupal_substr($text, 1, -1);
       }
       elseif ($delta == 6) {

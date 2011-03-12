@@ -281,7 +281,7 @@ function showLightbox(objLink) {
 
 // initLightbox()
 // Function runs on window load, going through link tags looking for
-// rel="lightbox".  These links receive onclick events that enable the lightbox
+// rel="lightshow".  These links receive onclick events that enable the lightbox
 // display for their targets.  The function also inserts html markup at the top
 // of the page which will be used as a container for the overlay pattern and
 // the inline image.

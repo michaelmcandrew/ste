@@ -768,7 +768,7 @@ function lightbox2_auto_image_handling_settings_form() {
 
   // Set image node options help text.
   $form['image_node_options'] = array(
-    '#value' => t('These options allow automatic URL re-formatting of images.  This removes the need for you to add \'rel="lightbox"\' to each image link throughout your site.  You can select which image sizes will trigger the lightbox and configure a list of image CSS classes which should also have their URLs automatically re-formatted.  This feature is not available when using Lightbox2 Lite.'),
+    '#value' => t('These options allow automatic URL re-formatting of images.  This removes the need for you to add \'rel="lightshow"\' to each image link throughout your site.  You can select which image sizes will trigger the lightbox and configure a list of image CSS classes which should also have their URLs automatically re-formatted.  This feature is not available when using Lightbox2 Lite.'),
   );
 
   // Define handler settings fieldset.
