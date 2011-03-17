@@ -435,12 +435,10 @@ ul li, ul.menu li, .item-list ul li, li.leaf {
 }
 
 #etside div ul li.expanded a {
-	text-decoration: underline;
 	font-weight: bold;
 }
 
 #etside div ul li.leaf a {
-	text-decoration: none;
 	font-weight: normal;
 }
 
