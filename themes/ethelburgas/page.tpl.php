@@ -10,8 +10,7 @@
 		<?php print phptemplate_get_ie_styles(); ?>
 		<![endif]-->
 	</head>
-
-	<body<?php print phptemplate_body_class($left, $right); ?>>
+	<body <?php if (substr($node->path, 0, 7)=='gallery' OR arg(0)=='gallery') { print " class='gallery' "; } ?>>
 	<!-- layout -->
 		<div id="header">
 			<?php if (isset($primary_links)) : ?>
@@ -22,7 +21,6 @@
 			<?php endif; ?>
 
 			<a href="/"><img src="/sites/all/themes/ethelburgas/images/logo.png" /></a>
-		
 			<?php if (substr($node->path, 0, 7)!='gallery') : ?>
 				<?php if (arg(0)!='gallery'): ?>
 					<a href="/"><img id="eban"src="/sites/all/themes/ethelburgas/images/banner
@@ -71,7 +69,7 @@
 				<?php endif; ?>
 			<?php endif; ?>
 
-			<div class="optionscaa right-corner">
+			<div class="optionscaa right-corner ">
 				<div class="left-corner">
 					<?php print $breadcrumb; ?>
 					<?php if ($mission): print '<div id="mission">'. $mission .'</div>'; endif; ?>
