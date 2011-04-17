@@ -12,8 +12,6 @@
 * CHRIS BIT
 
 */
-
-
 a {
 	color: #27A697;
 }
@@ -400,7 +398,9 @@ p {
 }
 
 
-
+a {
+	color: #27A697;
+}
 
 hr {
 	margin: 0;
