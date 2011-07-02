@@ -1,5 +1,7 @@
 Michael Lenahan, 8 February 2011
 
+UPDATE 2 July 2011: The same change was needed for the upgrade to CiviCRM 3.4.2
+
 The file:
 
 modules/civicrm/drupal/modules/views/civicrm.views.inc
