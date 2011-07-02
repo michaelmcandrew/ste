@@ -6046,14 +6046,14 @@ function civicrm_views_custom_data_cache($data, $entity_type, $groupID, $subType
             } else {
                 $handler = civicrm_get_field_handler( $currentfield['data_type'] );
             }
-            
-            if ( !empty($currentfield['option_group_id']) && in_array($currentfield['html_type'], $customMultiValueHTMLTypes) ){
-                $filter_handler = 'civicrm_handler_filter_custom_option';
-            } elseif ( !empty($currentfield['option_group_id']) ){
-                $filter_handler = 'civicrm_handler_filter_custom_single_option';  
-            } else {
-                $filter_handler = civicrm_get_filter_handler( $currentfield['data_type'] );
-            }
+            // ML 2011-02-08 roll back CRM-6709
+            //if ( !empty($currentfield['option_group_id']) && in_array($currentfield['html_type'], $customMultiValueHTMLTypes) ){
+            //    $filter_handler = 'civicrm_handler_filter_custom_option';
+            //} elseif ( !empty($currentfield['option_group_id']) ){
+            //    $filter_handler = 'civicrm_handler_filter_custom_single_option';  
+            //} else {
+            //    $filter_handler = civicrm_get_filter_handler( $currentfield['data_type'] );
+            //}
             
             //Create the Views Field
             $data[$currentgroup['table_name']][$currentfield['column_name']] = array(
@@ -6069,7 +6069,7 @@ function civicrm_views_custom_data_cache($data, $entity_type, $groupID, $subType
                                                                                                          ),
 
                                                                                      'filter' => array(
-                                                                                                       'handler' => $filter_handler
+                                                                                                       'handler' => civicrm_get_filter_handler($currentfield['data_type']), // $filter_handler // ML 2011-02-08 roll back CRM-6709
                                                                                                        ),
 
                                                                                      'sort' => array(
