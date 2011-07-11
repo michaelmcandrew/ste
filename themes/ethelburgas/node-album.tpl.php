@@ -15,6 +15,7 @@
 
   <div class="content clear-block">
     <?php print $content ?>
+	<p style="font-weight: bold;">Please click on the thumbnails above to see larger images and descriptions</p>
   </div>
 
   <div class="clear-block">
