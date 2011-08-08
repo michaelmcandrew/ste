@@ -1,0 +1,6 @@
+
+/** Changelog for media_metadatad.module **/
+
+July 2009
+-------------
+ * Create initial module (aaron).

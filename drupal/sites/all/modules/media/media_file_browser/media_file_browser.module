@@ -1,0 +1,117 @@
+<?php
+
+
+/**
+ * @FILE Provides a file browsing framework for the Media Module
+ *       Media Browser upload form
+ */
+
+
+/**
+ * Implementation of hook_menu
+ *
+ * @return array
+ */
+function media_file_browser_menu() {
+  $items = array();
+  $items['media_file_browser/js'] = array(
+    'page callback' => 'media_ahah_formatter_load',
+    // @TODO figure out how access is being handled here... 
+    'access arguments' => array('access content'),
+    'file' => 'media_file_browser.inc',
+  );
+  return $items;
+}
+
+
+/**
+ * Implementation of hook_media_register
+ * @return
+ *   array
+ */
+function media_file_browser_media_register() {
+  $registration = array();
+  $registration['media_file_browser_directory'] = array(
+    // human readable name
+    'name' => 'File Browser Local',
+    'description' => 'Provides access to local files',
+    'uri' => 'file',
+    'kind' => 'resource',
+    'callbacks' => array(
+      'resource' => 'media_file_browser_local_files',
+     ),
+    'fields' => array('attachments', 'filefield'),
+  );
+  if (module_exists('s3_api')) {
+    $registration['media_file_browser_s3'] = array(
+      'name' => 'File Browser S3',
+      'uri' => 'file',
+      'kind' => 'resource',
+      'description' => 'Provides access to files stored on Amazon\'s S3',
+      'callbacks' => array(
+        'resource' => 'media_file_browser_s3_files',
+       ),      
+      'fields' => array('attachments', 'filefield'),
+    );
+  }
+  if (module_exists('ftp_api')) {
+    $registration['media_file_browser_ftp'] = array(
+      // human readable name
+      'name' => 'File Browser FTP',
+      'description' => 'Provides access to files stored on the FTP server',
+      'uri' => 'file',
+      'kind' => 'resource',
+      'callbacks' => array(
+        'resource' => 'media_file_browser_ftp_files',
+       ),
+      'fields' => array('attachments', 'filefield'),
+    );
+  }
+  return $registration;
+}
+
+
+/**
+ * Builds the local directory file browser form
+ * @TODO build admin interface to set the location of the local directory
+ * @TODO build the ahah callbacks for browsing the directories
+ * @TODO abstract this so that all file browsing functions can use the 
+ *       same kind of form
+ *
+ * @param unknown_type $files
+ * @param unknown_type $title
+ * @return unknown
+ */
+function media_file_browser_local_files($files, $title = NULL) {
+
+  $pattern = ".*$";
+  // @TODO how do we set the local file directory
+  $path = file_directory_path();
+  $dir_files = file_scan_directory($path, $pattern, array(), null, false);
+  foreach($dir_files as $a_file) {
+    if (is_dir($a_file->filename)) {
+      $display_files[$a_file->filename .'/'] = $a_file->basename .' (directory)';
+    }
+    else {
+      $display_files[$a_file->filename] = $a_file->basename;
+    }
+  }
+    // build the radio form element that the admin can choose from to process a
+  // file, option is tied to AHAH.
+  $form['files']['data'] = array(
+    '#type' => 'select',
+    '#default_value' => $output_file_id ? $output_file_id: $form_state['values']['files']['data'],
+    '#options' => $display_files,
+    '#suffix' => '<div id="media_files_directory"></div>',
+    '#ahah' => array(
+      'event' => 'change',
+      'path' => 'media_browser/files',
+      'wrapper' => 'media_files_directory',
+      'method' => 'replace',
+      ),
+  );
+  return array(
+    t('Local Files') => array(
+      t('Files') => $form),
+  );
+}

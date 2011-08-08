@@ -1,0 +1,84 @@
+
+/**
+ * @file
+ * This provides the basic styling for the media browser elements
+ */
+
+
+/* Style the show media browser link */
+.media.browser.activation{
+  width: 112px;
+  border: 1px solid #999999;
+  padding: 5px 10px;
+  background-color: #cc3355;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.media.browser,
+.media-browser-metadata-wrapper {
+  border: 1px solid #999999;
+  padding: 5px;
+}
+
+/* push the tabs further right */
+.media.browser ul.tabs {
+  margin: 0px 0px -8px 120px;
+}
+
+/* style the pane which contains the drawers and drawer data */
+.media.browser .drawer.display{
+  min-height: 300px;
+}
+
+/* style the left hand drawers */
+.media.browser .browser.drawers ul.drawers {
+  margin: 0;
+}
+
+.media.browser .browser.drawers ul.drawers li{
+	background-color: #999999;
+	background-image: none;
+	border: 1px solid #999999;
+	clear: left;
+	float: left;
+	height: 30px;
+	list-style: none;
+	margin: 5px 0px 3px;
+	padding: 5px 10px 5px 10px;
+	width: 90px;
+	line-height: 1.2;
+}
+
+.media.browser .ui-tabs-panel .item-list ul li a {
+	color: #ffffff;
+}
+
+/* push the drawers down */
+.media.browser .ui-tabs-panel .item-list ul li.first{
+	margin-top: 20px;
+}
+
+
+/* style the active drawer */
+.media.browser .browser.drawers ul.drawers li.active{
+	background-color: #ffffff;
+	border-right: none;
+	width: 91px;
+}
+
+.media.browser .ui-tabs-panel .item-list ul li.active a {
+  color: #000000;
+}
+
+
+/* style the display of the drawer */
+.media.browser .drawer.display {
+  border: 1px solid #999999;
+  margin-left: 111px;
+  padding: 0px 10px 10px 20px
+}
+
+.media-browser-file-progress {
+  clear: both;
+  }

@@ -1,0 +1,22 @@
+
+Changelog for the Resource module.
+
+March 2009
+----------
+ * ResourceReadOnlyStreamWrapper implements ResourceStreamWrapperInterface (aaron).
+ * Move hook_boot includes to hook_init: cached pages are cached; unnecessary overhead (aaron).
+
+February 2009
+-------------
+ * #375876/kwinters D6 Permissions Fix for Resource Module (kwinters).
+
+January 2009
+------------
+ * Store paths as /v/[video-code]/t/[tags+more] for ResourceReadOnlyStreamWrapper.inc (aaron).
+ * Create ResourceReadOnlyStreamWrapper.inc (aaron).
+ * Port ResourceStreamWrapper.inc and ResourceStreamWrapperManager.inc from HEAD (aaron).
+ * Change require to include (aaron).
+ * Look in hook_exit to see if path has changed (aaron).
+ * Save module path to variable, as no access to drupal_get_path (aaron).
+ * Initial backport to d6 (aaron).
+ * Initial development (dopry).

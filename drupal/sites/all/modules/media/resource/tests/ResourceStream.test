@@ -1,0 +1,230 @@
+<?php
+
+/**
+ *  @file
+ *  This provides SimpleTests for the core stream wrapper functionality.
+ */
+
+
+/**
+ * Base class for file tests that adds some additional file specific
+ * assertions and helper functions.
+ */
+class ResourceStreamTestCase extends DrupalWebTestCase {
+
+  public $scheme = 'public://localhost/';
+  public $pathkey = 'stream_public_path';
+  public $pathdefault = '/sites/default/files';
+  public $filename = '';
+  public $dirname = '';
+  public $path = '';
+  public $handle = '';
+  public $streampath = '';
+  public $url = '';
+
+  function getInfo() {
+    return array(
+      'name' => t('ResourceStream Filesystem functions'),
+      'description' => t('Tests basic php stream functions.'),
+      'group' => t('Resource'),
+    );
+  }
+
+  function setUp() {
+    // create a known file and directory for testing.
+    resource_debug($this->scheme);
+    $this->realpath = realpath(variable_get($this->pathkey, $this->pathdefault));
+    $this->dirname = 'ResourceStreamTestCaseDir' . uniqid();
+    $this->filename = 'ResourceStreamTestCaseFile' . uniqid() . '.txt';
+    $this->path =  '/'. $this->dirname . '/' . $this->filename;
+    $this->url = $this->scheme . $this->path;
+    resource_debug("realpath: $this->realpath"); 
+    $data = '1234567890abcdef';
+    mkdir($this->realpath .'/'. $this->dirname);
+    file_put_contents($this->realpath .   $this->path, $data, LOCK_EX);
+    $this->assertTrue(file_exists($this->realpath .   $this->path), 'Source file created.');
+  }
+
+  function tearDown() {
+    unlink($this->realpath . $this->path);
+    rmdir($this->realpath .'/'. $this->dirname);
+  }
+
+
+  /**
+   * fopen calls the stream_open method of a streamwrapper.
+   */
+
+  function testFopen() {
+    $this->handle = fopen($this->url, 'r+');
+    $this->assertTrue($this->handle, 'fopen: '. $this->url);
+  }
+
+  // fread                    - stream_read
+  function testFread() {
+    $data = fread($this->handle, 4);
+    $this->assertTrue($data == '1234', 'fread 4 bytes, start pos 0');
+
+    $pos = ftell($this->handle);
+    $this->assertTrue($pos == 4, "ftell at pos 4($pos)");
+
+    $data = fread($this->handle, 4);
+    $this->assertTrue($data == '5678', 'fread 4 bytes, start pos 4');
+
+    // There is apparently a bug with either ftell or fseek working here.
+    // ftell should return the currently position. Seek is obviously 
+    // moving the file pointer or the reads wouldn't match. Either fseek 
+    // isn't updating the pos read by ftell, or ftell is actually returning
+    // bytes read.
+    $this->assertTrue(fseek($this->handle, 8), 'fseek to pos 0'); 
+    $pos = ftell($this->handle);
+    $this->assertTrue($pos == 8, "ftell at pos 8($pos)");
+
+    $data = fread($this->handle, 4);
+    $this->assertTrue($data == '90ab', "fread 4 bytes, start pos 4($data)");
+    $this->assertFalse(feof($this->handle), 'feof at pos 4');
+
+    $data = fgets($this->handle);
+    $this->assertTrue($data == 'cdef', 'fgets pos 12 - 15');
+
+
+    $this->assertTrue(feof($this->handle), 'feof at end of file');
+
+    $this->assertTrue(fseek($this->handle, 4), 'fseek to pos 4');
+    $this->assertTrue(fclose($this->handle), "Close file.");
+  }
+
+  // fwrite                   - stream_write
+  function testFwrite() {
+    $this->handle = fopen($this->scheme . $this->path, 'a+');
+    $this->assertTrue($this->handle, "Open $this->scheme$this->path in mode a+");
+    $data = '1234';
+    $this->assertTrue(fwrite($this->handle, $data), "fwrite ($data) to handle"); 
+    $this->assertTrue(fseek($this->handle, -4, SEEK_END), "Seek to pos before fwrite.");
+    $read = fread($this->handle, 4);
+    $this->assertTrue($data == $read, "fread ($read) == fwritten ($data) bytes");
+    $this->assertTrue(fclose($this->handle), "Close file.");
+  }
+
+  function testFilePutGetContents() {
+    $data = 'fedcba0987654321';
+    $this->assertTrue(file_put_contents($this->scheme . $this->path, $data), "file_put_contents($data)");
+    $read = file_get_contents($this->scheme . $this->path);
+    $this->assertTrue($data == $read, "file_get_contents ($read) == file_put_contents ($data) bytes");
+  }
+
+  function testCopyRenameUnlink() {
+    copy($this->scheme . $this->path, $this->scheme . $this->path .'.2');
+    $this->assertTrue(file_exists($this->scheme . $this->path .'.2'), "Copy successful");
+    unlink($this->scheme . $this->path);
+    $this->assertFalse(file_exists($this->scheme . $this->path), "Unlink successful");
+    rename($this->scheme . $this->path .'.2', $this->scheme . $this->path);
+    $this->assertTrue(file_exists($this->scheme . $this->path), "Rename successful");
+  }
+
+
+/*
+  // fflush                   - stream_flush
+  function testFflush() {
+  }
+
+  // fstat                    - stream_stat
+  function testFstat() {
+  }
+*/
+
+
+/*
+
+  // php >= 5.3.0 Implement in PHP 5.3 is required.
+  // stream_select            - stream_cast
+  // stream_set_blocking      - stream_set_option
+  // stream_set_timeout       - stream_set_option
+  // stream_set_write_buffer  - stream_set_option
+
+
+  // mkdir                    - mkdir
+  function testMkDir() {
+  }
+
+  // rmdir                    - rmdir
+  function testRmDir() {
+  }
+
+  // opendir                  - dir_opendir
+  function testOpenDir() {
+  }
+
+  // stat                     - url_stat
+  function testStat() {
+  }
+
+  // readdir                  - dir_readdir
+  function testReadDir() {
+  }
+
+  // rewinddir                - dir_rewinddir
+  function testRewindDir() {
+  }
+
+  // closedir                 - dir_closedir
+  function testCloseDir() {
+  }
+
+*/
+
+
+}
+
+
+class ResourceStreamPrivateTestCase extends ResourceStreamTestCase {
+  public $scheme = 'private://localhost/';
+
+  function getInfo() {
+    return array(
+      'name' => t('ResourceStreamPrivate Filesystem functions'),
+      'description' => t('Tests basic php stream functions for private://.'),
+      'group' => t('Resource'),
+    );
+  }
+}
+
+class ResourceStreamCrossingTestCase extends DrupalWebTestCase {
+
+  public $schemeA = 'public://localhost/';
+  public $schemeB = 'private://localhost/';
+  
+  public $urlA;
+  public $urlB;
+  public $data;
+
+  function getInfo() {
+    return array(
+      'name' => t('Cross Scheme public:// and private://'),
+      'description' => t('Tests basic php stream functions fori moving files between public:// and private://.'),
+      'group' => t('Resource'),
+    );
+  }
+
+  function setUp() {
+    $this->urlA = $this->schemeA . __CLASS__ . 'A' . uniqid();
+    $this->urlB = $this->schemeB . __CLASS__ . 'B' . uniqid();
+    $this->data = '1234567890';
+  }
+
+  function testCopyAtoB() {
+    $this->assertTrue(file_put_contents($this->urlA, $this->data), "file_put_contents($this->urlA, $this->data)");
+    $this->assertTrue(copy($this->urlA, $this->urlB), "copy($this->urlA, $this->urlB)");
+    $this->assertTrue($this->data == file_get_contents($this->urlB), "Verify content of $this->urlA matches $this->urlB($this->data)");
+    unlink($this->urlA);
+    unlink($this->urlB);
+  }
+
+  function testCopyBtoA() {
+    $this->asserttrue(file_put_contents($this->urlB, $this->data), "file_put_contents($this->urlB, $this->data)");
+    $this->asserttrue(copy($this->urlB, $this->urlA), "copy($this->urlB, $this->urlA)");
+    $this->asserttrue($this->data == file_get_contents($this->urlA), "verify content of $this->urlA($this->data) matches $this->urlB");
+    unlink($this->urlA);
+    unlink($this->urlB);
+  }
+}

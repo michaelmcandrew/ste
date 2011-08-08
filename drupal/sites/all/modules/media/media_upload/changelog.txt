@@ -1,0 +1,14 @@
+
+/** Changelog for media_upload.module **/
+
+June 2009
+-------------
+ * Code refactored to make more sense (jmstacey).
+
+February 2009
+-------------
+ * Change link formatting (aaron).
+ * Change test select to list checkbox (aaron).
+ * Link to file in media upload when displaying formatter (aaron).
+ * Media upload formatters default (aaron).
+ * media_upload_formatter_form($node_type, $field, $file_extension, $uri) (aaron).
