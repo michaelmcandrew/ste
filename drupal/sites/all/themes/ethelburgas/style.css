@@ -1226,35 +1226,28 @@ body.gallery .view-content {
 	margin-top: 25px;
 	float: left;
 }
-
 body.gallery .view-content h3 {
 	clear: left;
 	margin-bottom: 10px;
 	color: #96C956;
 	font-weight: normal;
 }
-
 body.gallery .views-row {
 	width: 136px;
 	float: left;
 	margin: 0 75px 20px 0;
 }
-
 body.gallery .views-row-first {
 	clear: left;
 }
-
 body.gallery .views-row-4, body.gallery .views-row-8, body.gallery .views-row-12, body.gallery .views-row-16,
 body.gallery .views-row-20, body.gallery .views-row-24, body.gallery .views-row-28, body.gallery .views-row-32,
-body.gallery .views-row-36, body.gallery .views-row-40, body.gallery .views-row-44, body.gallery .views-row-48
-{
+body.gallery .views-row-36, body.gallery .views-row-40, body.gallery .views-row-44, body.gallery .views-row-48 {
 	margin-right: 0;
 }
-
 body.gallery .views-row-last {
 	margin-bottom: 50px;
 }
-
 body.gallery .views-field-title .field-content a {
 	height: 40px;
 	color: #404045;
@@ -1264,16 +1257,13 @@ body.gallery .views-field-title .field-content a {
 	height: 35px;
 	text-decoration: none;
 }
-
 body.gallery .views-field-field-image-fid {
 	height: 110px;
 }
-
 body.gallery .field-content img.imagecache-thumbnail,
 body.gallery .field-item img {
 	border: 1px solid #404045;
 }
-
 body.gallery .views-row p {
 	color: #999;
 	font-size: 90%;
@@ -1286,29 +1276,37 @@ body.gallery .field-field-image {
 	margin-top: 25px;
 	overflow: auto;
 }
-
 body.gallery .field-field-image .field-item {
 	height: 130px;
 	width:138px;
 	float: left;
 	margin: 0 16px 20px 0;
 }
-
 body.gallery h2 {
 	float: left;
 }
-
 body.gallery .clear-block {
 	width: 100%;
 }
-
 a.albumBack {
 	float: right;
 }
 
 
-
-
+/*.........event listings........*/
+#eventDetails {
+	background: #CDE8FE;
+	padding: 6px;
+}
+#eventDetails h3 {
+	padding: 4px 0;
+}
+#eventDetails .section {
+	margin-bottom: 20px;
+}
+.crm-container #eventDetails label {
+	font-weight: bold;
+}
 
 
 
