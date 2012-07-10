@@ -1212,9 +1212,9 @@ a.albumBack {
 	padding: 4px 0;
 }
 #eventDetails .section {
-	margin-bottom: 20px;
+	margin-bottom: 16px;
 }
-.crm-container #eventDetails label {
+#crm-container #eventDetails label {
 	font-weight: bold;
 }
 
