@@ -43,108 +43,112 @@
          <strong><a href="{$registerURL}" title="{$registerText}">&raquo; {$registerText}</a></strong>
       </div>
   {/if}
-	<div class="section event_date_time-section">
-	    <div class="label"><label>{ts}When{/ts}</label></div>
-	    <div class="content">
-            {$event.event_start_date|date_format:"%A %e %B %Y %l:%M %p"}
+  
+  <div id="eventDetails">
+	<h3>Event information</h3>
+		<div class="section event_date_time-section">
+		    <div class="label"><label>{ts}When{/ts}</label></div>
+		    <div class="content">
+	            {$event.event_start_date|date_format:"%A %e %B %Y %l:%M %p"}
             
-			{if $event.event_end_date}
-                &nbsp;{ts}to{/ts}&nbsp;
-                {* If event ends on same day, no need to repeat date information - just display end time. 'date_format' specified to say compare just the Y/M/d i.e. not the time*}
-                {if $event.event_end_date|date_format:"%Y%m%d" == $event.event_start_date|date_format:"%Y%m%d"}
+				{if $event.event_end_date}
+	                &nbsp;{ts}to{/ts}&nbsp;
+	                {* If event ends on same day, no need to repeat date information - just display end time. 'date_format' specified to say compare just the Y/M/d i.e. not the time*}
+	                {if $event.event_end_date|date_format:"%Y%m%d" == $event.event_start_date|date_format:"%Y%m%d"}
                     
-                    {$event.event_end_date|crmDate:0:1}
+	                    {$event.event_end_date|crmDate:0:1}
                  
-			 {* else we do need to display the end date b/c it's different *}        
-                {else}
+				 {* else we do need to display the end date b/c it's different *}        
+	                {else}
                     
-                    {$event.event_end_date|date_format:"%A %e %B %Y %l:%M %p"}
+	                    {$event.event_end_date|date_format:"%A %e %B %Y %l:%M %p"}
           	
-                {/if}
-            {/if}
-        </div>
-		<div class="clear"></div>
-	</div>
-			    
-	{if $isShowLocation}
-
-        {if $location.address.1}
-            <div class="section event_address-section">
-                <div class="label"><label>{ts}Location{/ts}</label></div>
-                <div class="content">{$location.address.1.display|nl2br}</div>
-                <div class="clear"></div>
-            </div>
-        {/if}
-
-	    {if ( $event.is_map && $config->mapAPIKey && 
-	        ( is_numeric($location.address.1.geo_code_1)  || 
-	        ( $config->mapGeoCoding && $location.address.1.city AND $location.address.1.state_province ) ) ) }
-	        <div class="section event_map-section">
-	            <div class="content">
-                    {assign var=showDirectly value="1"}
-                    {if $mapProvider eq 'Google'}
-                        {include file="CRM/Contact/Form/Task/Map/Google.tpl" fields=$showDirectly}
-                    {elseif $mapProvider eq 'Yahoo'}
-                        {include file="CRM/Contact/Form/Task/Map/Yahoo.tpl"  fields=$showDirectly}
-                    {/if}
-                    <br /><a href="{$mapURL}" title="{ts}Show large map{/ts}">{ts}Show large map{/ts}</a>
-	            </div>
-	            <div class="clear"></div>
-	        </div>
-	    {/if}
-
-	{/if}{*End of isShowLocation condition*}  
-
-
-	{if $location.phone.1.phone || $location.email.1.email}
-	    <div class="section event_contact-section">
-	        <div class="label"><label>{ts}Contact{/ts}</label></div>
-	        <div class="content">
-	            {* loop on any phones and emails for this event *}
-	            {foreach from=$location.phone item=phone}
-	                {if $phone.phone}
-	                    {if $phone.phone_type}{$phone.phone_type_display}{else}{ts}Phone{/ts}{/if}: 
-	                        <span class="tel">{$phone.phone}</span> <br />
-	                    {/if}
-	            {/foreach}
-	
-	            {foreach from=$location.email item=email}
-	                {if $email.email}
-	                    {ts}Email:{/ts} <span class="email"><a href="mailto:{$email.email}">{$email.email}</a></span>
 	                {/if}
-	            {/foreach}
+	            {/if}
 	        </div>
-	        <div class="clear"></div>
-	    </div>
-	{/if}
+			<div class="clear"></div>
+		</div>
+			    
+		{if $isShowLocation}
+
+	        {if $location.address.1}
+	            <div class="section event_address-section">
+	                <div class="label"><label>{ts}Location{/ts}</label></div>
+	                <div class="content">{$location.address.1.display|nl2br}</div>
+	                <div class="clear"></div>
+	            </div>
+	        {/if}
+
+		    {if ( $event.is_map && $config->mapAPIKey && 
+		        ( is_numeric($location.address.1.geo_code_1)  || 
+		        ( $config->mapGeoCoding && $location.address.1.city AND $location.address.1.state_province ) ) ) }
+		        <div class="section event_map-section">
+		            <div class="content">
+	                    {assign var=showDirectly value="1"}
+	                    {if $mapProvider eq 'Google'}
+	                        {include file="CRM/Contact/Form/Task/Map/Google.tpl" fields=$showDirectly}
+	                    {elseif $mapProvider eq 'Yahoo'}
+	                        {include file="CRM/Contact/Form/Task/Map/Yahoo.tpl"  fields=$showDirectly}
+	                    {/if}
+	                    <br /><a href="{$mapURL}" title="{ts}Show large map{/ts}">{ts}Show large map{/ts}</a>
+		            </div>
+		            <div class="clear"></div>
+		        </div>
+		    {/if}
+
+		{/if}{*End of isShowLocation condition*}  
+
+
+		{if $location.phone.1.phone || $location.email.1.email}
+		    <div class="section event_contact-section">
+		        <div class="label"><label>{ts}Contact{/ts}</label></div>
+		        <div class="content">
+		            {* loop on any phones and emails for this event *}
+		            {foreach from=$location.phone item=phone}
+		                {if $phone.phone}
+		                    {if $phone.phone_type}{$phone.phone_type_display}{else}{ts}Phone{/ts}{/if}: 
+		                        <span class="tel">{$phone.phone}</span> <br />
+		                    {/if}
+		            {/foreach}
+	
+		            {foreach from=$location.email item=email}
+		                {if $email.email}
+		                    {ts}Email:{/ts} <span class="email"><a href="mailto:{$email.email}">{$email.email}</a></span>
+		                {/if}
+		            {/foreach}
+		        </div>
+		        <div class="clear"></div>
+		    </div>
+		{/if}
 
     
-	{if $event.is_monetary eq 1 && $feeBlock.value}
-	    <div class="section event_fees-section">
-	        <div class="label"><label>{$event.fee_label}</label></div>
-	        <div class="content">
-	            <table class="form-layout-compressed fee_block-table">
-	                {foreach from=$feeBlock.value name=fees item=value}
-	                    {assign var=idx value=$smarty.foreach.fees.iteration}
-	                    {if $feeBlock.lClass.$idx}
-	                        {assign var="lClass" value=$feeBlock.lClass.$idx}
-	                    {else}
-	                        {assign var="lClass" value="fee_level-label"}
-	                    {/if}
-	                    <tr>
-	                        <td class="{$lClass}">{$feeBlock.label.$idx}</td>
-	                        <td class="fee_amount-value right">{$feeBlock.value.$idx|crmMoney}</td>
-	                    </tr>
-	                {/foreach}
-	            </table>
-	        </div>
-	        <div class="clear"></div>
-	    </div>
-	{/if}
+		{if $event.is_monetary eq 1 && $feeBlock.value}
+		    <div class="section event_fees-section">
+		        <div class="label"><label>{$event.fee_label}</label></div>
+		        <div class="content">
+		            <table class="form-layout-compressed fee_block-table">
+		                {foreach from=$feeBlock.value name=fees item=value}
+		                    {assign var=idx value=$smarty.foreach.fees.iteration}
+		                    {if $feeBlock.lClass.$idx}
+		                        {assign var="lClass" value=$feeBlock.lClass.$idx}
+		                    {else}
+		                        {assign var="lClass" value="fee_level-label"}
+		                    {/if}
+		                    <tr>
+		                        <td class="{$lClass}">{$feeBlock.label.$idx}</td>
+		                        <td class="fee_amount-value right">{$feeBlock.value.$idx|crmMoney}</td>
+		                    </tr>
+		                {/foreach}
+		            </table>
+		        </div>
+		        <div class="clear"></div>
+		    </div>
+		{/if}
         
-    { if $event.is_public }
-        <br />{include file="CRM/Event/Page/iCalLinks.tpl"}
-    {/if}
+	    { if $event.is_public }
+	        <br />{include file="CRM/Event/Page/iCalLinks.tpl"}
+	    {/if}
+	</div>
     
     </div>
 </div>
