@@ -21,23 +21,31 @@
 			<?php endif; ?>
 
 			<a href="/"><img src="/sites/all/themes/ethelburgas/images/logo.png" /></a>
-					<!-- Show theme buttons on all pages except narrative resource pages -->
-					<?php if (substr($node->path, 0, 18)!='narrative-resource') : ?>
-						<div id="themeButtons">
-							<a href="/themes/reconciliation-resources"><img src="/sites/all/themes/ethelburgas/images/reconciliation.png" /></a>
-							<a href="/themes/facilitation-and-dialogue"><img src="/sites/all/themes/ethelburgas/images/facilitation.png" /></a>
-							<a href="/themes/power-of-stories"><img src="/sites/all/themes/ethelburgas/images/stories.png" /></a>
-							<a href="/themes/refusing-violence"><img src="/sites/all/themes/ethelburgas/images/violence.png" /></a>
-							<a href="/themes/multifaith"><img src="/sites/all/themes/ethelburgas/images/multifaith.png" /></a>
-							<a href="/themes/world-music"><img src="/sites/all/themes/ethelburgas/images/music.png" /></a>	
-						</div>
-					<?php endif; ?>
-					
-					<!-- Show NR banner on NR pages -->
-					<?php if (substr($node->path, 0, 18)=='narrative-resource') : ?>
-						<img id="eban"src="/sites/all/themes/ethelburgas/images/bannernr.jpg" />	
-					<?php endif; ?>
+			<?php if (substr($node->path, 0, 7)!='gallery') : ?>
+				<?php if (arg(0)!='gallery'): ?>
+					<a href="/"><img id="eban"src="/sites/all/themes/ethelburgas/images/banner
+						<?php if($is_front) {
+						echo '0';
+						} elseif($node->path=='themes/world-music') {
+						echo '7';
+						} elseif(substr($node->path, 0, 18)=='narrative-resource') {
+						echo 'nr';
+						} else {
+						echo rand(1,6);
+						}
+						?>.jpg" />
+					</a>
 
+					<?php if (substr($node->path, 0, 18)!='narrative-resource') : ?>
+						<a href="/themes/reconciliation-resources"><img src="/sites/all/themes/ethelburgas/images/reconciliation.png" /></a>
+					 	<a href="/themes/facilitation-and-dialogue"><img src="/sites/all/themes/ethelburgas/images/facilitation.png" /></a>
+						 <a href="/themes/power-of-stories"><img src="/sites/all/themes/ethelburgas/images/stories.png" /></a>
+						 <a href="/themes/refusing-violence"><img src="/sites/all/themes/ethelburgas/images/violence.png" /></a>
+						 <a href="/themes/multifaith"><img src="/sites/all/themes/ethelburgas/images/multifaith.png" /></a>
+						 <a href="/themes/world-music"><img src="/sites/all/themes/ethelburgas/images/music.png" /></a>
+					<?php endif; ?>
+				<?php endif; ?>
+			<?php endif; ?>
 		</div> 
 		<!-- /header -->
 
@@ -90,7 +98,6 @@
 		</div> <!-- /.left-corner, /.right-corner, /#squeeze, /#center -->
 	    <div id="footer">
 			<div id="footer-message">
-				
 				<?php print $footer_message ?> 
 			</div>
 			<?php print theme('links', $secondary_links, array('class' => 'links secondary-links'))?> 	

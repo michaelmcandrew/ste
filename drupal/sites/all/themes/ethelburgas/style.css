@@ -15,24 +15,19 @@
 a {
 	color: #27A697;
 }
-
 .floatleft {
 	float: left;
 }
-
 .field-field-icon {
 	float: left;
 	margin: 0 10px 10px 0;
 }
-
 #footer .content {
 	display: inline-block;
 }
-
 .maincontent {
 	width: 95%;
 }
-
 .clear-block {
 	display: inline-block;
 }
@@ -45,13 +40,10 @@ a {
 * Core 6.x
 */
 ul.nice-menu,
-
 ul.nice-menu ul,
-
 ul.nice-menu-down,
 ul.nice-menu-down ul,
 ul.nice-menu-down li,
-
 div.maincontent div.block {
 	margin-top: 60px;
 	} {
@@ -62,267 +54,218 @@ div.maincontent div.block {
 		background-image: none;
 	}
 
-	ul.nice-menu li.menuparent:hover, ul.nice-menu li.menuparent:hover aul.nice-menu li.menuparent a:hover, ul.nice-menu li.menuparent a, ul.nice-menu li,ul.nice-menu li.menuparent {
-		border: none;
-		background-color: transparent;
-		background-image: none;
-	}
+ul.nice-menu li.menuparent:hover, ul.nice-menu li.menuparent:hover aul.nice-menu li.menuparent a:hover, ul.nice-menu li.menuparent a, ul.nice-menu li,ul.nice-menu li.menuparent {
+	border: none;
+	background-color: transparent;
+	background-image: none;
+}
+ul.nice-menu li a {
+	margin-top: 7px;
+}
+#eban {
+	position: relative;
+	top: -1px;
+}
+ul.nice-menu li.menuparent a:after {
+	content: "|";
+	color: #008566;
+	margin-left: 20px;
+}
+#footer-message {
+	float: right;
+	padding-right: 10px;
+}
+ul.nice-menu li.menuparent ul li a:after {
+	content: "";
+	margin-left: 0;
+}
+ul.nice-menu li ul {
+	margin-top: 17px;
+	padding-top: 0;
+	border: none;
+}
+ul.nice-menu li ul {
+	padding: 1px;
+	margin: 1px;
+}
+ul.nice-menu li a.last:after {
+	content: "";
+	margin-left: 0;
+}
+#footer {
+	display: block;
+	background: #96C956;
+	color: #ffffff;
+	height: 25px;
+	margin: 0;
+	padding: 5px;
+}
+#footer a {
+	color: #FFF;
+	background: #96C956;
+	text-decoration: none;
+}
+#footer a:hover {
+	color: #1A8563;
+}
+#block-menu-menu-tertiarylinks {
+	height: 10px;
+}
+#etside {
+	width: 198px;
+	margin-right: 27px;
+	float: left;
+}
+#block-menu-menu-event-types, #block-menu-menu-actions,
+#block-menu-menu-about-us, #block-menu-menu-our-story, #block-views-Blog-block_1 {
+	border: 1px dashed #AAD459;
+	padding: 18px;
+	position: relative;
+	left: -9px;
+}
+#etside .blogblock h3 {
+	font-size: 110%;
+	margin: 10px 2px 2px 2px;
+	text-transform: uppercase;
+	color: #27A697;
+}
+#etside .blogblock p {
+	margin: 2px;
+	font-size: 100%;
+}
+.optionscaa {
+	width: 545px;
+	float: left;
+}
+body.gallery .optionscaa {
+	width: 770px;
+}
 
-	ul.nice-menu li a {
-		margin-top: 7px;
-	}
-
-	#eban {
-		position: relative;
-		top: -1px;
-	}
-
-	ul.nice-menu li.menuparent a:after {
-		content: "|";
-		color: #008566;
-		margin-left: 20px;
-	}
-
-	#footer-message {
-		float: right;
-		padding-right: 10px;
-	}
-
-	ul.nice-menu li.menuparent ul li a:after {
-		content: "";
-		margin-left: 0;
-	}
-
-	ul.nice-menu li ul {
-		margin-top: 17px;
-		padding-top: 0;
-		border: none;
-	}
-
-	ul.nice-menu li ul {
-		padding: 1px;
-		margin: 1px;
-	}
-
-	ul.nice-menu li a.last:after {
-		content: "";
-		margin-left: 0;
-	}
-
-	#footer {
-		display: block;
-		background: #96C956;
-		color: #ffffff;
-		height: 25px;
-		margin: 0;
-		padding: 5px;
-	}
-
-	#footer a {
-		color: #FFF;
-		background: #96C956;
-		text-decoration: none;
-	}
-
-	#footer a:hover {
-		color: #1A8563;
-	}
-
-	#block-menu-menu-tertiarylinks {
-		height: 10px;
-	}
-
-	#etside {
-		width: 198px;
-		margin-right: 27px;
-		float: left;
-	}
-
-	#block-menu-menu-event-types, #block-menu-menu-actions,
-	#block-menu-menu-about-us, #block-menu-menu-our-story, #block-views-Blog-block_1 {
-		border: 1px dashed #AAD459;
-		padding: 18px;
-		position: relative;
-		left: -9px;
-	}
-
-	#etside .blogblock h3 {
-		font-size: 110%;
-		margin: 10px 2px 2px 2px;
-		text-transform: uppercase;
-		color: #27A697;
-	}
-
-	#etside .blogblock p {
-		margin: 2px;
-		font-size: 100%;
-	}
-
-	.optionscaa {
-		width: 545px;
-		float: left;
-	}
-
-	body.gallery .optionscaa {
-		width: 770px;
-	}
-	
-	body.gallery .maincontent {
-		width: 100%;
-	}
-
-	ul.nice-menu, ul.primary-links {
-		width: 100%;
-		height: 29px;
-		background: #96C956;
-		margin: 0;
-	}
-
-	ul.nice-menu li, ul.primary-links li {
-		list-style-type: none;
-		color: #ffffff;
-		float: left;
-		margin: 0;
-		font-size: 115%;
-	}
-
-	#header {
-		line-height: 100%;
-	}
-
-	ul.nice-menu li a, ul.primary-links li a {
-		color: #ffffff;
-		text-decoration: none;
-		padding: 1px 12px;
-		border-right: solid 1px #1A8563
-	}
-
-	#etside a {
-		text-decoration: none;
-		padding: 2px 0;
-	}
-
-	#etside li a.active {
-		color: #aad459;
-		font-weight: bold;
-	}
-
-
-	#etside h2 {
-		padding-bottom: 2px;
-	}
-
-
-	ul.nice-menu li a:hover ,ul.primary-links li a:hover {
-		color: #27A697;
-	}
-
-	ul.nice-menu li ul li {
-		height: 25px;
-		background: #96C956;
-		font-size: 100%;
-	}
-
-	ul.menu li a:hover, ul#secnav li a:hover {
-		color: #AAD459;
-	}
-
-	ul.menu, ul#secnav {
-		color: #27A697;
-	}
-
-
-
-	#etside .block {
-		margin-bottom: 30px;
-		width: 160px;
-		border: 1px dashed #AAD459;
-		left: -9px;
-		padding: 18px;
-		position: relative;
-	}
-
-
-
-
-	#block-menu-menu-power-of-stories h2 {
-		background-image: url("http://stethelburgas.org/sites/default/files/images/Web-Power-of-Stories-shape.menu.jpg");
-		background-repeat: no-repeat;
-		padding-bottom: 110px;
-		background-position: 0 55px;
-	}
-
-	#block-menu-menu-reconciliation-resources h2 {
-		background-image: url("http://stethelburgas.org/sites/default/files/images/Web-Reconciliation-shape.menu.jpg");
-		background-repeat: no-repeat;
-		padding-bottom: 109px;
-		background-position: 0 53px;
-	}
-	#block-menu-menu-facilitation-and-dialogue h2 {
-		background-image: url("http://stethelburgas.org/sites/default/files/images/Web-Facilitation-shape.menu.jpg");
-		background-repeat: no-repeat;
-		padding-bottom: 122px;
-		background-position: 0 55px;
-	}
-	#block-menu-menu-refusing-violence h2 {
-		background-image: url("http://stethelburgas.org/sites/default/files/images/Web-Refusing-violence-shape.menu.jpg");
-		background-repeat: no-repeat;
-		padding-bottom: 118px;
-		background-position: 0 25px;
-	}
-	#block-menu-menu-multifaith h2 {
-		background-image: url("http://stethelburgas.org/sites/default/files/images/Web-Multifaith-shape.menu.jpg");
-		background-repeat: no-repeat;
-		padding-bottom: 98px;
-		background-position: 0 31px;
-	}
-	#block-menu-menu-world-music h2 {
-		background-image: url("http://stethelburgas.org/sites/default/files/images/Web-Music-shape.menu.jpg");
-		background-repeat: no-repeat;
-		padding-bottom: 109px;
-		background-position: 0 30px;
-	}
-
-	#etside div ul {
-		padding: 0;
-		margin: 0;
-	}
-
-	ul.menu li, ul#secnav li, #etside div ul li {
-		margin: 1px;
-		padding: 1px;
-		line-height: 140%;
-	}
-
-	ul.menu li a, ul#secnav li a {
-		color: #27A697;
-	}
-
-	#block-menu-menu-tertiarylinks li {
-		float: left;
-	}
-
-	#center {
-		padding: 40px;
-		width: 770px;
-		min-height: 800px;
-		margin: auto;
-		background: #ffffff;
-	}
-
-
-	#header {
-		width: 850px;
-		margin: auto;
-		background: #ffffff;
-	}
-
-
-
-	#footer {
-		width: 840px;
-		margin: auto auto 10px auto;
-	}
+body.gallery .maincontent {
+	width: 100%;
+}
+ul.nice-menu, ul.primary-links {
+	width: 100%;
+	height: 29px;
+	background: #96C956;
+	margin: 0;
+}
+ul.nice-menu li, ul.primary-links li {
+	list-style-type: none;
+	color: #ffffff;
+	float: left;
+	margin: 0;
+	font-size: 115%;
+}
+#header {
+	line-height: 100%;
+}
+ul.nice-menu li a, ul.primary-links li a {
+	color: #ffffff;
+	text-decoration: none;
+	padding: 1px 12px;
+	border-right: solid 1px #1A8563
+}
+#etside a {
+	text-decoration: none;
+	padding: 2px 0;
+}
+#etside li a.active {
+	color: #aad459;
+	font-weight: bold;
+}
+#etside h2 {
+	padding-bottom: 2px;
+}
+ul.nice-menu li a:hover ,ul.primary-links li a:hover {
+	color: #27A697;
+}
+ul.nice-menu li ul li {
+	height: 25px;
+	background: #96C956;
+	font-size: 100%;
+}
+ul.menu li a:hover, ul#secnav li a:hover {
+	color: #AAD459;
+}
+ul.menu, ul#secnav {
+	color: #27A697;
+}
+#etside .block {
+	margin-bottom: 30px;
+	width: 160px;
+	border: 1px dashed #AAD459;
+	left: -9px;
+	padding: 18px;
+	position: relative;
+}
+#block-menu-menu-power-of-stories h2 {
+	background-image: url("http://stethelburgas.org/sites/default/files/images/Web-Power-of-Stories-shape.menu.jpg");
+	background-repeat: no-repeat;
+	padding-bottom: 110px;
+	background-position: 0 55px;
+}
+#block-menu-menu-reconciliation-resources h2 {
+	background-image: url("http://stethelburgas.org/sites/default/files/images/Web-Reconciliation-shape.menu.jpg");
+	background-repeat: no-repeat;
+	padding-bottom: 109px;
+	background-position: 0 53px;
+}
+#block-menu-menu-facilitation-and-dialogue h2 {
+	background-image: url("http://stethelburgas.org/sites/default/files/images/Web-Facilitation-shape.menu.jpg");
+	background-repeat: no-repeat;
+	padding-bottom: 122px;
+	background-position: 0 55px;
+}
+#block-menu-menu-refusing-violence h2 {
+	background-image: url("http://stethelburgas.org/sites/default/files/images/Web-Refusing-violence-shape.menu.jpg");
+	background-repeat: no-repeat;
+	padding-bottom: 118px;
+	background-position: 0 25px;
+}
+#block-menu-menu-multifaith h2 {
+	background-image: url("http://stethelburgas.org/sites/default/files/images/Web-Multifaith-shape.menu.jpg");
+	background-repeat: no-repeat;
+	padding-bottom: 98px;
+	background-position: 0 31px;
+}
+#block-menu-menu-world-music h2 {
+	background-image: url("http://stethelburgas.org/sites/default/files/images/Web-Music-shape.menu.jpg");
+	background-repeat: no-repeat;
+	padding-bottom: 109px;
+	background-position: 0 30px;
+}
+#etside div ul {
+	padding: 0;
+	margin: 0;
+}
+ul.menu li, ul#secnav li, #etside div ul li {
+	margin: 1px;
+	padding: 1px;
+	line-height: 140%;
+}
+ul.menu li a, ul#secnav li a {
+	color: #27A697;
+}
+#block-menu-menu-tertiarylinks li {
+	float: left;
+}
+#center {
+	padding: 40px;
+	width: 770px;
+	min-height: 800px;
+	margin: auto;
+	background: #ffffff;
+}
+#header {
+	width: 850px;
+	margin: auto;
+	background: #ffffff;
+}
+#footer {
+	width: 840px;
+	margin: auto auto 10px auto;
+}
 
 /**
 * Generic elements
@@ -330,7 +273,7 @@ div.maincontent div.block {
 body {
 	margin: 0;
 	padding: 0;
-	background: url(images/bg.png) #edf5fa;
+	background-color: #eef2f4;
 	font: 12px/170% Verdana, sans-serif;
 	color: #494949;
 }
@@ -344,64 +287,49 @@ textarea, select {
 	font: 12px/160% Verdana, sans-serif;
 	color: #494949;
 }
-
-
-
-
 h1, h2, h3, h4, h5, h6 {
 	margin: 0;
 	padding: 0;
 	font-weight: normal;
 	font-family: Helvetica, Arial, sans-serif;
 }
-
 h1 {
 	color: #27A697;
 	font-size: 170%;
 	text-transform: uppercase;
 }
-
 h2 {
 	color: #27A697;
 	font-size: 160%;
 	line-height: 130%;
 }
-
 h3 {
 	font-size: 140%;
 	color: #96C956;
 	font-weight: bold;
 }
-
 h4 {
 	font-size: 130%;
 	color: #96C956;
 }
-
 h5 {
 	font-size: 120%;
 	color: #96C956;
 }
-
 h6 {
 	font-size: 110%;
 	color: #96C956;
 }
-
 ul, quote, code, fieldset {
 	margin: .5em 0;
 }
-
 p {
 	margin: 0.6em 0 1.2em;
 	padding: 0;
 }
-
-
 a {
 	color: #27A697;
 }
-
 hr {
 	margin: 0;
 	padding: 0;
@@ -409,57 +337,44 @@ hr {
 	height: 1px;
 	background: #5294c1;
 }
-
 ul {
 	margin: 0.5em 0 1em;
 	padding: 0;
 }
-
 ol {
 	margin: 0.75em 0 1.25em;
 	padding: 0;
 }
-
 ol li, ul li {
 	margin: 0.4em 0 0.4em .5em; /* LTR */
 }
-
 ol li, ul li, ul.menu li, .item-list ul li, li.leaf {
 	margin: 0.15em 0 0.15em 1.5em; /* LTR */
 }
-
 ul li, ul.menu li, .item-list ul li, li.leaf {
 	padding: 0 0 .2em 0.5em;
 }
-
 #etside ol li, #etside ul li, #etside ul.menu li, #etside .item-list ul li, #etside li.leaf {
 	margin: 0.15em 0 0.15em 0em; /* LTR */
 }
-
 #etside ul li, #etside ul.menu li, #etside .item-list ul li, #etside li.leaf {
 	padding: 0 0 .2em 0em;
 	list-style-type: none;
 	list-style-image: none;
 }
-
 #etside div ul li.expanded a {
 	font-weight: bold;
 }
-
 #etside div ul li.leaf a {
 	font-weight: normal;
 }
-
 #etside div ul li.leaf a.active {
 	font-weight: bold;
 }
-
 #etside div ul li.expanded ul.menu {
 	padding-left: 18px;
 	list-style: disc inside none;
 }
-
-
 ul li.collapsed {
 }
 
@@ -548,11 +463,6 @@ tr.drag {
 tr.drag-previous {
 	background-color: #ffd;
 }
-
-
-
-
-
 td.region, td.module, td.container, td.category {
 	border-top: 1.5em solid #fff;
 	border-bottom: 1px solid #b4d7f0;
@@ -1278,7 +1188,7 @@ body.gallery .field-field-image {
 }
 body.gallery .field-field-image .field-item {
 	height: 130px;
-	width:138px;
+	width: 138px;
 	float: left;
 	margin: 0 16px 20px 0;
 }
