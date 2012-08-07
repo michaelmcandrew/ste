@@ -175,7 +175,10 @@ ul.nice-menu li a, ul.primary-links li a {
 	font-weight: bold;
 }
 #etside h2 {
-	padding-bottom: 2px;
+	color: #494949;
+	font-weight: bold;
+	font-size: 130%;
+	padding-bottom: 6px;
 }
 ul.nice-menu li a:hover ,ul.primary-links li a:hover {
 	color: #27A697;
@@ -194,10 +197,25 @@ ul.menu, ul#secnav {
 #etside .block {
 	margin-bottom: 30px;
 	width: 160px;
-	border: 1px dashed #AAD459;
+	border: 1px solid #AAD459;
 	left: -9px;
 	padding: 18px;
 	position: relative;
+	
+	background-color: #f9f9f9;
+}
+.view-Blog .views-row {
+	margin-bottom: 16px;
+}
+#etside #block-menu-menu-followus li {
+	padding-left: 30px;
+	background: url(images/twitter.png) no-repeat 0 0;
+}
+#etside #block-menu-menu-followus li.first {
+	background-image: url(images/facebook.png);
+}
+#etside #block-menu-menu-followus li.last {
+	background-image: url(images/mailing-list.png);
 }
 #block-menu-menu-power-of-stories h2 {
 	background-image: url("http://stethelburgas.org/sites/default/files/images/Web-Power-of-Stories-shape.menu.jpg");
@@ -358,7 +376,7 @@ ul li, ul.menu li, .item-list ul li, li.leaf {
 	margin: 0.15em 0 0.15em 0em; /* LTR */
 }
 #etside ul li, #etside ul.menu li, #etside .item-list ul li, #etside li.leaf {
-	padding: 0 0 .2em 0em;
+	padding: 0 0 8px 0;
 	list-style-type: none;
 	list-style-image: none;
 }

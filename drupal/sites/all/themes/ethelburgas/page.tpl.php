@@ -21,22 +21,11 @@
 			<?php endif; ?>
 
 			<a href="/"><img src="/sites/all/themes/ethelburgas/images/logo.png" /></a>
-					<!-- Show theme buttons on all pages except narrative resource pages -->
-					<?php if (substr($node->path, 0, 18)!='narrative-resource') : ?>
-						<div id="themeButtons">
-							<a href="/themes/reconciliation-resources"><img src="/sites/all/themes/ethelburgas/images/reconciliation.png" /></a>
-							<a href="/themes/facilitation-and-dialogue"><img src="/sites/all/themes/ethelburgas/images/facilitation.png" /></a>
-							<a href="/themes/power-of-stories"><img src="/sites/all/themes/ethelburgas/images/stories.png" /></a>
-							<a href="/themes/refusing-violence"><img src="/sites/all/themes/ethelburgas/images/violence.png" /></a>
-							<a href="/themes/multifaith"><img src="/sites/all/themes/ethelburgas/images/multifaith.png" /></a>
-							<a href="/themes/world-music"><img src="/sites/all/themes/ethelburgas/images/music.png" /></a>	
-						</div>
-					<?php endif; ?>
-					
-					<!-- Show NR banner on NR pages -->
-					<?php if (substr($node->path, 0, 18)=='narrative-resource') : ?>
-						<img id="eban"src="/sites/all/themes/ethelburgas/images/bannernr.jpg" />	
-					<?php endif; ?>
+			
+			<!-- Show NR banner on NR pages -->
+			<?php if (substr($node->path, 0, 18)=='narrative-resource') : ?>
+				<img id="eban"src="/sites/all/themes/ethelburgas/images/bannernr.jpg" />	
+			<?php endif; ?>
 
 		</div> 
 		<!-- /header -->
